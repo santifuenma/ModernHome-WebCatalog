@@ -1,4 +1,4 @@
-export default function SubcategoriaPage({ params }: { params: { ambiente: string, subcategoria: string } }) {
+export default function SubcategoriaPage() {
     return (
         <div>
         </div>

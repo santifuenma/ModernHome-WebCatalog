@@ -1,4 +1,4 @@
-export default function AmbientePage({ params }: { params: { ambiente: string } }) {
+export default function AmbientePage() {
     return (
         <div>
         </div>
