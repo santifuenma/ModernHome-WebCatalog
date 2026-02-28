@@ -1,0 +1,20 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Modern Home Catalog",
+  description: "Modern Home Catalog",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="es">
+      <body>
+        {children}
+      </body>
+    </html>
+  );
+}
