@@ -11,7 +11,7 @@ export default function TestCloudinaryPage() {
             <div style={{ marginTop: '2rem', border: '1px dashed #ccc', padding: '1rem', display: 'inline-block' }}>
                 {/* Usamos el ID de imagen "cld-sample-5" que viene por defecto en todas las cuentas nuevas */}
                 <CldImage
-                    src="cld-sample-5"
+                    src="2_lphwzd"
                     width="500"
                     height="500"
                     crop={{
