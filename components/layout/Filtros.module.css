@@ -1,0 +1,48 @@
+.filtros_bar {
+    display: flex;
+    height: auto;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.filtros_content {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    gap: 10px;
+    padding: 20px 0 20px 0;
+
+}
+
+.filtros_content button {
+    cursor: pointer;
+    width: 120px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1.8px solid var(--color-text-muted);
+    color: var(--color-text);
+    background-color: white;
+
+}
+
+.filtros_content button:hover {
+    background-color: var(--color-border);
+    color: var(--color-text);
+
+}
+
+.filtro_item {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.filtro_item:hover {
+    color: var(--color-primary);
+}

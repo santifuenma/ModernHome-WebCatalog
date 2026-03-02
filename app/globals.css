@@ -1,0 +1,110 @@
+:root {
+    /* =========================================
+     VARIABLES GLOBALES
+     ========================================= */
+
+    /* Colores principales */
+    --color-primary: #000000;
+    --gris-texto: #959595;
+    --color-background: #ffffff;
+    --color-surface: #f5f5f5;
+    --color-text: #333333;
+    --color-text-muted: #b1b1b1;
+    --color-border: #eaeaea;
+
+    /* Tipografía */
+    /* La fuente Montserrat se inyecta directamente en el body vía next/font/google */
+    --font-size-base: 14px;
+    --font-size-sm: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.5rem;
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+
+    /* Espaciado */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Bordes y Sombras */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   RESET CSS (Tamaños y Márgenes)
+   ========================================= */
+
+/* Box sizing rules para todos los elementos */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+/* Eliminar márgenes por defecto */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+    margin: 0;
+}
+
+/* Eliminar listas por defecto en ul, ol si tienen role="list" o class */
+ul[role='list'],
+ol[role='list'],
+ul,
+ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Configurar cuerpo principal / body */
+html {
+    font-size: var(--font-size-base);
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+    line-height: 1.5;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    padding: 0;
+    margin: 0;
+}
+
+/* Hacer que las imágenes sean más fáciles de trabajar */
+img,
+picture {
+    max-width: 100%;
+    display: block;
+}
+
+/* Heredar fuentes en inputs y botones */
+input,
+button,
+textarea,
+select {
+    font: inherit;
+}
+
+/* Quitar decoraciones en los enlaces por defecto */
+a {
+    text-decoration: none;
+    color: inherit;
+}
