@@ -24,7 +24,7 @@ export default async function TestSupabasePage() {
                 </pre>
 
                 <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-                    * Nota: Es normal ver un error "relation does not exist" si tus credenciales son correctas pero aún no has creado ninguna tabla. Si ves un error de "FetchError" o "Invalid API key", revisa tus variables de entorno.
+                    * Nota: Es normal ver un error &quot;relation does not exist&quot; si tus credenciales son correctas pero aún no has creado ninguna tabla. Si ves un error de &quot;FetchError&quot; o &quot;Invalid API key&quot;, revisa tus variables de entorno.
                 </p>
             </div>
         </div>
