@@ -1,7 +1,11 @@
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 60px 0 0 0;
+    padding: 50px 10px 40px 10px;
+    /* Desktop padding */
+    position: relative;
+    /* Ensure absolute children stay within container bounds */
+
 }
 
 .backButton {
@@ -17,83 +21,101 @@
     padding: 0;
     margin-bottom: 10px;
     position: absolute;
-    top: 90px;
-    left: 30px
+    top: 14px;
+}
+
+.backButton:hover {
+    color: rgb(101, 101, 101);
 }
 
 .content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
     gap: var(--spacing-xl);
-}
+    padding-top: 0px;
 
-@media (min-width: 768px) {
-    .content {
-        flex-direction: row;
-        align-items: flex-start;
-    }
+    /* Space for the absolute back button on desktop */
 }
 
 .mainImageContainer {
     flex: 2;
     border: 1px solid var(--color-border);
-    padding: var(--spacing-xl);
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0.3;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .mainImageWrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    max-width: 600px;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease-in-out;
 }
 
-.image {
+.mainImageWrapper .image {
     object-fit: contain;
+    transform: scale(1.2);
 }
 
 .thumbnails {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: var(--spacing-md);
     flex: 0.5;
-}
-
-@media (min-width: 768px) {
-    .thumbnails {
-        flex-direction: column;
-    }
+    overflow-x: visible;
+    padding-bottom: 0;
 }
 
 .thumbnailContainer {
     border: 1px solid var(--color-border);
-    padding: var(--spacing-sm);
+
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: white;
     cursor: pointer;
-    width: 100px;
+    min-width: 100px;
+    width: 100%;
+    overflow: hidden;
 }
 
-@media (min-width: 768px) {
-    .thumbnailContainer {
-        width: 100%;
-    }
+.thumbnailContainer .image {
+    transition: opacity 0.3s ease;
+}
+
+.thumbnailContainer:hover .image {
+    opacity: 0.6;
+}
+
+.thumbnailContainer.activeThumbnail {
+    border-color: var(--color-primary);
 }
 
 .thumbnailWrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 1 / 1;
 }
 
 .details {
     flex: 1.5;
     display: flex;
     flex-direction: column;
+    margin-top: 0;
 }
 
 .title {
@@ -106,7 +128,7 @@
 .subtitle {
     font-size: var(--font-size-lg);
     color: var(--gris-texto);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 0px;
 }
 
 .divider {
@@ -157,17 +179,108 @@
 .downloadButton {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    width: 100%;
     gap: var(--spacing-sm);
     background: none;
     border: none;
+    border-radius: var(--border-radius-sm);
     color: #1a56db;
     font-size: var(--font-size-sm);
     cursor: pointer;
     padding: 0;
     font-weight: var(--font-weight-bold);
+    margin-top: 0;
 }
 
 .downloadButton svg {
     width: 20px;
     height: 20px;
+}
+
+/* -------------------------------------
+   MOBILE STYLES
+   ------------------------------------- */
+
+@media (max-width: 967px) {
+    .container {
+        padding: 20px 25px 40px 25px;
+        /* Mobile safe padding */
+    }
+
+    .backButton {
+        margin-bottom: 20px;
+        position: static;
+        /* Revert absolute top/left if any */
+    }
+
+    .content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+        padding-top: 10px;
+    }
+
+    .mainImageContainer {
+        border: none;
+        padding: 0;
+        background-color: transparent;
+    }
+
+    .mainImageWrapper {
+
+        aspect-ratio: 3 / 2;
+
+    }
+
+    .thumbnails {
+        flex-direction: row;
+        gap: var(--spacing-sm);
+        overflow-x: auto;
+        /* Allow horizontal scrolling on very small mobile devices if needed */
+        padding-bottom: 5px;
+        /* Visual space for scroll area */
+    }
+
+    .thumbnailContainer {
+        width: 50%;
+
+    }
+
+    .details {
+        margin-top: var(--spacing-md);
+        padding: 0 10px;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .subtitle {
+        font-size: var(--font-size-base);
+    }
+
+    .divider {
+        margin: var(--spacing-md) 0;
+    }
+
+    .section {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .sectionTitle {
+        font-weight: var(--font-weight-bold);
+    }
+
+    .swatch {
+        width: 50px;
+        height: 50px;
+    }
+
+    .downloadButton {
+        justify-content: center;
+        border: 1px solid #1a56db;
+        padding: 10px 0;
+        margin-top: var(--spacing-sm);
+    }
 }

@@ -47,34 +47,6 @@ const DUMMY_PRODUCTS: ProductSkeleton[] = [
         image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
     }
     ,
-    {
-        id: '6',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '7',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '8',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '9',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
 ];
 
 export default function ProductGrid() {

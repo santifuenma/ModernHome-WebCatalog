@@ -1,11 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styles from './ProductDetails.module.css';
 
+const productImages = [
+    "/icons/dorian-novaluna.jpg",
+    "/icons/dorian-novaluna-2.jpg",
+    "/icons/dorian-novaluna-3.jpg",
+];
+
 export default function ProductDetails() {
     const router = useRouter();
+    const [selectedImage, setSelectedImage] = useState(productImages[0]);
 
     return (
         <div className={styles.container}>
@@ -27,9 +35,9 @@ export default function ProductDetails() {
 
             <div className={styles.content}>
                 <div className={styles.mainImageContainer}>
-                    <div className={styles.mainImageWrapper}>
+                    <div className={styles.mainImageWrapper} key={selectedImage}>
                         <Image
-                            src="/icons/dorian-novaluna.jpg"
+                            src={selectedImage}
                             alt="Cama Dorian"
                             fill
                             className={styles.image}
@@ -38,26 +46,24 @@ export default function ProductDetails() {
                 </div>
 
                 <div className={styles.thumbnails}>
-                    <div className={styles.thumbnailContainer}>
-                        <div className={styles.thumbnailWrapper}>
-                            <Image
-                                src="/icons/dorian-novaluna.jpg"
-                                alt="Cama Dorian miniatura 1"
-                                fill
-                                className={styles.image}
-                            />
-                        </div>
-                    </div>
-                    <div className={styles.thumbnailContainer}>
-                        <div className={styles.thumbnailWrapper}>
-                            <Image
-                                src="/icons/dorian-novaluna.jpg"
-                                alt="Cama Dorian miniatura 2"
-                                fill
-                                className={styles.image}
-                            />
-                        </div>
-                    </div>
+                    {productImages
+                        .filter((imgSrc) => imgSrc !== selectedImage)
+                        .map((imgSrc, index) => (
+                            <div
+                                key={index}
+                                className={styles.thumbnailContainer}
+                                onClick={() => setSelectedImage(imgSrc)}
+                            >
+                                <div className={styles.thumbnailWrapper}>
+                                    <Image
+                                        src={imgSrc}
+                                        alt={`Cama Dorian miniatura ${index + 1}`}
+                                        fill
+                                        className={styles.image}
+                                    />
+                                </div>
+                            </div>
+                        ))}
                 </div>
 
                 <div className={styles.details}>
