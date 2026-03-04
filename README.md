@@ -27,17 +27,15 @@ MODERN HOME CATALOG/
 │       ├── Navbar.tsx              # Barra de navegación principal
 │       ├── ProductGrid.tsx         # Cuadrícula de productos de muestra
 │       └── ProductGrid.module.css  # Estilos modulares para la cuadrícula
-├── domain/                         # 🧠 Dominio del sistema
-│   ├── entities/                   # Entidades principales (modelos de datos puros)
-│   └── types/                      # Tipos compartidos del dominio
-├── services/                       # ⚙️ Lógica de aplicación (Casos de uso)
-├── repositories/                   # 🗄️ Capa de abstracción de base de datos
+├── features/                         # 💡 Dominio y Lógica de Negocio por Funcionalidades
+│   └── products/                   # Ejemplo de característica: Productos
+│       ├── product.repository.ts   # Acceso a base de datos de productos
+│       ├── product.service.ts      # Lógica de negocio de productos
+│       └── product.types.ts        # Tipos y modelos de productos
 ├── infrastructure/                 # 🧱 Implementaciones técnicas externas
 │   ├── cloudinary/                 # Integración con Cloudinary
 │   └── supabase/                   # Integración con Supabase (cliente/servidor)
 ├── utils/                          # 🛠️ Utilidades (Errores, Validadores, Respuestas)
-├── lib/                            # 🛠️ Helpers y configuraciones legacy
-│   └── supabase/                   # Configuración del cliente Supabase SSR
 ├── public/                         # 🖼️ Recursos estáticos (Accesibles públicamente)
 │   └── icons/                      # Logos e imágenes del catálogo y la app
 ├── styles/                         # (Opcional) Otros estilos globales
