@@ -9,6 +9,8 @@ El proyecto sigue una arquitectura orientada a componentes y rutas (App Router),
 ```text
 MODERN HOME CATALOG/
 ├── app/                            # 🚀 App Router de Next.js (Rutas y Páginas)
+│   ├── api/                        # Rutas API de backend
+│   │   └── README.md               # Documentación sobre arquitectura de la API
 │   ├── catalogo/                   # Rutas dinámicas del catálogo
 │   │   └── [ambiente]/[subcategoria]/[producto]/ # Ej: /catalogo/dormitorio/camas/dorian
 │   ├── test-cloudinary/            # Ruta de prueba de integración con Cloudinary
@@ -25,7 +27,16 @@ MODERN HOME CATALOG/
 │       ├── Navbar.tsx              # Barra de navegación principal
 │       ├── ProductGrid.tsx         # Cuadrícula de productos de muestra
 │       └── ProductGrid.module.css  # Estilos modulares para la cuadrícula
-├── lib/                            # 🛠️ Utilidades, configuraciones y helpers
+├── domain/                         # 🧠 Dominio del sistema
+│   ├── entities/                   # Entidades principales (modelos de datos puros)
+│   └── types/                      # Tipos compartidos del dominio
+├── services/                       # ⚙️ Lógica de aplicación (Casos de uso)
+├── repositories/                   # 🗄️ Capa de abstracción de base de datos
+├── infrastructure/                 # 🧱 Implementaciones técnicas externas
+│   ├── cloudinary/                 # Integración con Cloudinary
+│   └── supabase/                   # Integración con Supabase (cliente/servidor)
+├── utils/                          # 🛠️ Utilidades (Errores, Validadores, Respuestas)
+├── lib/                            # 🛠️ Helpers y configuraciones legacy
 │   └── supabase/                   # Configuración del cliente Supabase SSR
 ├── public/                         # 🖼️ Recursos estáticos (Accesibles públicamente)
 │   └── icons/                      # Logos e imágenes del catálogo y la app
