@@ -25,13 +25,14 @@ MODERN HOME CATALOG/
 │   └── layout/                     # Componentes estructurales de la web
 │       ├── FiltrosWrapper.tsx      # Barra/Filtros de navegación secundaria
 │       ├── Navbar.tsx              # Barra de navegación principal
-│       ├── ProductGrid.tsx         # Cuadrícula de productos de muestra
+│       ├── ProductGrid.tsx         # Cuadrícula de productos del catálogo
 │       └── ProductGrid.module.css  # Estilos modulares para la cuadrícula
-├── features/                         # 💡 Dominio y Lógica de Negocio por Funcionalidades
-│   └── products/                   # Ejemplo de característica: Productos
-│       ├── product.repository.ts   # Acceso a base de datos de productos
-│       ├── product.service.ts      # Lógica de negocio de productos
-│       └── product.types.ts        # Tipos y modelos de productos
+├── features/                       # 💡 Lógica de negocio por funcionalidad
+│   └── products/                   # Feature de Productos
+│       ├── mockProducts.ts         # Datos de muestra para desarrollo
+│       ├── product.repository.ts   # Acceso a base de datos (pendiente Supabase)
+│       ├── product.service.ts      # Lógica de negocio y funciones de consulta
+│       └── product.types.ts        # Tipos e interfaces TypeScript del dominio
 ├── infrastructure/                 # 🧱 Implementaciones técnicas externas
 │   ├── cloudinary/                 # Integración con Cloudinary
 │   └── supabase/                   # Integración con Supabase (cliente/servidor)
@@ -47,8 +48,8 @@ MODERN HOME CATALOG/
 
 ## 🛠️ Frameworks y Tecnologías Implementadas
 
-1. **Next.js (v14.2.15)**: Framework principal basado en React usando el **App Router**. Optimizado para Server Components por defecto.
-2. **React (v18)**: Librería para el desarrollo de la interfaz de usuario.
+1. **Next.js (v16)**: Framework principal basado en React usando el **App Router**. Optimizado para Server Components por defecto.
+2. **React (v19)**: Librería para el desarrollo de la interfaz de usuario.
 3. **TypeScript (v5)**: Tipado estricto para un desarrollo más robusto y evitar errores en tiempo de ejecución.
 4. **Supabase (`@supabase/ssr`)**: Implementado como backend para base de datos y autenticación, preparado para funcionar de forma segura desde el servidor.
 5. **Cloudinary (`next-cloudinary`)**: Integración lista para el alojamiento, transformación y optimización de imágenes.
