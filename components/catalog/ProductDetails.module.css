@@ -1,55 +1,86 @@
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 50px 10px 40px 10px;
-    /* Desktop padding */
-    position: relative;
-    /* Ensure absolute children stay within container bounds */
+    height: 90.4vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.backButtonContainer {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 
 }
 
 .backButton {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--gris-texto);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-bold);
-    padding: 0;
-    margin-bottom: 10px;
-    position: absolute;
-    top: 14px;
-}
 
-.backButton:hover {
-    color: rgb(101, 101, 101);
-}
-
-.content {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: var(--spacing-xl);
-    padding-top: 0px;
-
-    /* Space for the absolute back button on desktop */
-}
-
-.mainImageContainer {
-    flex: 2;
-    border: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgb(134, 134, 134);
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    gap: 5px;
+    margin-left: 30px;
+
+}
+
+.backButton:hover {
+    color: rgb(94, 94, 94);
+}
+
+.productContentContainer {
+    width: 100%;
+    height: 100%;
+    max-width: 1300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px 20px 20px;
+}
+
+.productImagesContainer {
+    width: 65%;
+    height: 100%;
+    display: flex;
+
+}
+
+.mainImageContainer {
+    width: 75%;
+    height: 100%;
+    position: relative;
+
+}
+
+
+.mainImageWrapper {
+    width: 100%;
+    height: 100%;
     background-color: white;
+}
+
+.mainImageWrapper .image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: fadeIn 0.3s ease-in-out;
+
+
 }
 
 @keyframes fadeIn {
     from {
-        opacity: 0.3;
+        opacity: 0;
     }
 
     to {
@@ -57,230 +88,226 @@
     }
 }
 
-.mainImageWrapper {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    animation: fadeIn 0.4s ease-in-out;
-}
-
-.mainImageWrapper .image {
-    object-fit: contain;
-    transform: scale(1.2);
-}
-
-.thumbnails {
+.thumbnailsContainer {
+    width: 25%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    flex: 0.5;
-    overflow-x: visible;
-    padding-bottom: 0;
-}
-
-.thumbnailContainer {
-    border: 1px solid var(--color-border);
-
-    display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: white;
-    cursor: pointer;
-    min-width: 100px;
-    width: 100%;
-    overflow: hidden;
-}
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0 10px;
 
-.thumbnailContainer .image {
-    transition: opacity 0.3s ease;
-}
-
-.thumbnailContainer:hover .image {
-    opacity: 0.6;
-}
-
-.thumbnailContainer.activeThumbnail {
-    border-color: var(--color-primary);
 }
 
 .thumbnailWrapper {
-    position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    border: 1px solid rgb(227, 227, 227);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 }
 
-.details {
-    flex: 1.5;
+.thumbnailWrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, 0);
+    z-index: 100000;
+    transition: background-color 0.3s ease;
+}
+
+.thumbnailWrapper:hover::after {
+    background-color: rgba(128, 128, 128, 0.14);
+}
+
+.thumbnailWrapper .image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    aspect-ratio: 1/1;
+}
+
+.productDetailsContainer {
+    width: 35%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    margin-top: 0;
+    align-items: flex-start;
+    padding: 0 20px 10px 20px;
 }
 
-.title {
-    font-size: 2rem;
-    font-weight: var(--font-weight-normal);
-    color: var(--color-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.subtitle {
-    font-size: var(--font-size-lg);
-    color: var(--gris-texto);
-    margin-bottom: 0px;
+.productHeader {
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
 }
 
 .divider {
     border: none;
-    border-top: 1px solid var(--color-border);
-    margin: var(--spacing-lg) 0;
+    height: 1px;
+    background-color: #e5e5e5;
     width: 100%;
+    margin: 20px 0 15px 0;
+
 }
 
-.section {
-    margin-bottom: var(--spacing-lg);
+.title {
+    font-size: clamp(22px, 2vw, 25px);
+    font-weight: 500;
+    color: rgb(55, 55, 55);
+    text-transform: uppercase;
+}
+
+.subtitle {
+    font-size: clamp(15px, 1.5vw, 16px);
+    color: rgb(134, 134, 134);
+}
+
+.productInfoContainer {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    gap: 15px;
 }
 
 .sectionTitle {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-normal);
-    margin-bottom: var(--spacing-sm);
-    color: var(--color-text);
+    font-size: clamp(15px, 1.5vw, 17px);
+    font-weight: 500;
+    color: rgb(59, 59, 59);
+    margin-bottom: 5px;
 }
 
 .textLine {
-    color: var(--gris-texto);
-    margin-bottom: var(--spacing-xs);
-    font-size: var(--font-size-sm);
+    font-size: clamp(14px, 1.5vw, 15px);
+    color: rgb(126, 126, 126);
+    font-weight: 400;
+}
+
+.productMaterialsContainer {
+    width: 100%;
+    height: 90px;
+    margin-bottom: 10px;
+    margin-top: 15px;
+
 }
 
 .swatches {
     display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    height: 100%;
 }
 
 .swatch {
-    width: 60px;
-    height: 60px;
-    border: 1px solid var(--color-border);
+    width: 90px;
+    height: 100% !important;
+    border: 1px solid rgb(227, 227, 227);
 }
 
-/* Sample swatch background colors (alternatively use background-image) */
-.blueSwatch {
-    background-color: #8fa6c1;
-}
+.productDownloadContainer {
+    width: 100%;
+    height: 40px;
 
-.greySwatch {
-    background-color: #b3b3b3;
+    display: flex;
+    align-items: center;
+
 }
 
 .downloadButton {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    width: 100%;
-    gap: var(--spacing-sm);
-    background: none;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    color: #1a56db;
-    font-size: var(--font-size-sm);
+    gap: 10px;
     cursor: pointer;
-    padding: 0;
-    font-weight: var(--font-weight-bold);
-    margin-top: 0;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    color: rgb(0, 111, 189);
+    font-size: clamp(14px, 1.5vw, 15px);
+    font-weight: 400;
 }
 
-.downloadButton svg {
-    width: 20px;
-    height: 20px;
+.downloadButton:hover {
+    color: rgb(0, 111, 189);
+    font-weight: 600;
+
 }
 
-/* -------------------------------------
-   MOBILE STYLES
-   ------------------------------------- */
+@media (max-width: 960px) {
 
-@media (max-width: 967px) {
-    .container {
-        padding: 20px 25px 40px 25px;
-        /* Mobile safe padding */
-    }
-
-    .backButton {
-        margin-bottom: 20px;
-        position: static;
-        /* Revert absolute top/left if any */
-    }
-
-    .content {
+    .productImagesContainer {
         flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-md);
-        padding-top: 10px;
     }
 
     .mainImageContainer {
-        border: none;
-        padding: 0;
-        background-color: transparent;
+        width: 100%;
+        height: 70%;
     }
 
-    .mainImageWrapper {
-
-        aspect-ratio: 3 / 2;
-
-    }
-
-    .thumbnails {
+    .thumbnailsContainer {
         flex-direction: row;
-        gap: var(--spacing-sm);
-        overflow-x: auto;
-        /* Allow horizontal scrolling on very small mobile devices if needed */
-        padding-bottom: 5px;
-        /* Visual space for scroll area */
+        height: 30%;
+        width: 100%;
+        padding: 0;
+        justify-content: flex-start;
     }
 
-    .thumbnailContainer {
-        width: 50%;
-
+    .thumbnailWrapper {
+        height: 100% !important;
+        width: 180px !important;
+        cursor: pointer;
     }
 
-    .details {
-        margin-top: var(--spacing-md);
-        padding: 0 10px;
+    .thumbnailWrapper .image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        aspect-ratio: 1/1;
     }
 
-    .title {
-        font-size: 1.75rem;
+}
+
+@media (max-width: 800px) {
+
+    .container {
+        height: auto;
     }
 
-    .subtitle {
-        font-size: var(--font-size-base);
+    .productContentContainer {
+
+        flex-direction: column;
     }
 
-    .divider {
-        margin: var(--spacing-md) 0;
+    .productImagesContainer {
+        width: 100%;
     }
 
-    .section {
-        margin-bottom: var(--spacing-md);
+    .thumbnailWrapper {
+
+        width: 100% !important;
+        border: none;
+        pointer-events: none;
     }
 
-    .sectionTitle {
-        font-weight: var(--font-weight-bold);
+    .productDetailsContainer {
+        width: 100%;
     }
 
-    .swatch {
-        width: 50px;
-        height: 50px;
+    .productHeader {
+        margin-top: 25px;
     }
 
-    .downloadButton {
-        justify-content: center;
-        border: 1px solid #1a56db;
-        padding: 10px 0;
-        margin-top: var(--spacing-sm);
-    }
 }

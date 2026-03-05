@@ -1,8 +1,9 @@
-import { updateSession } from '@/lib/supabase/middleware'
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-    return await updateSession(request)
+    // Auth session update logic has been temporarily removed 
+    // as part of the architecture refactor to a feature-based structure.
+    return NextResponse.next()
 }
 
 export const config = {

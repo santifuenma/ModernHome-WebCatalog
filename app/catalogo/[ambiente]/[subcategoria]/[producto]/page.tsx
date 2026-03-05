@@ -1,7 +1,21 @@
-import ProductDetails from '@/components/catalog/ProductDetails';
+import ProductDetails from '@/components/catalog/ProductDetails'
+import { getProductBySlug } from '@/features/products/product.service'
 
-export default function ProductoPage() {
+interface ProductoPageProps {
+    params: Promise<{
+        producto: string
+    }>
+}
+
+export default async function ProductoPage(props: ProductoPageProps) {
+    const params = await props.params;
+    const product = getProductBySlug(params.producto)
+
+    if (!product) {
+        return <div>Producto no encontrado</div>
+    }
+
     return (
-        <ProductDetails />
-    );
+        <ProductDetails product={product} />
+    )
 }

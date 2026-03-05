@@ -1,82 +1,50 @@
-import styles from './ProductGrid.module.css';
-import Image from 'next/image';
-import Link from 'next/link';
+import styles from './ProductGrid.module.css'
+import { ProductCard } from "@/features/products/product.types"
+import Image from 'next/image'
+import Link from 'next/link'
 
-// Interfaz temporal para los datos del producto
-interface ProductSkeleton {
-    id: string;
-    title: string;
-    subtitle: string;
-    image: string;
+interface ProductGridProps {
+    products: ProductCard[]
 }
 
-// Datos de prueba temporales basados en la imagen
-const DUMMY_PRODUCTS: ProductSkeleton[] = [
-    {
-        id: '1',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '2',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '3',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '4',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-    {
-        id: '5',
-        title: 'BOLERO',
-        subtitle: 'Essenza',
-        image: '/icons/dorian-novaluna.jpg' // Necesitas poner una imagen en la carpeta public
-    }
-    ,
-];
+export default function ProductGrid({ products }: ProductGridProps) {
 
-export default function ProductGrid() {
     return (
         <section className={styles.grid_section}>
             <div className={styles.grid_container}>
-                {DUMMY_PRODUCTS.map((product) => {
-                    // Solo el primer producto lleva a la plantilla que creamos
-                    const href = product.id === '1' ? '/catalogo/ambiente/subcategoria/producto' : '#';
+
+                {products.map((product) => {
+
+                    const href = `/catalogo/${product.ambiente}/${product.subcategoria}/${product.slug}`
+
                     return (
-                        <Link href={href} key={product.id} passHref legacyBehavior>
-                            <a className={styles.link_wrapper}>
-                                <article className={styles.product_card}>
-                                    <div className={styles.image_placeholder}>
-                                        <Image
-                                            src={product.image}
-                                            alt={`Imagen de ${product.title}`}
-                                            fill
-                                        />
-                                    </div>
-                                    <div className={styles.info_container}>
-                                        <h3 className={styles.product_title}>{product.title}</h3>
-                                        <p className={styles.product_subtitle}>{product.subtitle}</p>
-                                    </div>
-                                </article>
-                            </a>
+                        <Link href={href} key={product.id} className={styles.link_wrapper}>
+                            <article className={styles.product_card}>
+
+                                <div className={styles.image_placeholder}>
+                                    <Image
+                                        src={product.image}
+                                        alt={`Imagen de ${product.name}`}
+                                        fill
+                                    />
+                                </div>
+
+                                <div className={styles.info_container}>
+                                    <h3 className={styles.product_title}>
+                                        {product.name}
+                                    </h3>
+
+                                    <p className={styles.product_subtitle}>
+                                        {product.brand}
+                                    </p>
+                                </div>
+
+                            </article>
                         </Link>
-                    );
+                    )
                 })}
+
             </div>
         </section>
-    );
+    )
 }

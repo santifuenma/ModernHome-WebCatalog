@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+// import { createClient } from '@/lib/supabase/server'
 
 export default async function TestSupabasePage() {
-    const supabase = createClient()
+    // const supabase = createClient()
+    // const { data, error } = await supabase.from('test_table_does_not_exist').select('*').limit(1)
 
-    // Realizamos una consulta muy básica solo para probar la conexión.
-    // Intentaremos consultar algo genérico o simplemente mostrar el estado.
-    const { data, error } = await supabase.from('test_table_does_not_exist').select('*').limit(1)
+    const error = "Integration temporarily disabled during architecture refactor"
+    const data = null
 
     return (
         <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
