@@ -42,6 +42,7 @@ MODERN HOME CATALOG/
 ├── styles/                         # (Opcional) Otros estilos globales
 ├── types/                          # Definición de tipos globales para TypeScript
 ├── .env.local                      # Variables de entorno locales (NO subir a Git)
+├── .npmrc                          # Configuración de npm (legacy-peer-deps para Vercel)
 ├── middleware.ts                   # Middleware de Next.js (ej. proteger rutas)
 └── package.json                    # Dependencias y scripts del proyecto
 ```
