@@ -1,11 +1,21 @@
 import ProductGrid from "@/components/layout/ProductGrid"
+import Pagination from "@/components/layout/Pagination"
 import { getProductCards } from "@/features/products/product.service"
 
-export default function CatalogoPage() {
+interface CatalogoPageProps {
+    searchParams: Promise<{ page?: string }>
+}
 
-    const products = getProductCards()
+export default async function CatalogoPage(props: CatalogoPageProps) {
+    const { page } = await props.searchParams
+    const currentPage = parseInt(page ?? '1', 10)
+
+    const { items, totalPages } = await getProductCards(currentPage)
 
     return (
-        <ProductGrid products={products} />
+        <>
+            <ProductGrid products={items} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/catalogo" />
+        </>
     )
 }

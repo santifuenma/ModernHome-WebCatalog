@@ -1,6 +1,19 @@
 // ======================================================
-// PRODUCT IMAGE
+// STORE CODES
+// Maps to the `store` column in the DB (LM, SM, DP, CT, BT)
 // ======================================================
+
+export type StoreCode = 'LM' | 'SM' | 'DP' | 'CT' | 'BT'
+
+export const STORE_LABELS: Record<StoreCode, string> = {
+    LM: 'Las Mercedes',
+    SM: 'Santa Monica',
+    DP: 'Depósito',
+    CT: 'Castellana',
+    BT: 'Barquisimeto',
+}
+
+
 
 export interface ProductImage {
     url: string
@@ -57,6 +70,13 @@ export interface Product {
 
     // Archivo descargable (ej: modelo 3D)
     download?: ProductDownload
+
+    // ── Campos de negocio (DB only — no se muestran en la UI por ahora) ──
+    code?: string           // Código interno del producto (ej: 'MH-001')
+    store?: StoreCode       // Código de tienda (LM | SM | DP | CT | BT)
+    stock?: number          // Unidades disponibles
+    is_active?: boolean     // Si el producto está publicado
+    created_at?: string     // Fecha de creación (ISO string)
 }
 
 // ======================================================

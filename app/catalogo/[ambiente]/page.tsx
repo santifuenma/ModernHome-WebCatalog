@@ -1,25 +1,23 @@
 import ProductGrid from "@/components/layout/ProductGrid"
+import Pagination from "@/components/layout/Pagination"
 import { getProductsByAmbiente } from "@/features/products/product.service"
 
 interface AmbientePageProps {
-    params: Promise<{
-        ambiente: string
-    }>
+    params: Promise<{ ambiente: string }>
+    searchParams: Promise<{ page?: string }>
 }
 
-/**
- * AmbientePage
- * Página dinámica que muestra los productos filtrados por ambiente.
- * Se renderiza en /catalogo/[ambiente] (ej: /catalogo/dormitorio).
- * Reutiliza ProductGrid con los productos del ambiente seleccionado.
- */
 export default async function AmbientePage(props: AmbientePageProps) {
     const { ambiente } = await props.params
+    const { page } = await props.searchParams
+    const currentPage = parseInt(page ?? '1', 10)
 
-    // Fetch products filtered by the ambiente from the URL param
-    const products = getProductsByAmbiente(ambiente)
+    const { items, totalPages } = await getProductsByAmbiente(ambiente, currentPage)
 
     return (
-        <ProductGrid products={products} />
+        <>
+            <ProductGrid products={items} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} basePath={`/catalogo/${ambiente}`} />
+        </>
     )
 }

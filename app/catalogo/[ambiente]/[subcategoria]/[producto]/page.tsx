@@ -9,7 +9,7 @@ interface ProductoPageProps {
 
 export default async function ProductoPage(props: ProductoPageProps) {
     const params = await props.params;
-    const product = getProductBySlug(params.producto)
+    const product = await getProductBySlug(params.producto)
 
     if (!product) {
         return <div>Producto no encontrado</div>
