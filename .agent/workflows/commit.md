@@ -2,6 +2,8 @@
 description: How to commit changes to git
 ---
 
+> ⚠️ NEVER commit automatically. Only commit when the user explicitly asks for it (e.g. "haz un commit", "haz commit", "commit").
+
 Before committing, always update README.md to reflect any changes to the project structure, dependencies, or features.
 
 1. Review the changes made in this session (new files, modified features, dependency upgrades, etc.)

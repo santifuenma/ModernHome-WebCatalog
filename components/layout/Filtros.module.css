@@ -1,6 +1,7 @@
 .filtros_bar {
     display: flex;
-    height: auto;
+    flex-direction: column;
+    /* Stack ambiente row + subcategoria row vertically */
     align-items: center;
     justify-content: center;
     background-color: var(--color-background);
@@ -8,41 +9,164 @@
     position: sticky;
     top: 0;
     z-index: 40;
+    /* REQUIRED: constrains children so overflow-x: auto works on them */
+    width: 100%;
+    overflow: hidden;
 }
 
 .filtros_content {
     display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 1.5rem;
-    font-size: 13px;
+    font-size: clamp(13px, 1vw, 14px);
     font-weight: 500;
     color: var(--color-text);
     gap: 10px;
-    padding: 20px 0 20px 0;
-
+    padding: 20px 40px 20px 40px;
+    width: 100%;
+    /* Scrollable row — hides scrollbar visually across all browsers */
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-.filtros_content button {
+.filtros_content::-webkit-scrollbar {
+    display: none;
+}
+
+/* ─── INDIVIDUAL FILTER BUTTON ─────────────────────────────────────── */
+/* Used for both Link and button elements in the filter bar */
+.filtro_button {
     cursor: pointer;
-    width: 120px;
+    width: 120px !important;
+    flex-shrink: 0;
+    /* Prevents the flex container from squeezing the button */
     height: 32px;
+    line-height: 32px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 8px;
     border: 1.8px solid var(--color-text-muted);
     color: var(--color-text);
     background-color: white;
-
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    text-decoration: none;
 }
 
-.filtros_content button:hover {
+.filtro_button:hover {
     background-color: var(--color-border);
+    font-weight: 600;
+
+}
+
+/* Active state: highlights the currently selected ambiente filter */
+.active {
+    background-color: rgb(242, 242, 242);
+    border-color: #A90404;
+    font-weight: 700;
+    color: #A90404;
+    border: 2.5px solid #A90404;
+}
+
+/* ─── SUBCATEGORÍAS ROW ──────────────────────────────────────────────── */
+/* Second row shown below ambientes when an ambiente is selected */
+.subcategorias_content {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Links drop to a second line when they don't fit */
+    gap: 15px;
+    padding: 5px 16px 8px 16px;
+    border-top: 1px solid var(--color-border);
+    width: 100%;
+    justify-content: center;
+}
+
+/* Subcategoria link — plain text style matching the screenshot */
+.subcategoria_link {
+    font-size: clamp(13px, 1vw, 14px);
+    font-weight: 400;
+    color: rgb(156, 156, 156);
+    text-decoration: none;
+    transition: color 0.2s ease, font-weight 0.2s ease;
+    white-space: nowrap;
+}
+
+.subcategoria_link:hover {
     color: var(--color-text);
-
 }
 
-.filtro_item {
+/* Active subcategoria: red text, no border (matches the screenshot) */
+.subcategoriaActive {
+    color: #A90404;
+    font-weight: 600;
+}
+
+/* ─── MOBILE SELECT ──────────────────────────────────────────────────── */
+/* Hidden on desktop — shown only below 680px via media query */
+.select_mobile_wrapper {
+    display: none;
+}
+
+/* Styled to match the button aesthetic */
+.select_mobile {
     cursor: pointer;
-    transition: color 0.2s ease;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1.8px solid var(--color-text-muted);
+    color: var(--color-text);
+    background-color: white;
+    border: 2.5px solid #A90404;
+    color: #A90404;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    appearance: none;
+    text-align: center;
+    /* Remove native arrow */
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    min-width: 200px;
+    transition: border-color 0.2s ease, color 0.2s ease;
+    outline: none;
+    /* Remove browser default orange focus ring */
 }
 
-.filtro_item:hover {
-    color: var(--color-primary);
+/* Active state: red border when an ambiente is selected */
+.select_active {
+    border: 2.5px solid #A90404;
+    color: #A90404;
+    font-weight: 700;
+    background-color: rgb(242, 242, 242);
+}
+
+/* ─── BREAKPOINT: swap buttons → select at 680px ─────────────────────── */
+@media (max-width: 680px) {
+
+    /* Hide the button row */
+    .filtros_content {
+        display: none;
+    }
+
+    /* Show the select wrapper */
+    .select_mobile_wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 16px;
+        width: 100%;
+    }
+
+    .select_mobile {
+        width: 100%;
+    }
 }

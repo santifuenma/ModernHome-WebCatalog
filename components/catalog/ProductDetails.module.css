@@ -293,6 +293,20 @@
 
     .productImagesContainer {
         width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mainImageContainer {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        position: relative;
+    }
+
+    .mainImageWrapper {
+        width: 100%;
+        height: 100%;
     }
 
     .thumbnailWrapper {

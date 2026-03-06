@@ -12,7 +12,9 @@ MODERN HOME CATALOG/
 │   ├── api/                        # Rutas API de backend
 │   │   └── README.md               # Documentación sobre arquitectura de la API
 │   ├── catalogo/                   # Rutas dinámicas del catálogo
-│   │   └── [ambiente]/[subcategoria]/[producto]/ # Ej: /catalogo/dormitorio/camas/dorian
+│   │   ├── [ambiente]/             # Ej: /catalogo/dormitorio → filtra por ambiente
+│   │   └── [ambiente]/[subcategoria]/ # Ej: /catalogo/sala/sofas → filtra por subcategoría
+│   │       └── [producto]/         # Ej: /catalogo/dormitorio/camas/dorian → detalle de producto
 │   ├── test-cloudinary/            # Ruta de prueba de integración con Cloudinary
 │   ├── test-supabase/              # Ruta de prueba de integración con Supabase
 │   ├── globals.css                 # Estilos globales y reset (Vanilla CSS)
@@ -23,11 +25,23 @@ MODERN HOME CATALOG/
 │   │   ├── ProductDetails.tsx      # Componente de la ficha de detalle de producto
 │   │   └── ProductDetails.module.css # Estilos modulares de ProductDetails
 │   └── layout/                     # Componentes estructurales de la web
-│       ├── FiltrosWrapper.tsx      # Barra/Filtros de navegación secundaria
+│       ├── Filtros.tsx             # Barra de filtros por ambiente/subcategoría (responsive)
+│       ├── Filtros.module.css      # Estilos de la barra de filtros
+│       ├── FiltrosWrapper.tsx      # Oculta los filtros en páginas de detalle
 │       ├── Navbar.tsx              # Barra de navegación principal
 │       ├── ProductGrid.tsx         # Cuadrícula de productos del catálogo
 │       └── ProductGrid.module.css  # Estilos modulares para la cuadrícula
 ├── features/                       # 💡 Lógica de negocio por funcionalidad
+│   ├── ambientes/                  # Feature de Ambientes
+│   │   ├── mockAmbientes.ts        # Datos de muestra (sala, comedor, dormitorio...)
+│   │   ├── ambiente.repository.ts  # Acceso a datos (pendiente Supabase)
+│   │   ├── ambiente.service.ts     # getAmbientes() para la barra de filtros
+│   │   └── ambiente.types.ts       # Interfaz Ambiente { label, slug }
+│   ├── subcategorias/              # Feature de Subcategorías
+│   │   ├── mockSubcategorias.ts    # Datos de muestra agrupados por ambiente
+│   │   ├── subcategoria.repository.ts # Acceso a datos (pendiente Supabase)
+│   │   ├── subcategoria.service.ts # getSubcategoriasByAmbiente()
+│   │   └── subcategoria.types.ts   # Interfaz Subcategoria { label, slug, ambiente }
 │   └── products/                   # Feature de Productos
 │       ├── mockProducts.ts         # Datos de muestra para desarrollo
 │       ├── product.repository.ts   # Acceso a base de datos (pendiente Supabase)
