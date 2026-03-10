@@ -14,10 +14,12 @@ export const mockSubcategorias: Subcategoria[] = [
     { label: 'Sillones', slug: 'sillones', ambiente: 'sala' },
     { label: 'Mesas de centro', slug: 'mesas-de-centro', ambiente: 'sala' },
     { label: 'Mesas laterales', slug: 'mesas-laterales', ambiente: 'sala' },
+    { label: 'Mueble de TV', slug: 'mueble-de-tv', ambiente: 'sala' },
 
     // ─── COMEDOR ──────────────────────────────────────────────────────────
     { label: 'Mesas', slug: 'mesas', ambiente: 'comedor' },
     { label: 'Sillas', slug: 'sillas', ambiente: 'comedor' },
+    { label: 'Aparadores', slug: 'aparadores', ambiente: 'comedor' },
 
     // ─── DORMITORIO ───────────────────────────────────────────────────────
     { label: 'Camas', slug: 'camas', ambiente: 'dormitorio' },
