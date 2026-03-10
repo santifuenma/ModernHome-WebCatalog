@@ -1,6 +1,6 @@
 # Modern Home Catalog Base
 
-Proyecto base Next.js 14+ con App Router y TypeScript, preparado para integración con Supabase y Cloudinary. Estructura limpia sin librerías de UI instaladas, listo para crecer y desplegar en Vercel.
+Proyecto Next.js 15+ con App Router y TypeScript, integrado con Supabase y Cloudinary. Arquitectura optimizada para catálogos de 4000+ productos con paginación real en base de datos, select mínimo por contexto e imágenes servidas en formato moderno vía Cloudinary (WebP/AVIF).
 
 ## 🗂️ Estructura del Proyecto
 
@@ -63,11 +63,11 @@ MODERN HOME CATALOG/
 
 ## 🛠️ Frameworks y Tecnologías Implementadas
 
-1. **Next.js (v16)**: Framework principal basado en React usando el **App Router**. Optimizado para Server Components por defecto.
+1. **Next.js (v16)**: Framework principal basado en React usando el **App Router**. Optimizado para Server Components por defecto. Rutas de ambiente pre-generadas con `generateStaticParams`.
 2. **React (v19)**: Librería para el desarrollo de la interfaz de usuario.
 3. **TypeScript (v5)**: Tipado estricto para un desarrollo más robusto y evitar errores en tiempo de ejecución.
-4. **Supabase (`@supabase/ssr`)**: Implementado como backend para base de datos y autenticación, preparado para funcionar de forma segura desde el servidor.
-5. **Cloudinary (`next-cloudinary`)**: Integración lista para el alojamiento, transformación y optimización de imágenes.
+4. **Supabase (`@supabase/ssr`)**: Backend para base de datos y autenticación. Las queries usan paginación real con `.range()` y COUNT por separado para no transferir datos innecesarios.
+5. **Cloudinary (`next-cloudinary`)**: Alojamiento, transformación y optimización de imágenes. URLs generadas con `f_auto,q_auto` (WebP/AVIF automático) y `c_limit,w_800` para cards de catálogo.
 6. **CSS Modules**: Sistema de estilos basado en Vanilla CSS, permitiendo que el CSS sea modular (`.module.css`) y evitando conflictos de clases entre componentes.
 
 ---

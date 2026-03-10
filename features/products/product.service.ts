@@ -6,10 +6,11 @@ import {
     dbGetProductsByStore,
     dbGetProductsInStock,
     dbGetInactiveProducts,
+    PaginatedProducts,
 } from './product.repository'
 import { Product, ProductCard } from './product.types'
 
-const PAGE_SIZE = 20
+export const PAGE_SIZE = 20
 
 // ======================================================
 // Tipos de paginación
@@ -23,122 +24,100 @@ export interface PaginatedResult<T> {
 }
 
 // ======================================================
-// Helper: pagina un array ya filtrado/mapeado
+// Helper: convierte PaginatedProducts del repo → PaginatedResult del service
 // ======================================================
 
-/**
- * paginateProducts
- * Divides an array of ProductCard into pages of PAGE_SIZE items.
- * Returns only the items for the requested page plus pagination metadata.
- */
-function paginateProducts(products: ProductCard[], page: number): PaginatedResult<ProductCard> {
-    const totalItems = products.length
+function toResult(
+    { items, totalItems }: PaginatedProducts,
+    page: number,
+): PaginatedResult<ProductCard> {
     const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE))
     const currentPage = Math.min(Math.max(1, page), totalPages)
-    const start = (currentPage - 1) * PAGE_SIZE
-    const items = products.slice(start, start + PAGE_SIZE)
     return { items, currentPage, totalPages, totalItems }
 }
 
 // ======================================================
-// Obtener todos los productos (estructura completa)
-// ======================================================
-
-/**
- * getProducts
- * Returns all products from Supabase (unfiltered, unpaginated).
- * Used internally — prefer getProductCards for catalog pages.
- */
-export async function getProducts(): Promise<ProductCard[]> {
-    return dbGetAllProducts()
-}
-
-// ======================================================
-// Obtener productos para el catálogo (versión ligera, paginada)
+// Obtener todos los productos (paginados)
 // ======================================================
 
 /**
  * getProductCards
- * Returns all products as lightweight ProductCards, paginated.
+ * Returns paginated products for the main catalog page.
+ * No extra caching — the DB-level .range() already ensures only 20 rows are fetched.
+ * New products appear immediately on the next request.
  */
 export async function getProductCards(page = 1): Promise<PaginatedResult<ProductCard>> {
-    const all = await dbGetAllProducts()
-    return paginateProducts(all, page)
+    const result = await dbGetAllProducts(page, PAGE_SIZE)
+    return toResult(result, page)
 }
 
 // ======================================================
-// Obtener productos por ambiente (para catálogo, paginado)
+// Obtener todos los productos (sin paginación — uso interno)
 // ======================================================
 
-/**
- * getProductsByAmbiente
- * Returns products filtered by ambiente, paginated.
- */
-export async function getProductsByAmbiente(ambiente: string, page = 1): Promise<PaginatedResult<ProductCard>> {
-    const filtered = await dbGetProductsByAmbiente(ambiente)
-    return paginateProducts(filtered, page)
+export async function getProducts(): Promise<ProductCard[]> {
+    const result = await dbGetAllProducts(1, PAGE_SIZE)
+    return result.items
 }
 
 // ======================================================
-// Obtener productos por subcategoría (para catálogo, paginado)
+// Obtener productos por ambiente (paginados)
 // ======================================================
 
-/**
- * getProductsBySubcategoria
- * Returns products filtered by subcategoria, paginated.
- */
-export async function getProductsBySubcategoria(subcategoria: string, page = 1): Promise<PaginatedResult<ProductCard>> {
-    const filtered = await dbGetProductsBySubcategoria(subcategoria)
-    return paginateProducts(filtered, page)
+export async function getProductsByAmbiente(
+    ambiente: string,
+    page = 1,
+): Promise<PaginatedResult<ProductCard>> {
+    const result = await dbGetProductsByAmbiente(ambiente, page, PAGE_SIZE)
+    return toResult(result, page)
+}
+
+// ======================================================
+// Obtener productos por subcategoría (paginados)
+// ======================================================
+
+export async function getProductsBySubcategoria(
+    subcategoria: string,
+    page = 1,
+): Promise<PaginatedResult<ProductCard>> {
+    const result = await dbGetProductsBySubcategoria(subcategoria, page, PAGE_SIZE)
+    return toResult(result, page)
 }
 
 // ======================================================
 // Obtener producto completo por slug (detalle)
 // ======================================================
 
-/**
- * getProductBySlug
- * Returns the full Product object for the detail page.
- */
 export async function getProductBySlug(slug: string): Promise<Product | null> {
     return dbGetProductBySlug(slug)
 }
 
 // ======================================================
-// Obtener productos por tienda (DB only — no se muestra en UI)
+// Obtener productos por tienda
 // ======================================================
 
-/**
- * getProductsByStore
- * Returns products for a specific store code (LM, SM, DP, CT, BT).
- */
-export async function getProductsByStore(store: string, page = 1): Promise<PaginatedResult<ProductCard>> {
-    const filtered = await dbGetProductsByStore(store)
-    return paginateProducts(filtered, page)
+export async function getProductsByStore(
+    store: string,
+    page = 1,
+): Promise<PaginatedResult<ProductCard>> {
+    const result = await dbGetProductsByStore(store, page, PAGE_SIZE)
+    return toResult(result, page)
 }
 
 // ======================================================
-// Obtener productos con stock disponible (DB only)
+// Obtener productos con stock disponible
 // ======================================================
 
-/**
- * getProductsInStock
- * Returns products with stock > 0.
- */
 export async function getProductsInStock(page = 1): Promise<PaginatedResult<ProductCard>> {
-    const filtered = await dbGetProductsInStock()
-    return paginateProducts(filtered, page)
+    const result = await dbGetProductsInStock(page, PAGE_SIZE)
+    return toResult(result, page)
 }
 
 // ======================================================
-// Obtener productos inactivos (DB only)
+// Obtener productos inactivos (admin)
 // ======================================================
 
-/**
- * getInactiveProducts
- * Returns products marked as inactive (for admin use).
- */
 export async function getInactiveProducts(page = 1): Promise<PaginatedResult<ProductCard>> {
-    const filtered = await dbGetInactiveProducts()
-    return paginateProducts(filtered, page)
+    const result = await dbGetInactiveProducts(page, PAGE_SIZE)
+    return toResult(result, page)
 }

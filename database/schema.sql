@@ -128,3 +128,27 @@ CREATE INDEX idx_products_is_active     ON products(is_active);
 CREATE INDEX idx_product_images_product_id      ON product_images(product_id);
 CREATE INDEX idx_product_swatches_product_id    ON product_material_swatches(product_id);
 CREATE INDEX idx_product_downloads_product_id   ON product_downloads(product_id);
+
+-- =============================================================================
+-- COMPOSITE & PARTIAL INDEXES (optimized for 4000+ products)
+-- The catalog always filters with is_active = true AND (ambiente OR subcategoria).
+-- Composite indexes are faster than two separate indexes for these patterns.
+-- =============================================================================
+
+-- Used by: getProductsByAmbiente → WHERE is_active = true AND ambiente = X
+CREATE INDEX idx_products_active_ambiente
+    ON products(is_active, ambiente);
+
+-- Used by: getProductsBySubcategoria → WHERE is_active = true AND subcategoria = X
+CREATE INDEX idx_products_active_subcategoria
+    ON products(is_active, subcategoria);
+
+-- Used by: getProductsByStore → WHERE is_active = true AND store = X
+CREATE INDEX idx_products_active_store
+    ON products(is_active, store);
+
+-- Partial index: only indexes active products (smaller index, faster scans).
+-- Used by: getProductCards → WHERE is_active = true ORDER BY created_at DESC
+CREATE INDEX idx_products_active_created_at
+    ON products(created_at DESC)
+    WHERE is_active = true;

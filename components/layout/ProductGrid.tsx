@@ -5,15 +5,17 @@ import Link from 'next/link'
 
 interface ProductGridProps {
     products: ProductCard[]
+    /** Number of images to load eagerly (above-fold). Defaults to 4. */
+    priorityCount?: number
 }
 
-export default function ProductGrid({ products }: ProductGridProps) {
+export default function ProductGrid({ products, priorityCount = 4 }: ProductGridProps) {
 
     return (
         <section className={styles.grid_section}>
             <div className={styles.grid_container}>
 
-                {products.map((product) => {
+                {products.map((product, index) => {
 
                     const href = `/catalogo/${product.ambiente}/${product.subcategoria}/${product.slug}`
 
@@ -26,6 +28,8 @@ export default function ProductGrid({ products }: ProductGridProps) {
                                         src={product.image}
                                         alt={`Imagen de ${product.name}`}
                                         fill
+                                        priority={index < priorityCount}
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                     />
                                 </div>
 

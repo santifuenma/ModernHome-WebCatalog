@@ -14,7 +14,7 @@ export default async function CatalogoPage(props: CatalogoPageProps) {
 
     return (
         <>
-            <ProductGrid products={items} />
+            <ProductGrid products={items} priorityCount={4} />
             <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/catalogo" />
         </>
     )

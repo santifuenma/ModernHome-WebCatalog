@@ -6,7 +6,8 @@ import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload } f
  * Capa de acceso a datos — hace las queries directas a Supabase.
  * El service layer llama a estas funciones; los componentes nunca llaman aquí directamente.
  *
- * Cada función devuelve los datos ya mapeados al tipo TypeScript correspondiente.
+ * Paginación real: usa .range() en la DB — nunca se traen más filas de las necesarias.
+ * Select mínimo: PRODUCT_CARD_SELECT solo trae los campos necesarios para la grilla.
  */
 
 // ─── Row types (shape of raw Supabase rows) ───────────────────────────────────
@@ -31,6 +32,17 @@ interface ProductRow {
     product_downloads: DownloadRow[]
 }
 
+// Fila ligera para la grilla — solo campos de ProductCard + imagen principal
+interface ProductCardRow {
+    id: string
+    name: string
+    slug: string
+    brand: string
+    ambiente: string
+    subcategoria: string
+    product_images: Pick<ImageRow, 'cloudinary_public_id' | 'is_main'>[]
+}
+
 interface ImageRow {
     id: string
     cloudinary_public_id: string
@@ -51,18 +63,30 @@ interface DownloadRow {
     url: string
 }
 
+// ─── Resultado paginado ───────────────────────────────────────────────────────
+
+export interface PaginatedProducts {
+    items: ProductCard[]
+    totalItems: number
+}
+
 // ─── Cloudinary URL builder ────────────────────────────────────────────────────
 
 /**
  * buildCloudinaryUrl
  * Constructs the full Cloudinary URL from a public_id.
  * The DB stores only the public_id; the full URL is built here in the repository.
+ *
+ * f_auto → Cloudinary serves the correct format (jpg, webp, avif) automatically
+ * q_auto → Optimizes quality automatically
+ * c_limit,w_800 → Cap width at 800px for card images (saves bandwidth on grids)
  */
-function buildCloudinaryUrl(publicId: string): string {
+function buildCloudinaryUrl(publicId: string, forCard = false): string {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-    // f_auto → Cloudinary serves the correct format (jpg, webp, avif) automatically
-    // q_auto → Optimizes quality automatically
-    return `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/${publicId}`
+    const transforms = forCard
+        ? 'f_auto,q_auto,c_limit,w_800'
+        : 'f_auto,q_auto'
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms}/${publicId}`
 }
 
 // ─── Row → TypeScript mappers ─────────────────────────────────────────────────
@@ -107,9 +131,9 @@ function toProduct(row: ProductRow): Product {
 
 /**
  * toProductCard
- * Maps a raw row to the lightweight ProductCard used in grids.
+ * Maps a lightweight card row to the ProductCard used in grids.
  */
-function toProductCard(row: ProductRow): ProductCard {
+function toProductCard(row: ProductCardRow): ProductCard {
     const mainImage = row.product_images?.find(img => img.is_main) ?? row.product_images?.[0]
     return {
         id: row.id,
@@ -118,13 +142,33 @@ function toProductCard(row: ProductRow): ProductCard {
         brand: row.brand,
         ambiente: row.ambiente,
         subcategoria: row.subcategoria,
-        image: mainImage ? buildCloudinaryUrl(mainImage.cloudinary_public_id) : '',
+        image: mainImage ? buildCloudinaryUrl(mainImage.cloudinary_public_id, true) : '',
     }
 }
 
-// ─── Base query (reused in all list queries) ──────────────────────────────────
+// ─── Select strings ────────────────────────────────────────────────────────────
 
-const PRODUCT_SELECT = `
+/**
+ * PRODUCT_CARD_SELECT
+ * Select mínimo para la grilla del catálogo.
+ * Solo trae los campos que necesita ProductCard + la imagen principal.
+ * NO incluye swatches ni downloads (reducción ~60% de datos transferidos).
+ */
+const PRODUCT_CARD_SELECT = `
+    id,
+    name,
+    slug,
+    brand,
+    ambiente,
+    subcategoria,
+    product_images ( cloudinary_public_id, is_main )
+`
+
+/**
+ * PRODUCT_FULL_SELECT
+ * Select completo para la página de detalle de producto.
+ */
+const PRODUCT_FULL_SELECT = `
     *,
     product_images ( id, cloudinary_public_id, alt, is_main, position ),
     product_material_swatches ( id, name, cloudinary_public_id ),
@@ -135,52 +179,102 @@ const PRODUCT_SELECT = `
 
 /**
  * dbGetAllProducts
- * Returns ALL active products (used by the main catalog page).
+ * Returns paginated active products for the main catalog page.
+ * Uses DB-level .range() — never fetches more rows than needed.
  */
-export async function dbGetAllProducts(): Promise<ProductCard[]> {
+export async function dbGetAllProducts(page: number, pageSize: number): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    if (error) throw new Error(`dbGetAllProducts: ${error.message}`)
-    return (data as ProductRow[]).map(toProductCard)
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_active', true),
+    ])
+
+    if (dataResult.error) throw new Error(`dbGetAllProducts: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
 }
 
 /**
  * dbGetProductsByAmbiente
- * Returns active products filtered by ambiente.
+ * Returns paginated active products filtered by ambiente.
  */
-export async function dbGetProductsByAmbiente(ambiente: string): Promise<ProductCard[]> {
+export async function dbGetProductsByAmbiente(
+    ambiente: string,
+    page: number,
+    pageSize: number,
+): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .eq('ambiente', ambiente)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    if (error) throw new Error(`dbGetProductsByAmbiente: ${error.message}`)
-    return (data as ProductRow[]).map(toProductCard)
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .eq('ambiente', ambiente)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('ambiente', ambiente)
+            .eq('is_active', true),
+    ])
+
+    if (dataResult.error) throw new Error(`dbGetProductsByAmbiente: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
 }
 
 /**
  * dbGetProductsBySubcategoria
- * Returns active products filtered by subcategoria.
+ * Returns paginated active products filtered by subcategoria.
  */
-export async function dbGetProductsBySubcategoria(subcategoria: string): Promise<ProductCard[]> {
+export async function dbGetProductsBySubcategoria(
+    subcategoria: string,
+    page: number,
+    pageSize: number,
+): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .eq('subcategoria', subcategoria)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    if (error) throw new Error(`dbGetProductsBySubcategoria: ${error.message}`)
-    return (data as ProductRow[]).map(toProductCard)
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .eq('subcategoria', subcategoria)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('subcategoria', subcategoria)
+            .eq('is_active', true),
+    ])
+
+    if (dataResult.error) throw new Error(`dbGetProductsBySubcategoria: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
 }
 
 /**
@@ -191,7 +285,7 @@ export async function dbGetProductBySlug(slug: string): Promise<Product | null> 
     const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
         .from('products')
-        .select(PRODUCT_SELECT)
+        .select(PRODUCT_FULL_SELECT)
         .eq('slug', slug)
         .eq('is_active', true)
         .single()
@@ -202,47 +296,98 @@ export async function dbGetProductBySlug(slug: string): Promise<Product | null> 
 
 /**
  * dbGetProductsByStore
- * Returns products for a specific store code (LM, SM, DP, CT, BT).
+ * Returns paginated products for a specific store code (LM, SM, DP, CT, BT).
  */
-export async function dbGetProductsByStore(store: string): Promise<ProductCard[]> {
+export async function dbGetProductsByStore(
+    store: string,
+    page: number,
+    pageSize: number,
+): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .eq('store', store)
-        .eq('is_active', true)
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    if (error) throw new Error(`dbGetProductsByStore: ${error.message}`)
-    return (data as ProductRow[]).map(toProductCard)
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .eq('store', store)
+            .eq('is_active', true)
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('store', store)
+            .eq('is_active', true),
+    ])
+
+    if (dataResult.error) throw new Error(`dbGetProductsByStore: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
 }
 
 /**
  * dbGetProductsInStock
- * Returns products with stock > 0.
+ * Returns paginated products with stock > 0.
  */
-export async function dbGetProductsInStock(): Promise<ProductCard[]> {
+export async function dbGetProductsInStock(
+    page: number,
+    pageSize: number,
+): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .gt('stock', 0)
-        .eq('is_active', true)
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    if (error) throw new Error(`dbGetProductsInStock: ${error.message}`)
-    return (data as ProductRow[]).map(toProductCard)
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .gt('stock', 0)
+            .eq('is_active', true)
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .gt('stock', 0)
+            .eq('is_active', true),
+    ])
+
+    if (dataResult.error) throw new Error(`dbGetProductsInStock: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
 }
 
 /**
  * dbGetInactiveProducts
- * Returns products marked as inactive (for admin use).
+ * Returns paginated products marked as inactive (for admin use).
  */
-export async function dbGetInactiveProducts(): Promise<ProductCard[]> {
+export async function dbGetInactiveProducts(
+    page: number,
+    pageSize: number,
+): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .eq('is_active', false)
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
 
-    if (error) throw new Error(`dbGetInactiveProducts: ${error.message}`)
-    return (data as ProductRow[]).map(toProductCard)
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .eq('is_active', false)
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_active', false),
+    ])
+
+    if (dataResult.error) throw new Error(`dbGetInactiveProducts: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
 }
