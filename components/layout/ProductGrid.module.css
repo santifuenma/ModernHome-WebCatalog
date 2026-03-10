@@ -46,6 +46,7 @@
     height: 90% !important;
     object-fit: contain !important;
     object-position: center !important;
+    margin: 0 auto;
     transition: transform 0.4s ease-in-out;
 }
 
