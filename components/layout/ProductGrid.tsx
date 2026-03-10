@@ -24,13 +24,15 @@ export default function ProductGrid({ products, priorityCount = 4 }: ProductGrid
                             <article className={styles.product_card}>
 
                                 <div className={styles.image_placeholder}>
-                                    <Image
-                                        src={product.image}
-                                        alt={`Imagen de ${product.name}`}
-                                        fill
-                                        priority={index < priorityCount}
-                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                    />
+                                    {product.image ? (
+                                        <Image
+                                            src={product.image}
+                                            alt={`Imagen de ${product.name}`}
+                                            fill
+                                            priority={index < priorityCount}
+                                            unoptimized={true}
+                                        />
+                                    ) : null}
                                 </div>
 
                                 <div className={styles.info_container}>

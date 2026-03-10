@@ -16,6 +16,7 @@ export const STORE_LABELS: Record<StoreCode, string> = {
 
 
 export interface ProductImage {
+    id?: string
     url: string
     alt?: string
     isMain?: boolean

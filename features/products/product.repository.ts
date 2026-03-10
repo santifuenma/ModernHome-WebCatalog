@@ -83,9 +83,9 @@ export interface PaginatedProducts {
  */
 function buildCloudinaryUrl(publicId: string, forCard = false): string {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-    const transforms = forCard
-        ? 'f_auto,q_auto,c_limit,w_800'
-        : 'f_auto,q_auto'
+    // Se quita c_limit,w_800 para evitar pixelaciones si next/image pide resoluciones grandes.
+    // Dejamos que next/image de Next.js haga el sizing responsive basado en los "sizes" props.
+    const transforms = 'f_auto,q_auto'
     return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms}/${publicId}`
 }
 
@@ -114,6 +114,7 @@ function toProduct(row: ProductRow): Product {
         images: (row.product_images ?? [])
             .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
             .map((img): ProductImage => ({
+                id: img.id,
                 url: buildCloudinaryUrl(img.cloudinary_public_id),
                 alt: img.alt ?? undefined,
                 isMain: img.is_main ?? false,
@@ -295,6 +296,22 @@ export async function dbGetProductBySlug(slug: string): Promise<Product | null> 
 }
 
 /**
+ * dbGetProductById
+ * Returns the full Product detail by ID (Useful for Admin).
+ */
+export async function dbGetProductById(id: string): Promise<Product | null> {
+    const supabase = await createSupabaseServerClient()
+    const { data, error } = await supabase
+        .from('products')
+        .select(PRODUCT_FULL_SELECT)
+        .eq('id', id)
+        .single()
+
+    if (error) return null
+    return toProduct(data as ProductRow)
+}
+
+/**
  * dbGetProductsByStore
  * Returns paginated products for a specific store code (LM, SM, DP, CT, BT).
  */
@@ -390,4 +407,195 @@ export async function dbGetInactiveProducts(
         items: (dataResult.data as ProductCardRow[]).map(toProductCard),
         totalItems: countResult.count ?? 0,
     }
+}
+
+// ─── ADMIN CRUD FUNCTIONS ──────────────────────────────────────────────────────
+
+/**
+ * dbSearchProductsAdmin
+ * Searches products by code (exact) or name (partial, case-insensitive).
+ * Ignores active status to allow managing all products.
+ */
+export async function dbSearchProductsAdmin(
+    query: string,
+    page: number,
+    pageSize: number
+): Promise<PaginatedProducts> {
+    const supabase = await createSupabaseServerClient()
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+
+    const searchQuery = `%${query}%`
+
+    const [dataResult, countResult] = await Promise.all([
+        supabase
+            .from('products')
+            .select(PRODUCT_CARD_SELECT)
+            .or(`code.eq."${query}",name.ilike."${searchQuery}"`)
+            .order('created_at', { ascending: false })
+            .range(from, to),
+        supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .or(`code.eq."${query}",name.ilike."${searchQuery}"`),
+    ])
+
+    if (dataResult.error) throw new Error(`dbSearchProductsAdmin: ${dataResult.error.message}`)
+    return {
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        totalItems: countResult.count ?? 0,
+    }
+}
+
+/**
+ * dbCreateProduct
+ * Inserts a new product into the database.
+ */
+export async function dbCreateProduct(productData: any): Promise<string> {
+    const supabase = await createSupabaseServerClient()
+    const { data, error } = await supabase
+        .from('products')
+        .insert(productData)
+        .select('id')
+        .single()
+
+    if (error) throw new Error(`dbCreateProduct: ${error.message}`)
+    return data.id
+}
+
+/**
+ * dbUpdateProduct
+ * Updates an existing product.
+ */
+export async function dbUpdateProduct(id: string, productData: any): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+    const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', id)
+
+    if (error) throw new Error(`dbUpdateProduct: ${error.message}`)
+}
+
+/**
+ * dbDeleteProduct
+ * Deletes a product. Related images and data cascade delete automatically.
+ */
+export async function dbDeleteProduct(id: string): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+    const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id)
+
+    if (error) throw new Error(`dbDeleteProduct: ${error.message}`)
+}
+
+/**
+ * dbAddProductImage
+ * Links a Cloudinary image to a product.
+ */
+export async function dbAddProductImage(productId: string, cloudinaryPublicId: string, isMain: boolean = false): Promise<string> {
+    const supabase = await createSupabaseServerClient()
+    
+    // Si la nueva imagen es principal, quitar la flag is_main del resto
+    if (isMain) {
+        await supabase
+            .from('product_images')
+            .update({ is_main: false })
+            .eq('product_id', productId)
+    }
+
+    const { data, error } = await supabase
+        .from('product_images')
+        .insert({
+            product_id: productId,
+            cloudinary_public_id: cloudinaryPublicId,
+            is_main: isMain,
+            position: 0
+        })
+        .select('id')
+        .single()
+
+    if (error) throw new Error(`dbAddProductImage: ${error.message}`)
+    return data.id
+}
+
+/**
+ * dbRemoveProductImage
+ * Removes an image link from the database.
+ */
+export async function dbRemoveProductImage(imageId: string): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+    const { error } = await supabase
+        .from('product_images')
+        .delete()
+        .eq('id', imageId)
+
+    if (error) throw new Error(`dbRemoveProductImage: ${error.message}`)
+}
+
+/**
+ * dbAddProductSwatch
+ */
+export async function dbAddProductSwatch(productId: string, name: string | null, cloudinaryPublicId: string): Promise<string> {
+    const supabase = await createSupabaseServerClient()
+    const { data, error } = await supabase
+        .from('product_material_swatches')
+        .insert({
+            product_id: productId,
+            name: name,
+            cloudinary_public_id: cloudinaryPublicId,
+        })
+        .select('id')
+        .single()
+
+    if (error) throw new Error(`dbAddProductSwatch: ${error.message}`)
+    return data.id
+}
+
+/**
+ * dbRemoveProductSwatch
+ */
+export async function dbRemoveProductSwatch(swatchId: string): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+    const { error } = await supabase
+        .from('product_material_swatches')
+        .delete()
+        .eq('id', swatchId)
+
+    if (error) throw new Error(`dbRemoveProductSwatch: ${error.message}`)
+}
+
+/**
+ * dbSetProductDownload
+ * Upserts a single download link per product.
+ */
+export async function dbSetProductDownload(productId: string, name: string, url: string): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+    // Borrar el anterior si existe (por simplicidad, nuestra UI maneja 1 solo descargable)
+    await supabase.from('product_downloads').delete().eq('product_id', productId)
+    
+    const { error } = await supabase
+        .from('product_downloads')
+        .insert({
+            product_id: productId,
+            name: name,
+            url: url
+        })
+
+    if (error) throw new Error(`dbSetProductDownload: ${error.message}`)
+}
+
+/**
+ * dbRemoveProductDownload
+ */
+export async function dbRemoveProductDownload(productId: string): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+    const { error } = await supabase
+        .from('product_downloads')
+        .delete()
+        .eq('product_id', productId)
+
+    if (error) throw new Error(`dbRemoveProductDownload: ${error.message}`)
 }

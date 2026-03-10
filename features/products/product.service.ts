@@ -3,9 +3,20 @@ import {
     dbGetProductsByAmbiente,
     dbGetProductsBySubcategoria,
     dbGetProductBySlug,
+    dbGetProductById,
     dbGetProductsByStore,
     dbGetProductsInStock,
     dbGetInactiveProducts,
+    dbSearchProductsAdmin,
+    dbCreateProduct,
+    dbUpdateProduct,
+    dbDeleteProduct,
+    dbAddProductImage,
+    dbRemoveProductImage,
+    dbAddProductSwatch,
+    dbRemoveProductSwatch,
+    dbSetProductDownload,
+    dbRemoveProductDownload,
     PaginatedProducts,
 } from './product.repository'
 import { Product, ProductCard } from './product.types'
@@ -92,6 +103,10 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return dbGetProductBySlug(slug)
 }
 
+export async function getProductById(id: string): Promise<Product | null> {
+    return dbGetProductById(id)
+}
+
 // ======================================================
 // Obtener productos por tienda
 // ======================================================
@@ -120,4 +135,49 @@ export async function getProductsInStock(page = 1): Promise<PaginatedResult<Prod
 export async function getInactiveProducts(page = 1): Promise<PaginatedResult<ProductCard>> {
     const result = await dbGetInactiveProducts(page, PAGE_SIZE)
     return toResult(result, page)
+}
+
+// ======================================================
+// ADMIN CRUD (Search, Create, Update, Delete)
+// ======================================================
+
+export async function searchProductsAdmin(query: string, page = 1): Promise<PaginatedResult<ProductCard>> {
+    const result = await dbSearchProductsAdmin(query, page, PAGE_SIZE)
+    return toResult(result, page)
+}
+
+export async function createProduct(data: Partial<Product>): Promise<string> {
+    return dbCreateProduct(data)
+}
+
+export async function updateProduct(id: string, data: Partial<Product>): Promise<void> {
+    return dbUpdateProduct(id, data)
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+    return dbDeleteProduct(id)
+}
+
+export async function addProductImage(productId: string, cloudinaryPublicId: string, isMain = false): Promise<string> {
+    return dbAddProductImage(productId, cloudinaryPublicId, isMain)
+}
+
+export async function removeProductImage(imageId: string): Promise<void> {
+    return dbRemoveProductImage(imageId)
+}
+
+export async function addProductSwatch(productId: string, name: string | null, cloudinaryPublicId: string): Promise<string> {
+    return dbAddProductSwatch(productId, name, cloudinaryPublicId)
+}
+
+export async function removeProductSwatch(swatchId: string): Promise<void> {
+    return dbRemoveProductSwatch(swatchId)
+}
+
+export async function setProductDownload(productId: string, name: string, url: string): Promise<void> {
+    return dbSetProductDownload(productId, name, url)
+}
+
+export async function removeProductDownload(productId: string): Promise<void> {
+    return dbRemoveProductDownload(productId)
 }
