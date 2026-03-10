@@ -193,12 +193,14 @@ export async function dbGetAllProducts(page: number, pageSize: number): Promise<
             .from('products')
             .select(PRODUCT_CARD_SELECT)
             .eq('is_active', true)
+            .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
             .range(from, to),
         supabase
             .from('products')
             .select('id', { count: 'exact', head: true })
-            .eq('is_active', true),
+            .eq('is_active', true)
+            .not('product_images', 'is', null),
     ])
 
     if (dataResult.error) throw new Error(`dbGetAllProducts: ${dataResult.error.message}`)
@@ -227,13 +229,15 @@ export async function dbGetProductsByAmbiente(
             .select(PRODUCT_CARD_SELECT)
             .eq('ambiente', ambiente)
             .eq('is_active', true)
+            .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
             .range(from, to),
         supabase
             .from('products')
             .select('id', { count: 'exact', head: true })
             .eq('ambiente', ambiente)
-            .eq('is_active', true),
+            .eq('is_active', true)
+            .not('product_images', 'is', null),
     ])
 
     if (dataResult.error) throw new Error(`dbGetProductsByAmbiente: ${dataResult.error.message}`)
@@ -262,13 +266,15 @@ export async function dbGetProductsBySubcategoria(
             .select(PRODUCT_CARD_SELECT)
             .eq('subcategoria', subcategoria)
             .eq('is_active', true)
+            .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
             .range(from, to),
         supabase
             .from('products')
             .select('id', { count: 'exact', head: true })
             .eq('subcategoria', subcategoria)
-            .eq('is_active', true),
+            .eq('is_active', true)
+            .not('product_images', 'is', null),
     ])
 
     if (dataResult.error) throw new Error(`dbGetProductsBySubcategoria: ${dataResult.error.message}`)

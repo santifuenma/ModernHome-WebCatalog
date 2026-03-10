@@ -15,7 +15,7 @@ export default function ProductGrid({ products, priorityCount = 4 }: ProductGrid
         <section className={styles.grid_section}>
             <div className={styles.grid_container}>
 
-                {products.filter(p => !!p.image).map((product, index) => {
+                {products.map((product, index) => {
 
                     const href = `/catalogo/${product.ambiente}/${product.subcategoria}/${product.slug}`
 
