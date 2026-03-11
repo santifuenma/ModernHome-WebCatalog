@@ -1,4 +1,4 @@
-import { getProductById } from '@/features/products/product.service'
+import { getProductById, getAllUniqueSwatches } from '@/features/products/product.service'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { ImageUploader } from '@/components/admin/ImageUploader'
 import { SwatchesManager } from '@/components/admin/SwatchesManager'
@@ -13,7 +13,10 @@ interface EditProductPageProps {
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
     const { id } = await params
-    const product = await getProductById(id)
+    const [product, availableSwatches] = await Promise.all([
+        getProductById(id),
+        getAllUniqueSwatches()
+    ])
 
     if (!product) {
         notFound()
@@ -56,7 +59,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
             <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #eaeaea' }} />
 
-            <SwatchesManager productId={product.id} swatches={product.materialSwatches || []} />
+            <SwatchesManager productId={product.id} swatches={product.materialSwatches || []} availableSwatches={availableSwatches} />
 
             <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #eaeaea' }} />
 

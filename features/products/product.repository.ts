@@ -123,6 +123,7 @@ function toProduct(row: ProductRow): Product {
             })),
         materialSwatches: (row.product_material_swatches ?? [])
             .map((s): MaterialSwatch => ({
+                id: s.id,
                 name: s.name ?? undefined,
                 image: buildCloudinaryUrl(s.cloudinary_public_id),
             })),
@@ -606,4 +607,36 @@ export async function dbRemoveProductDownload(productId: string): Promise<void> 
         .eq('product_id', productId)
 
     if (error) throw new Error(`dbRemoveProductDownload: ${error.message}`)
+}
+
+/**
+ * dbGetAllUniqueSwatches
+ * Retrieves a deduplicated list of all available material swatches in the entire catalog.
+ * Useful for the Admin UI to allow selecting existing materials instead of re-uploading them.
+ */
+export async function dbGetAllUniqueSwatches(): Promise<MaterialSwatch[]> {
+    const supabase = await createSupabaseServerClient()
+    
+    // Using a distinct select implicitly if supported or fetching all and deduplicating in memory.
+    // For small/medium catalogs, fetching swatches and deduplicating in-memory or via distinct is fine.
+    const { data, error } = await supabase
+        .from('product_material_swatches')
+        .select('name, cloudinary_public_id')
+        // Order by name so they appear alphabetically.
+        .order('name', { ascending: true })
+
+    if (error) throw new Error(`dbGetAllUniqueSwatches: ${error.message}`)
+
+    // Deduplicate by cloudinary_public_id
+    const uniqueMap = new Map<string, MaterialSwatch>()
+    for (const row of data || []) {
+        if (!uniqueMap.has(row.cloudinary_public_id)) {
+            uniqueMap.set(row.cloudinary_public_id, {
+                name: row.name ?? undefined,
+                image: buildCloudinaryUrl(row.cloudinary_public_id),
+            })
+        }
+    }
+
+    return Array.from(uniqueMap.values())
 }

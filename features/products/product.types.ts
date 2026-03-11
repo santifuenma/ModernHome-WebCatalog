@@ -27,6 +27,7 @@ export interface ProductImage {
 // ======================================================
 
 export interface MaterialSwatch {
+    id?: string
     name?: string
     image: string
 }

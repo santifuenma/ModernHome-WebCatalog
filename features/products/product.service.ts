@@ -17,9 +17,10 @@ import {
     dbRemoveProductSwatch,
     dbSetProductDownload,
     dbRemoveProductDownload,
+    dbGetAllUniqueSwatches,
     PaginatedProducts,
 } from './product.repository'
-import { Product, ProductCard } from './product.types'
+import { Product, ProductCard, MaterialSwatch } from './product.types'
 
 export const PAGE_SIZE = 20
 
@@ -180,4 +181,8 @@ export async function setProductDownload(productId: string, name: string, url: s
 
 export async function removeProductDownload(productId: string): Promise<void> {
     return dbRemoveProductDownload(productId)
+}
+
+export async function getAllUniqueSwatches(): Promise<MaterialSwatch[]> {
+    return dbGetAllUniqueSwatches()
 }
