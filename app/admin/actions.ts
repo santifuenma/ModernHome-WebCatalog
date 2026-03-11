@@ -24,6 +24,7 @@ export async function saveProduct(formData: FormData) {
         stock: parseInt(formData.get('stock') as string || '0', 10),
         ambiente: formData.get('ambiente') as string,
         subcategoria: formData.get('subcategoria') as string,
+        url: formData.get('url') as string || undefined,
         materials: (formData.get('materials') as string || '').split('\n').map(s => s.trim()).filter(Boolean),
         dimensions: (formData.get('dimensions') as string || '').split('\n').map(s => s.trim()).filter(Boolean),
     }

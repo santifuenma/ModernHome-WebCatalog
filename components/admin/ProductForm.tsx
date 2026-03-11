@@ -78,6 +78,11 @@ export function ProductForm({ initialData }: ProductFormProps) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label>URL (Enlace externo)</label>
+                <input type="url" name="url" defaultValue={initialData?.url} placeholder="https://..." style={inputStyle} />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label>Materiales (uno por línea)</label>
                 <textarea name="materials" defaultValue={initialData?.materials?.join('\n')} rows={3} style={inputStyle} />
             </div>

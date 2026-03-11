@@ -72,6 +72,9 @@ export interface Product {
     // Archivo descargable (ej: modelo 3D)
     download?: ProductDownload
 
+    // Enlace externo al producto
+    url?: string
+
     // ── Campos de negocio (DB only — no se muestran en la UI por ahora) ──
     code?: string           // Código interno del producto (ej: 'MH-001')
     store?: StoreCode       // Código de tienda (LM | SM | DP | CT | BT)

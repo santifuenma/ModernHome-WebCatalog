@@ -118,8 +118,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                                         <Image
                                             src={swatch.image}
                                             alt={swatch.name || `material ${index + 1}`}
-                                            width={40}
-                                            height={40}
+                                            fill
                                         />
                                     </div>
                                 ))}

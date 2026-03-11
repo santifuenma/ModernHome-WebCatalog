@@ -25,6 +25,7 @@ interface ProductRow {
     subcategoria: string
     dimensions: string[] | null
     materials: string[] | null
+    url: string | null
     is_active: boolean | null
     created_at: string | null
     product_images: ImageRow[]
@@ -109,6 +110,7 @@ function toProduct(row: ProductRow): Product {
         subcategoria: row.subcategoria,
         dimensions: row.dimensions ?? [],
         materials: row.materials ?? [],
+        url: row.url ?? undefined,
         is_active: row.is_active ?? true,
         created_at: row.created_at ?? undefined,
         images: (row.product_images ?? [])

@@ -39,6 +39,9 @@ CREATE TABLE products (
     ambiente            TEXT        NOT NULL,              -- e.g. dormitorio, sala, comedor
     subcategoria        TEXT        NOT NULL,              -- e.g. camas, sofas, mesas
 
+    -- External link
+    url                 TEXT,                              -- URL del producto (externo)
+
     -- Characteristics (stored as arrays — maps to Product.dimensions[] and Product.materials[])
     dimensions          TEXT[],                            -- e.g. ARRAY['200x160x90cm', 'King: 200x200cm']
     materials           TEXT[],                            -- e.g. ARRAY['Madera de roble', 'Tela lino']
