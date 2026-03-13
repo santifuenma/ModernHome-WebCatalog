@@ -201,9 +201,8 @@ export async function dbGetAllProducts(page: number, pageSize: number): Promise<
             .range(from, to),
         supabase
             .from('products')
-            .select('id', { count: 'exact', head: true })
-            .eq('is_active', true)
-            .not('product_images', 'is', null),
+            .select('id, product_images!inner(id)', { count: 'exact', head: true })
+            .eq('is_active', true),
     ])
 
     if (dataResult.error) throw new Error(`dbGetAllProducts: ${dataResult.error.message}`)
@@ -237,10 +236,9 @@ export async function dbGetProductsByAmbiente(
             .range(from, to),
         supabase
             .from('products')
-            .select('id', { count: 'exact', head: true })
+            .select('id, product_images!inner(id)', { count: 'exact', head: true })
             .eq('ambiente', ambiente)
-            .eq('is_active', true)
-            .not('product_images', 'is', null),
+            .eq('is_active', true),
     ])
 
     if (dataResult.error) throw new Error(`dbGetProductsByAmbiente: ${dataResult.error.message}`)
@@ -274,10 +272,9 @@ export async function dbGetProductsBySubcategoria(
             .range(from, to),
         supabase
             .from('products')
-            .select('id', { count: 'exact', head: true })
+            .select('id, product_images!inner(id)', { count: 'exact', head: true })
             .eq('subcategoria', subcategoria)
-            .eq('is_active', true)
-            .not('product_images', 'is', null),
+            .eq('is_active', true),
     ])
 
     if (dataResult.error) throw new Error(`dbGetProductsBySubcategoria: ${dataResult.error.message}`)
