@@ -90,7 +90,7 @@
     margin: 0;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 901px) {
     .grid_container {
         grid-template-columns: repeat(2, 1fr);
         padding: 0 2rem;
