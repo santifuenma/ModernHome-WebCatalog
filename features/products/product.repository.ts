@@ -198,6 +198,7 @@ export async function dbGetAllProducts(page: number, pageSize: number): Promise<
             .eq('is_active', true)
             .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
@@ -233,6 +234,7 @@ export async function dbGetProductsByAmbiente(
             .eq('is_active', true)
             .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
@@ -269,6 +271,7 @@ export async function dbGetProductsBySubcategoria(
             .eq('is_active', true)
             .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
@@ -336,6 +339,8 @@ export async function dbGetProductsByStore(
             .select(PRODUCT_CARD_SELECT)
             .eq('store', store)
             .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
@@ -369,6 +374,8 @@ export async function dbGetProductsInStock(
             .select(PRODUCT_CARD_SELECT)
             .gt('stock', 0)
             .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
@@ -401,6 +408,8 @@ export async function dbGetInactiveProducts(
             .from('products')
             .select(PRODUCT_CARD_SELECT)
             .eq('is_active', false)
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
@@ -439,6 +448,7 @@ export async function dbSearchProductsAdmin(
             .select(PRODUCT_CARD_SELECT)
             .or(`code.eq."${query}",name.ilike."${searchQuery}"`)
             .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
