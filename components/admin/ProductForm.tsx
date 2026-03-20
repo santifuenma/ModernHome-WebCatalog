@@ -1,16 +1,25 @@
 'use client'
 
+import { Subcategoria } from '@/features/subcategorias/subcategoria.types'
 import { saveProduct } from '@/app/admin/actions'
 import { Product } from '@/features/products/product.types'
 import { useState } from 'react'
 
 interface ProductFormProps {
     initialData?: Product
+    ambientes: { label: string, slug: string }[]
+    subcategoriaMap: Record<string, Subcategoria[]>
 }
 
-export function ProductForm({ initialData }: ProductFormProps) {
+export function ProductForm({ initialData, ambientes, subcategoriaMap }: ProductFormProps) {
     const isEditing = !!initialData
     const [loading, setLoading] = useState(false)
+
+    const [selectedAmbiente, setSelectedAmbiente] = useState(initialData?.ambiente || 'general')
+    const [selectedSubcategoria, setSelectedSubcategoria] = useState(initialData?.subcategoria || '')
+    const [isNewSubcategoria, setIsNewSubcategoria] = useState(false)
+
+    const availableSubcategorias = subcategoriaMap[selectedAmbiente] || []
 
     return (
         <form 
@@ -69,12 +78,59 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label>Ambiente *</label>
-                <input required type="text" name="ambiente" defaultValue={initialData?.ambiente || 'general'} style={inputStyle} />
+                <select 
+                    required 
+                    name="ambiente" 
+                    value={selectedAmbiente}
+                    onChange={(e) => {
+                        setSelectedAmbiente(e.target.value)
+                        setSelectedSubcategoria('')
+                        setIsNewSubcategoria(false)
+                    }}
+                    style={inputStyle}
+                >
+                    <option value="" disabled>Selecciona un ambiente</option>
+                    {ambientes.map(a => (
+                        <option key={a.slug} value={a.slug}>{a.label}</option>
+                    ))}
+                </select>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <label>Subcategoria *</label>
-                <input required type="text" name="subcategoria" defaultValue={initialData?.subcategoria || 'general'} style={inputStyle} />
+                <select 
+                    required={!isNewSubcategoria} 
+                    name={isNewSubcategoria ? "_ignore_subcategoria" : "subcategoria"} 
+                    value={isNewSubcategoria ? 'NEW' : selectedSubcategoria}
+                    onChange={(e) => {
+                        const val = e.target.value
+                        if (val === 'NEW') {
+                            setIsNewSubcategoria(true)
+                            setSelectedSubcategoria('NEW')
+                        } else {
+                            setIsNewSubcategoria(false)
+                            setSelectedSubcategoria(val)
+                        }
+                    }}
+                    style={inputStyle}
+                >
+                    <option value="" disabled>Selecciona una subcategoría</option>
+                    {availableSubcategorias.map(s => (
+                        <option key={s.slug} value={s.slug}>{s.label}</option>
+                    ))}
+                    <option value="NEW">+ Agregar nueva...</option>
+                </select>
+
+                {isNewSubcategoria && (
+                    <input 
+                        required 
+                        type="text" 
+                        name="subcategoria" 
+                        placeholder="Ej: mesas-de-centro" 
+                        style={{ ...inputStyle, marginTop: '5px' }} 
+                        autoFocus
+                    />
+                )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>

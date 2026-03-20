@@ -14,16 +14,20 @@ export const metadata: Metadata = {
   description: "Modern Home Catalog",
 };
 
-export default function RootLayout({
+import { getAllActiveSubcategorias } from '@/features/subcategorias/subcategoria.service';
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const subcategoriaMap = await getAllActiveSubcategorias();
+
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={montserrat.className} suppressHydrationWarning>
         <Navbar />
-        <FiltrosWrapper />
+        <FiltrosWrapper subcategoriaMap={subcategoriaMap} />
         <main>
           {children}
         </main>

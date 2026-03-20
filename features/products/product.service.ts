@@ -89,10 +89,11 @@ export async function getProductsByAmbiente(
 // ======================================================
 
 export async function getProductsBySubcategoria(
+    ambiente: string,
     subcategoria: string,
     page = 1,
 ): Promise<PaginatedResult<ProductCard>> {
-    const result = await dbGetProductsBySubcategoria(subcategoria, page, PAGE_SIZE)
+    const result = await dbGetProductsBySubcategoria(ambiente, subcategoria, page, PAGE_SIZE)
     return toResult(result, page)
 }
 

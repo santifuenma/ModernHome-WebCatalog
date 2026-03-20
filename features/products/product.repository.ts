@@ -252,9 +252,10 @@ export async function dbGetProductsByAmbiente(
 
 /**
  * dbGetProductsBySubcategoria
- * Returns paginated active products filtered by subcategoria.
+ * Returns paginated active products filtered by ambiente and subcategoria.
  */
 export async function dbGetProductsBySubcategoria(
+    ambiente: string,
     subcategoria: string,
     page: number,
     pageSize: number,
@@ -267,6 +268,7 @@ export async function dbGetProductsBySubcategoria(
         supabase
             .from('products')
             .select(PRODUCT_CARD_SELECT)
+            .eq('ambiente', ambiente)
             .eq('subcategoria', subcategoria)
             .eq('is_active', true)
             .not('product_images', 'is', null)
@@ -276,6 +278,7 @@ export async function dbGetProductsBySubcategoria(
         supabase
             .from('products')
             .select('id, product_images!inner(id)', { count: 'exact', head: true })
+            .eq('ambiente', ambiente)
             .eq('subcategoria', subcategoria)
             .eq('is_active', true),
     ])
@@ -646,4 +649,54 @@ export async function dbGetAllUniqueSwatches(): Promise<MaterialSwatch[]> {
     }
 
     return Array.from(uniqueMap.values())
+}
+
+/**
+ * dbGetAllActiveSubcategories
+ * Fetches all active subcategories from the products table.
+ * Returns a Record mapping each ambiente to its list of Subcategories.
+ */
+export async function dbGetAllActiveSubcategories(): Promise<Record<string, { label: string, slug: string, ambiente: string }[]>> {
+    const supabase = await createSupabaseServerClient()
+    
+    // We only need the ambiente and subcategoria fields of active products
+    const { data, error } = await supabase
+        .from('products')
+        .select('ambiente, subcategoria')
+        .eq('is_active', true)
+
+    if (error) throw new Error(`dbGetAllActiveSubcategories: ${error.message}`)
+
+    // Use a Set to track uniqueness by combining ambiente + subcategoria
+    const uniqueMap = new Map<string, { label: string, slug: string, ambiente: string }>()
+    
+    for (const row of data || []) {
+        const key = `${row.ambiente}-${row.subcategoria}`
+        if (!uniqueMap.has(key)) {
+            // Helper to capitalize: e.g. "mesas-de-centro" -> "Mesas de centro"
+            const raw = row.subcategoria.replace(/-/g, ' ')
+            const label = raw.charAt(0).toUpperCase() + raw.slice(1)
+            
+            uniqueMap.set(key, {
+                label,
+                slug: row.subcategoria,
+                ambiente: row.ambiente
+            })
+        }
+    }
+
+    // Group them by ambiente
+    const grouped: Record<string, { label: string, slug: string, ambiente: string }[]> = {}
+    
+    for (const sub of uniqueMap.values()) {
+        if (!grouped[sub.ambiente]) grouped[sub.ambiente] = []
+        grouped[sub.ambiente].push(sub)
+    }
+
+    // Optionally sort them alphabetically within each ambiente
+    for (const key in grouped) {
+        grouped[key].sort((a, b) => a.label.localeCompare(b.label))
+    }
+
+    return grouped
 }

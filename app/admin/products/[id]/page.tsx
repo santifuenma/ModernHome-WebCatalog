@@ -1,4 +1,6 @@
 import { getProductById, getAllUniqueSwatches } from '@/features/products/product.service'
+import { getAmbientes } from '@/features/ambientes/ambiente.service'
+import { getAllActiveSubcategorias } from '@/features/subcategorias/subcategoria.service'
 import { ProductForm } from '@/components/admin/ProductForm'
 import { ImageUploader } from '@/components/admin/ImageUploader'
 import { SwatchesManager } from '@/components/admin/SwatchesManager'
@@ -13,10 +15,12 @@ interface EditProductPageProps {
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
     const { id } = await params
-    const [product, availableSwatches] = await Promise.all([
+    const [product, availableSwatches, subcategoriaMap] = await Promise.all([
         getProductById(id),
-        getAllUniqueSwatches()
+        getAllUniqueSwatches(),
+        getAllActiveSubcategorias()
     ])
+    const ambientes = getAmbientes()
 
     if (!product) {
         notFound()
@@ -51,7 +55,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
                 </form>
             </div>
 
-            <ProductForm initialData={product} />
+            <ProductForm initialData={product} ambientes={ambientes} subcategoriaMap={subcategoriaMap} />
 
             <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #eaeaea' }} />
 

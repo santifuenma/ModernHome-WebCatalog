@@ -1,18 +1,20 @@
-import { mockSubcategorias } from './mockSubcategorias'
+import { dbGetAllActiveSubcategories } from '../products/product.repository'
 import { Subcategoria } from './subcategoria.types'
 
 /**
  * subcategoria.service.ts
  * Lógica de negocio para subcategorías del catálogo.
- * Los componentes UI consumen este servicio — nunca acceden directamente al mock o repositorio.
- * Cuando se conecte Supabase, solo hay que cambiar la fuente de datos aquí.
  */
 
 /**
- * getSubcategoriasByAmbiente
- * Devuelve las subcategorías disponibles para un ambiente concreto.
- * Usada por la barra de filtros para renderizar la fila secundaria de subcategorías.
+ * getAllActiveSubcategorias
+ * Fetch all subcategories directly from the database (active products only)
+ * and returns them grouped by ambiente.
  */
-export function getSubcategoriasByAmbiente(ambiente: string): Subcategoria[] {
-    return mockSubcategorias.filter(s => s.ambiente === ambiente)
+export async function getAllActiveSubcategorias(): Promise<Record<string, Subcategoria[]>> {
+    const rawData = await dbGetAllActiveSubcategories()
+    
+    // The repository function already formats it to the required shape:
+    // Record<string, { label: string, slug: string, ambiente: string }[]>
+    return rawData as Record<string, Subcategoria[]>
 }

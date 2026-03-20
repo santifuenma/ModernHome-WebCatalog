@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { getAmbientes } from '@/features/ambientes/ambiente.service';
-import { getSubcategoriasByAmbiente } from '@/features/subcategorias/subcategoria.service';
+import { Subcategoria } from '@/features/subcategorias/subcategoria.types';
 import styles from './Filtros.module.css';
 
 /**
@@ -11,13 +11,13 @@ import styles from './Filtros.module.css';
  * Barra de filtros del catálogo con dos filas:
  * - Fila 1: Ambientes — botones en desktop, <select> en móvil
  * - Fila 2: Subcategorías del ambiente activo
- *
- * Navegación:
- * - Clic en ambiente → /catalogo/[ambiente]
- * - Clic en ambiente activo → /catalogo (limpia el filtro)
- * - Clic en subcategoría → /catalogo/[ambiente]/[subcategoria]
  */
-export default function Filtros() {
+
+interface Props {
+    subcategoriaMap: Record<string, Subcategoria[]>;
+}
+
+export default function Filtros({ subcategoriaMap }: Props) {
     const pathname = usePathname();
     const router = useRouter();
     const ambientes = getAmbientes();
@@ -33,7 +33,7 @@ export default function Filtros() {
 
     // Get subcategorias for the active ambiente (empty if none selected)
     const subcategorias = activeAmbiente
-        ? getSubcategoriasByAmbiente(activeAmbiente)
+        ? (subcategoriaMap[activeAmbiente] || [])
         : []
 
     // Handle select change on mobile: navigate to the selected ambiente
