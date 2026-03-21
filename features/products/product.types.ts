@@ -99,6 +99,7 @@ export interface ProductCard {
     subcategoria: string
 
     image: string
+    is_active?: boolean
 }
 
 // ======================================================

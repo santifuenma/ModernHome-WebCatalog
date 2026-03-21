@@ -44,7 +44,23 @@ export function ProductTable({ products }: ProductTableProps) {
                             <strong>{product.slug?.split('-').pop()}</strong><br/>
                             <small style={{ color: '#666' }}>{product.slug}</small>
                         </td>
-                        <td style={{ padding: '12px' }}>{product.name}</td>
+                        <td style={{ padding: '12px' }}>
+                            {product.name}
+                            {product.is_active === false && (
+                                <span style={{ 
+                                    marginLeft: '10px', 
+                                    padding: '2px 6px', 
+                                    backgroundColor: '#fee2e2', 
+                                    color: '#991b1b', 
+                                    fontSize: '12px', 
+                                    borderRadius: '4px',
+                                    fontWeight: 'bold',
+                                    border: '1px solid #fca5a5'
+                                }}>
+                                    Oculto
+                                </span>
+                            )}
+                        </td>
                         <td style={{ padding: '12px' }}>{product.brand}</td>
                         <td style={{ padding: '12px' }}>
                             <Link 

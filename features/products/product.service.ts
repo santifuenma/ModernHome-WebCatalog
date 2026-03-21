@@ -19,6 +19,7 @@ import {
     dbRemoveProductDownload,
     dbGetAllUniqueSwatches,
     PaginatedProducts,
+    AdminFilters,
 } from './product.repository'
 import { Product, ProductCard, MaterialSwatch } from './product.types'
 
@@ -143,8 +144,8 @@ export async function getInactiveProducts(page = 1): Promise<PaginatedResult<Pro
 // ADMIN CRUD (Search, Create, Update, Delete)
 // ======================================================
 
-export async function searchProductsAdmin(query: string, page = 1): Promise<PaginatedResult<ProductCard>> {
-    const result = await dbSearchProductsAdmin(query, page, PAGE_SIZE)
+export async function searchProductsAdmin(filters: AdminFilters, page = 1): Promise<PaginatedResult<ProductCard>> {
+    const result = await dbSearchProductsAdmin(filters, page, PAGE_SIZE)
     return toResult(result, page)
 }
 

@@ -83,3 +83,58 @@ export async function detachDownload(productId: string) {
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
 }
+
+import { compareInventoryExcel, importProductsFromExcel } from '@/features/inventory/inventory.service'
+
+export async function compareInventoryAction(formData: FormData) {
+    const file = formData.get('file') as File
+    if (!file) throw new Error('No file provided')
+
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const result = await compareInventoryExcel(buffer)
+
+    return result
+}
+
+export async function importProductsAction(formData: FormData) {
+    const file = formData.get('file') as File
+    if (!file) throw new Error('No file provided')
+
+    // Read the File into a Buffer
+    const buffer = Buffer.from(await file.arrayBuffer())
+    
+    // Call the core import logic
+    const result = await importProductsFromExcel(buffer)
+    
+    // Revalidate the product lists so new products appear immediately
+    revalidatePath('/admin/products')
+    revalidatePath('/catalogo')
+
+    return result
+}
+
+import { exportCatalogToExcelBase64 } from '@/features/inventory/export.service'
+
+export async function exportCatalogAction(includeHidden: boolean = false): Promise<string> {
+    const base64 = await exportCatalogToExcelBase64(includeHidden)
+    return base64
+}
+
+import { deactivateProductsFromExcel } from '@/features/inventory/inventory.service'
+
+export async function deactivateProductsAction(formData: FormData) {
+    const file = formData.get('file') as File
+    if (!file) throw new Error('No file provided')
+
+    // Read the File into a Buffer
+    const buffer = Buffer.from(await file.arrayBuffer())
+    
+    // Call the core deactivation logic
+    const result = await deactivateProductsFromExcel(buffer)
+    
+    // Revalidate the product lists so changes appear immediately
+    revalidatePath('/admin/products')
+    revalidatePath('/catalogo')
+
+    return result
+}

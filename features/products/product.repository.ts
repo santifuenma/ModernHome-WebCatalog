@@ -41,6 +41,7 @@ interface ProductCardRow {
     brand: string
     ambiente: string
     subcategoria: string
+    is_active: boolean | null
     product_images: Pick<ImageRow, 'cloudinary_public_id' | 'is_main'>[]
 }
 
@@ -146,6 +147,7 @@ function toProductCard(row: ProductCardRow): ProductCard {
         brand: row.brand,
         ambiente: row.ambiente,
         subcategoria: row.subcategoria,
+        is_active: row.is_active ?? true,
         image: mainImage ? buildCloudinaryUrl(mainImage.cloudinary_public_id, true) : '',
     }
 }
@@ -165,6 +167,7 @@ const PRODUCT_CARD_SELECT = `
     brand,
     ambiente,
     subcategoria,
+    is_active,
     product_images ( cloudinary_public_id, is_main )
 `
 
@@ -427,15 +430,27 @@ export async function dbGetInactiveProducts(
     }
 }
 
+// ─── Admin filter types ────────────────────────────────────────────────────────
+
+export interface AdminFilters {
+    query?: string
+    status?: 'active' | 'hidden' | 'all'
+    images?: 'with' | 'without' | 'all'
+    store?: string
+    ambiente?: string
+    subcategoria?: string
+    stock?: 'instock' | 'nostock' | 'all'
+}
+
 // ─── ADMIN CRUD FUNCTIONS ──────────────────────────────────────────────────────
 
 /**
  * dbSearchProductsAdmin
- * Searches products by code (exact) or name (partial, case-insensitive).
- * Ignores active status to allow managing all products.
+ * Searches and filters products for the admin panel.
+ * Does NOT enforce is_active — surfaces all products so admins can manage them.
  */
 export async function dbSearchProductsAdmin(
-    query: string,
+    filters: AdminFilters,
     page: number,
     pageSize: number
 ): Promise<PaginatedProducts> {
@@ -443,20 +458,55 @@ export async function dbSearchProductsAdmin(
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
-    const searchQuery = `%${query}%`
+    function applyFilters(q: any) {
+        let chain = q as any
+
+        // Text search
+        if (filters.query) {
+            const searchQuery = `%${filters.query}%`
+            chain = chain.or(`code.eq."${filters.query}",name.ilike."${searchQuery}"`)
+        }
+
+        // Status
+        if (filters.status === 'active') chain = chain.eq('is_active', true)
+        else if (filters.status === 'hidden') chain = chain.eq('is_active', false)
+
+        // Store
+        if (filters.store) chain = chain.eq('store', filters.store)
+
+        // Ambiente
+        if (filters.ambiente) chain = chain.eq('ambiente', filters.ambiente)
+
+        // Subcategoria
+        if (filters.subcategoria) chain = chain.eq('subcategoria', filters.subcategoria)
+
+        // Stock
+        if (filters.stock === 'instock') chain = chain.gt('stock', 0)
+        else if (filters.stock === 'nostock') chain = chain.eq('stock', 0)
+
+        return chain
+    }
+
+    // Images filter requires different select strings
+    let dataQuery = supabase.from('products').select(PRODUCT_CARD_SELECT)
+    let countQuery = supabase.from('products').select('id', { count: 'exact', head: true })
+
+    if (filters.images === 'with') {
+        dataQuery = supabase.from('products').select(PRODUCT_CARD_SELECT).not('product_images', 'is', null)
+        // For count we need inner join to ensure at least 1 image exists
+        const countSelect = 'id, product_images!inner(id)'
+        countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true })
+    } else if (filters.images === 'without') {
+        // Products with NO images: filter where product_images is null
+        dataQuery = supabase.from('products').select(PRODUCT_CARD_SELECT).is('product_images', null)
+        countQuery = supabase.from('products').select('id', { count: 'exact', head: true }).is('product_images', null)
+    }
 
     const [dataResult, countResult] = await Promise.all([
-        supabase
-            .from('products')
-            .select(PRODUCT_CARD_SELECT)
-            .or(`code.eq."${query}",name.ilike."${searchQuery}"`)
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: true })
-            .range(from, to),
-        supabase
-            .from('products')
-            .select('id', { count: 'exact', head: true })
-            .or(`code.eq."${query}",name.ilike."${searchQuery}"`),
+        applyFilters(
+            dataQuery.order('created_at', { ascending: false }).order('id', { ascending: true }).range(from, to)
+        ),
+        applyFilters(countQuery),
     ])
 
     if (dataResult.error) throw new Error(`dbSearchProductsAdmin: ${dataResult.error.message}`)
