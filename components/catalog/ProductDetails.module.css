@@ -292,11 +292,14 @@
 
     .container {
         height: auto;
+        min-height: 0;
     }
 
     .productContentContainer {
-
+        height: auto;
+        min-height: 0;
         flex-direction: column;
+        overflow-y: visible;
     }
 
     .productImagesContainer {
@@ -308,6 +311,7 @@
 
     .mainImageContainer {
         width: 100%;
+        height: auto;
         aspect-ratio: 4 / 3;
         position: relative;
     }
@@ -315,10 +319,11 @@
     .mainImageWrapper {
         width: 100%;
         height: 100%;
+        aspect-ratio: 4 / 3;
+        position: relative;
     }
 
     .thumbnailWrapper {
-
         width: 100% !important;
         border: none;
         pointer-events: none;
