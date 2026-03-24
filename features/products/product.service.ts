@@ -23,7 +23,7 @@ import {
 } from './product.repository'
 import { Product, ProductCard, MaterialSwatch } from './product.types'
 
-export const PAGE_SIZE = 20
+export const PAGE_SIZE = 21
 
 // ======================================================
 // Tipos de paginación
