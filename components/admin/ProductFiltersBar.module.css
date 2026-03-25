@@ -1,0 +1,100 @@
+.card {
+    background: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    margin-bottom: 2rem;
+}
+
+.filterGrid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.25rem;
+}
+
+.fieldGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+}
+
+.input, .select {
+    padding: 0.6rem 0.8rem;
+    background: #ffffff;
+    border: 1.8px solid var(--color-text-muted, #b1b1b1);
+    border-radius: 8px;
+    color: var(--color-text, #333333);
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-width: 140px;
+}
+
+.input:focus, .select:focus {
+    border-color: #A90404;
+    box-shadow: 0 0 0 1px #A90404;
+}
+
+.searchInput {
+    min-width: 220px;
+}
+
+.searchLayout {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    background-color: rgb(242, 242, 242);
+    border: 2px solid #A90404;
+    border-radius: 8px;
+    color: #A90404;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.button:hover {
+    background-color: #A90404;
+    color: white;
+}
+
+.clearButton {
+    background-color: transparent;
+    border: 1.8px solid #e8e6e1;
+    color: #888;
+    margin-left: auto;
+}
+
+.clearButton:hover {
+    background-color: #fdf2f2;
+    color: #A90404;
+    border-color: #f5c6c6;
+}
+
+/* Restyle native select dropdown arrow for a cleaner look */
+select.select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}

@@ -1,5 +1,5 @@
-import ProductGrid from "@/components/layout/ProductGrid"
-import Pagination from "@/components/layout/Pagination"
+import ProductGrid from "@/components/catalog/ProductGrid"
+import Pagination from "@/components/ui/Pagination"
 import { getProductsBySubcategoria } from "@/features/products/product.service"
 
 interface SubcategoriaPageProps {

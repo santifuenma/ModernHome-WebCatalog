@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback, useState } from 'react'
+import styles from './ProductFiltersBar.module.css'
 
 const STORES = ['LM', 'SM', 'DP', 'CT', 'BT']
 
@@ -61,65 +62,32 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
     const currentAmbienteSlug = current.ambiente
     const subcategoriasForAmbiente = ambienteMap[currentAmbienteSlug] ?? []
 
-    const selectStyle = {
-        padding: '8px 10px',
-        border: '1px solid #ddd',
-        borderRadius: '6px',
-        fontSize: '13px',
-        backgroundColor: '#fff',
-        color: '#333',
-        cursor: 'pointer',
-        minWidth: '140px',
-    }
-
-    const labelStyle = {
-        fontSize: '11px',
-        fontWeight: '600' as const,
-        color: '#888',
-        textTransform: 'uppercase' as const,
-        letterSpacing: '0.5px',
-        marginBottom: '3px',
-        display: 'block',
-    }
-
     return (
-        <div style={{ backgroundColor: '#f9f9f9', border: '1px solid #eee', borderRadius: '8px', padding: '16px', marginBottom: '20px' }}>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <div className={styles.card}>
+            <div className={styles.filterGrid}>
 
                 {/* Text search */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={labelStyle}>Búsqueda</span>
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                <div className={styles.fieldGroup}>
+                    <span className={styles.label}>Búsqueda</span>
+                    <div className={styles.searchLayout}>
                         <input
                             type="text"
                             placeholder="Código o nombre..."
                             value={inputValue}
                             onChange={e => setInputValue(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && submitSearch()}
-                            style={{ ...selectStyle, minWidth: '200px' }}
+                            className={`${styles.input} ${styles.searchInput}`}
                         />
-                        <button
-                            onClick={submitSearch}
-                            style={{
-                                padding: '8px 14px',
-                                backgroundColor: '#0070f3',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontWeight: 'bold',
-                                fontSize: '13px',
-                            }}
-                        >
+                        <button onClick={submitSearch} className={styles.button}>
                             Buscar
                         </button>
                     </div>
                 </div>
 
                 {/* Status */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={labelStyle}>Estado</span>
-                    <select style={selectStyle} value={current.status} onChange={e => update('status', e.target.value)}>
+                <div className={styles.fieldGroup}>
+                    <span className={styles.label}>Estado</span>
+                    <select className={styles.select} value={current.status} onChange={e => update('status', e.target.value)}>
                         <option value="">Todos</option>
                         <option value="active">Solo activos</option>
                         <option value="hidden">Solo ocultos</option>
@@ -127,9 +95,9 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
                 </div>
 
                 {/* Images */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={labelStyle}>Imágenes</span>
-                    <select style={selectStyle} value={current.images} onChange={e => update('images', e.target.value)}>
+                <div className={styles.fieldGroup}>
+                    <span className={styles.label}>Imágenes</span>
+                    <select className={styles.select} value={current.images} onChange={e => update('images', e.target.value)}>
                         <option value="">Todos</option>
                         <option value="with">Con imagen</option>
                         <option value="without">Sin imagen</option>
@@ -137,9 +105,9 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
                 </div>
 
                 {/* Stock */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={labelStyle}>Stock</span>
-                    <select style={selectStyle} value={current.stock} onChange={e => update('stock', e.target.value)}>
+                <div className={styles.fieldGroup}>
+                    <span className={styles.label}>Stock</span>
+                    <select className={styles.select} value={current.stock} onChange={e => update('stock', e.target.value)}>
                         <option value="">Todos</option>
                         <option value="instock">En stock (&gt; 0)</option>
                         <option value="nostock">Sin stock (= 0)</option>
@@ -147,18 +115,18 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
                 </div>
 
                 {/* Store */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={labelStyle}>Tienda</span>
-                    <select style={selectStyle} value={current.store} onChange={e => update('store', e.target.value)}>
+                <div className={styles.fieldGroup}>
+                    <span className={styles.label}>Tienda</span>
+                    <select className={styles.select} value={current.store} onChange={e => update('store', e.target.value)}>
                         <option value="">Todas</option>
                         {STORES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                 </div>
 
                 {/* Ambiente */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={labelStyle}>Ambiente</span>
-                    <select style={selectStyle} value={current.ambiente} onChange={e => update('ambiente', e.target.value)}>
+                <div className={styles.fieldGroup}>
+                    <span className={styles.label}>Ambiente</span>
+                    <select className={styles.select} value={current.ambiente} onChange={e => update('ambiente', e.target.value)}>
                         <option value="">Todos</option>
                         {Object.keys(ambienteMap).map(a => (
                             <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
@@ -168,9 +136,9 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
 
                 {/* Subcategoria (only show if ambiente selected) */}
                 {subcategoriasForAmbiente.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={labelStyle}>Subcategoría</span>
-                        <select style={selectStyle} value={current.subcategoria} onChange={e => update('subcategoria', e.target.value)}>
+                    <div className={styles.fieldGroup}>
+                        <span className={styles.label}>Subcategoría</span>
+                        <select className={styles.select} value={current.subcategoria} onChange={e => update('subcategoria', e.target.value)}>
                             <option value="">Todas</option>
                             {subcategoriasForAmbiente.map(s => (
                                 <option key={s.slug} value={s.slug}>{s.label}</option>
@@ -181,20 +149,7 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
 
                 {/* Clear all */}
                 {hasFilters && (
-                    <button
-                        onClick={clearAll}
-                        style={{
-                            padding: '8px 14px',
-                            backgroundColor: '#fee2e2',
-                            color: '#991b1b',
-                            border: '1px solid #fca5a5',
-                            borderRadius: '6px',
-                            fontSize: '13px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold',
-                            alignSelf: 'flex-end',
-                        }}
-                    >
+                    <button onClick={clearAll} className={`${styles.button} ${styles.clearButton}`}>
                         ✕ Limpiar filtros
                     </button>
                 )}

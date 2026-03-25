@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { createSupabaseServerClient } from '@/infrastructure/supabase/server'
 import { 
     createProduct, updateProduct, deleteProduct, 
     addProductImage, removeProductImage,
@@ -10,7 +11,21 @@ import {
 } from '@/features/products/product.service'
 import { StoreCode } from '@/features/products/product.types'
 
+/**
+ * requireAuth
+ * Called at the top of every Server Action.
+ * Validates the Supabase session server-side — throws immediately if unauthorized.
+ * This is a second line of defence in case middleware is somehow bypassed.
+ */
+async function requireAuth() {
+    const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Unauthorized: no active admin session.')
+}
+
+
 export async function saveProduct(formData: FormData) {
+    await requireAuth()
     const id = formData.get('id') as string | null
     const isEditing = !!id
 
@@ -44,41 +59,48 @@ export async function saveProduct(formData: FormData) {
 }
 
 export async function removeProduct(id: string) {
+    await requireAuth()
     await deleteProduct(id)
     revalidatePath('/admin/products')
     redirect('/admin/products')
 }
 
 export async function attachImage(productId: string, cloudinaryPublicId: string) {
+    await requireAuth()
     await addProductImage(productId, cloudinaryPublicId, false) // Defaulting to not main for simplicity, or handle it via UI setup
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
 }
 
 export async function detachImage(imageId: string, productId: string) {
+    await requireAuth()
     await removeProductImage(imageId)
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
 }
 export async function attachSwatch(productId: string, name: string | null, cloudinaryPublicId: string) {
+    await requireAuth()
     await addProductSwatch(productId, name, cloudinaryPublicId)
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
 }
 
 export async function detachSwatch(swatchId: string, productId: string) {
+    await requireAuth()
     await removeProductSwatch(swatchId)
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
 }
 
 export async function attachDownload(productId: string, name: string, url: string) {
+    await requireAuth()
     await setProductDownload(productId, name, url)
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
 }
 
 export async function detachDownload(productId: string) {
+    await requireAuth()
     await removeProductDownload(productId)
     revalidatePath(`/admin/products/${productId}`)
     revalidatePath(`/catalogo`)
@@ -87,6 +109,7 @@ export async function detachDownload(productId: string) {
 import { compareInventoryExcel, importProductsFromExcel } from '@/features/inventory/inventory.service'
 
 export async function compareInventoryAction(formData: FormData) {
+    await requireAuth()
     const file = formData.get('file') as File
     if (!file) throw new Error('No file provided')
 
@@ -97,6 +120,7 @@ export async function compareInventoryAction(formData: FormData) {
 }
 
 export async function importProductsAction(formData: FormData) {
+    await requireAuth()
     const file = formData.get('file') as File
     if (!file) throw new Error('No file provided')
 
@@ -116,6 +140,7 @@ export async function importProductsAction(formData: FormData) {
 import { exportCatalogToExcelBase64 } from '@/features/inventory/export.service'
 
 export async function exportCatalogAction(includeHidden: boolean = false): Promise<string> {
+    await requireAuth()
     const base64 = await exportCatalogToExcelBase64(includeHidden)
     return base64
 }
@@ -123,6 +148,7 @@ export async function exportCatalogAction(includeHidden: boolean = false): Promi
 import { deactivateProductsFromExcel } from '@/features/inventory/inventory.service'
 
 export async function deactivateProductsAction(formData: FormData) {
+    await requireAuth()
     const file = formData.get('file') as File
     if (!file) throw new Error('No file provided')
 

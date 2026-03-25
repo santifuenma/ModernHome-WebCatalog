@@ -1,0 +1,55 @@
+.shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f9f9f9;
+}
+
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 60px; /* Slightly taller for modern look */
+    background: #ffffff;
+    border-bottom: 1px solid #e8e6e1;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.brand {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: -0.01em;
+}
+
+.brand span {
+    font-weight: 500;
+    color: #888;
+}
+
+.logoutBtn {
+    background: transparent;
+    border: 1.8px solid var(--color-text-muted, #b1b1b1);
+    border-radius: 8px;
+    color: var(--color-text, #333333);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logoutBtn:hover {
+    border-color: #A90404;
+    color: #A90404;
+    background-color: #fdf2f2;
+}
+
+.content {
+    flex: 1;
+}

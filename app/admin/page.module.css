@@ -1,0 +1,127 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.header {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #888;
+    margin: 0;
+}
+
+.section {
+    margin-bottom: 3rem;
+}
+
+.sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e8e6e1;
+}
+
+/* Responsiveness: Auto-filling grid that collapses to 1 column on mobile */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Base card structure */
+.card {
+    background: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    border-color: #d8d6d1;
+}
+
+.card:focus-within {
+    border-color: #A90404;
+    outline: none;
+}
+
+/* Link-specific styling */
+a.card {
+    cursor: pointer;
+}
+
+.cardIcon {
+    margin-bottom: 1rem;
+    color: #A90404;
+}
+
+.cardContent {
+    flex-grow: 1;
+}
+
+.cardTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.cardDesc {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.cardAction {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #A90404;
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: gap 0.2s ease;
+}
+
+a.card:hover .cardAction {
+    gap: 0.4rem;
+}
+
+/* Export Component overrides inside Card */
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 2rem 1.5rem;
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

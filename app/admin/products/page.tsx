@@ -18,6 +18,8 @@ interface AdminProductsPageProps {
     }>
 }
 
+import styles from './products.module.css'
+
 export default async function AdminProductsPage({ searchParams }: AdminProductsPageProps) {
     const sp = await searchParams
     const page = Math.max(1, parseInt(sp.page || '1', 10))
@@ -40,26 +42,35 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
     ])
 
     return (
-        <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <div>
-                    <h1 style={{ margin: 0 }}>Products Manager</h1>
-                    <p style={{ margin: '4px 0 0', color: '#666', fontSize: '14px' }}>
+        <div className={styles.container}>
+            <Link href="/admin" className={styles.backLink}>
+                <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                >
+                    <path
+                        d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z"
+                        fill="currentColor"
+                    />
+                </svg>
+                Atrás
+            </Link>
+
+            <div className={styles.headerRow}>
+                <div className={styles.titleWrapper}>
+                    <h1 className={styles.title}>Products Manager</h1>
+                    <p className={styles.subtitle}>
                         {data.totalItems} producto{data.totalItems !== 1 ? 's' : ''} encontrado{data.totalItems !== 1 ? 's' : ''}
                     </p>
                 </div>
-                <Link 
-                    href="/admin/products/new"
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#0070f3',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '4px',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    + New Product
+                <Link href="/admin/products/new" className={styles.newButton}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Nuevo Producto
                 </Link>
             </div>
 

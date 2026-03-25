@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { exportCatalogAction } from '@/app/admin/actions'
+import styles from './ExportCatalogButton.module.css'
 
 export function ExportCatalogButton() {
     const [loading, setLoading] = useState(false)
@@ -29,10 +30,11 @@ export function ExportCatalogButton() {
     }
 
     return (
-        <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '15px', gap: '10px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '14px', color: '#555', cursor: 'pointer' }}>
+        <div className={styles.container}>
+            <label className={styles.label}>
                 <input 
                     type="checkbox" 
+                    className={styles.checkbox}
                     checked={includeHidden} 
                     onChange={e => setIncludeHidden(e.target.checked)} 
                 />
@@ -41,18 +43,20 @@ export function ExportCatalogButton() {
             <button 
                 onClick={handleExport}
                 disabled={loading}
-                style={{
-                    padding: '12px 24px',
-                    backgroundColor: loading ? '#ccc' : '#2563eb', // Blue
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontWeight: 'bold',
-                    cursor: loading ? 'not-allowed' : 'pointer'
-                }}
+                className={styles.button}
             >
-                {loading ? 'Generando Excel...' : 'Exportar Catálogo ⬇️'}
+                {loading ? 'Generando Excel...' : (
+                    <>
+                        Exportar Excel
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </>
+                )}
             </button>
         </div>
     )
 }
+

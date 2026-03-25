@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import styles from './AdminPagination.module.css'
 
 interface AdminPaginationProps {
     currentPage: number
@@ -34,26 +35,14 @@ export function AdminPagination({ currentPage, totalPages, totalItems }: AdminPa
     if (range[range.length - 1] < totalPages - 1) pages.push('...')
     if (totalPages > 1) pages.push(totalPages)
 
-    const btnStyle = (active: boolean, disabled = false) => ({
-        padding: '7px 12px',
-        border: `1px solid ${active ? '#0070f3' : '#ddd'}`,
-        borderRadius: '6px',
-        backgroundColor: active ? '#0070f3' : disabled ? '#f5f5f5' : '#fff',
-        color: active ? '#fff' : disabled ? '#bbb' : '#333',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontWeight: active ? 'bold' as const : 'normal' as const,
-        fontSize: '14px',
-        minWidth: '38px',
-    })
-
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', flexWrap: 'wrap', gap: '12px' }}>
-            <span style={{ fontSize: '13px', color: '#666' }}>
+        <div className={styles.container}>
+            <span className={styles.info}>
                 Página {currentPage} de {totalPages} · {totalItems} productos en total
             </span>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            <div className={styles.pagination}>
                 <button
-                    style={btnStyle(false, currentPage === 1)}
+                    className={styles.button}
                     onClick={() => goTo(currentPage - 1)}
                     disabled={currentPage === 1}
                 >
@@ -62,10 +51,10 @@ export function AdminPagination({ currentPage, totalPages, totalItems }: AdminPa
 
                 {pages.map((p, i) =>
                     p === '...'
-                        ? <span key={`ellipsis-${i}`} style={{ padding: '7px 6px', color: '#999', alignSelf: 'center' }}>…</span>
+                        ? <span key={`ellipsis-${i}`} className={styles.ellipsis}>…</span>
                         : <button
                             key={p}
-                            style={btnStyle(p === currentPage)}
+                            className={`${styles.button} ${p === currentPage ? styles.active : ''}`}
                             onClick={() => goTo(p as number)}
                           >
                             {p}
@@ -73,7 +62,7 @@ export function AdminPagination({ currentPage, totalPages, totalItems }: AdminPa
                 )}
 
                 <button
-                    style={btnStyle(false, currentPage === totalPages)}
+                    className={styles.button}
                     onClick={() => goTo(currentPage + 1)}
                     disabled={currentPage === totalPages}
                 >

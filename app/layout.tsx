@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-
 import { Montserrat } from "next/font/google";
-import Navbar from '@/components/layout/Navbar';
-import FiltrosWrapper from '@/components/layout/FiltrosWrapper';
 import './globals.css';
 
 const montserrat = Montserrat({
@@ -14,23 +11,21 @@ export const metadata: Metadata = {
   description: "Modern Home Catalog",
 };
 
-import { getAllActiveSubcategorias } from '@/features/subcategorias/subcategoria.service';
-
-export default async function RootLayout({
+/**
+ * RootLayout
+ * Bare shell — just html/body/font/globals.
+ * Catalog UI (Navbar, Filtros) lives in app/(catalog)/layout.tsx
+ * Admin UI (top bar, logout) lives in app/admin/layout.tsx
+ */
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const subcategoriaMap = await getAllActiveSubcategorias();
-
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={montserrat.className} suppressHydrationWarning>
-        <Navbar />
-        <FiltrosWrapper subcategoriaMap={subcategoriaMap} />
-        <main>
-          {children}
-        </main>
+        {children}
       </body>
     </html>
   );

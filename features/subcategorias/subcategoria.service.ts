@@ -1,4 +1,4 @@
-import { dbGetAllActiveSubcategories } from '../products/product.repository'
+import { fetchAllActiveSubcategorias } from './subcategoria.repository'
 import { Subcategoria } from './subcategoria.types'
 
 /**
@@ -8,13 +8,9 @@ import { Subcategoria } from './subcategoria.types'
 
 /**
  * getAllActiveSubcategorias
- * Fetch all subcategories directly from the database (active products only)
- * and returns them grouped by ambiente.
+ * Devuelve todas las subcategorías activas agrupadas por ambiente.
  */
 export async function getAllActiveSubcategorias(): Promise<Record<string, Subcategoria[]>> {
-    const rawData = await dbGetAllActiveSubcategories()
-    
-    // The repository function already formats it to the required shape:
-    // Record<string, { label: string, slug: string, ambiente: string }[]>
-    return rawData as Record<string, Subcategoria[]>
+    return fetchAllActiveSubcategorias()
 }
+
