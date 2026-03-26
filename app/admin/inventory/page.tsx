@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { compareInventoryAction } from '@/app/admin/actions'
 
+import styles from '../operations.module.css'
+
 export default function InventoryComparisonPage() {
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
@@ -41,75 +43,71 @@ export default function InventoryComparisonPage() {
     }
 
     return (
-        <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
-            <Link href="/admin" style={{ color: '#0070f3', textDecoration: 'none' }}>
-                &larr; Back to Dashboard
+        <div className={styles.container}>
+            <Link href="/admin" className={styles.backLink}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 11H7.83L13.42 5.41L12 4L4 12L12 20L13.41 18.59L7.83 13H20V11Z" fill="currentColor"/>
+                </svg>
+                Atrás al Dashboard
             </Link>
-            <h1 style={{ marginTop: '20px' }}>Comparador de Inventario</h1>
-            <p style={{ color: '#666', marginBottom: '30px' }}>
+
+            <h1 className={styles.title}>Comparador de Inventario</h1>
+            <p className={styles.description}>
                 Sube tu nuevo archivo Excel de inventario. Lo compararemos con la base de datos actual (solo productos activos) basándonos en la columna "Código". Obtendrás dos archivos Excel de vuelta: uno con los productos nuevos y otro con los que ya no están.
             </p>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px' }}>
-                <input 
-                    type="file" 
-                    name="file" 
-                    accept=".xlsx, .xls, .csv" 
-                    required
-                    style={{ padding: '10px', border: '1px dashed #ccc', borderRadius: '4px' }}
-                />
-                
-                <button 
-                    type="submit" 
-                    disabled={loading}
-                    style={{
-                        padding: '12px',
-                        backgroundColor: loading ? '#ccc' : '#0070f3',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    {loading ? 'Procesando comparación...' : 'Comparar Inventario'}
-                </button>
-            </form>
+            <div className={styles.card}>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <input 
+                        type="file" 
+                        name="file" 
+                        accept=".xlsx, .xls, .csv" 
+                        required
+                        className={styles.fileInput}
+                    />
+                    
+                    <button 
+                        type="submit" 
+                        disabled={loading}
+                        className={styles.submitButton}
+                    >
+                        {loading ? 'Procesando comparación...' : 'Comparar Inventario'}
+                    </button>
+                </form>
 
-            {error && (
-                <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fee', color: '#c00', borderRadius: '4px' }}>
-                    <strong>Error:</strong> {error}
-                </div>
-            )}
+                {error && (
+                    <div className={styles.errorBox}>
+                        <strong>Error:</strong> {error}
+                    </div>
+                )}
+            </div>
 
             {result && (
-                <div style={{ marginTop: '40px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-                    <h2 style={{ marginTop: 0 }}>Resultados</h2>
+                <div className={styles.card}>
+                    <h2 className={styles.resultsHeader}>Resultados</h2>
                     
-                    <div style={{ display: 'flex', gap: '20px', marginTop: '20px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: 1, minWidth: '250px', padding: '15px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #eee' }}>
-                            <p style={{ margin: '0 0 10px 0', fontSize: '18px' }}>
-                                <strong>{result.newCount}</strong> Productos Nuevos
-                            </p>
-                            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 15px 0' }}>Están en el Excel que has subido, pero no en tu base de datos M.H.</p>
+                    <div className={styles.statsGrid}>
+                        <div className={styles.statBox}>
+                            <p className={styles.statNumber}>{result.newCount}</p>
+                            <p className={styles.statLabel}>Productos Nuevos en el Excel que has subido.</p>
                             <button 
                                 onClick={() => handleDownload(result.newProductsBase64, 'modern-home-NUEVOS.xlsx')}
-                                style={downloadBtnStyle}
+                                className={styles.downloadButton}
                             >
-                                📥 Descargar Nuevos
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Descargar Nuevos
                             </button>
                         </div>
 
-                        <div style={{ flex: 1, minWidth: '250px', padding: '15px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #eee' }}>
-                            <p style={{ margin: '0 0 10px 0', fontSize: '18px' }}>
-                                <strong>{result.oldCount}</strong> Productos Antiguos
-                            </p>
-                            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 15px 0' }}>Están en tu web M.H, pero ya no figuran en el último Excel que has subido.</p>
+                        <div className={styles.statBox}>
+                            <p className={styles.statNumber}>{result.oldCount}</p>
+                            <p className={styles.statLabel}>Productos Antiguos (ya no figuran en el Excel).</p>
                             <button 
                                 onClick={() => handleDownload(result.oldProductsBase64, 'modern-home-PARA-BORRAR.xlsx')}
-                                style={downloadBtnStyle}
+                                className={styles.downloadButton}
                             >
-                                📥 Descargar Antiguos
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Descargar Antiguos
                             </button>
                         </div>
                     </div>
@@ -117,15 +115,4 @@ export default function InventoryComparisonPage() {
             )}
         </div>
     )
-}
-
-const downloadBtnStyle = {
-    padding: '10px 15px',
-    backgroundColor: '#333',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    width: '100%',
-    fontWeight: 'bold'
 }

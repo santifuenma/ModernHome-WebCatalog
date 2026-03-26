@@ -1,0 +1,214 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgb(134, 134, 134);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 2rem;
+    transition: color 0.2s;
+}
+
+.backLink:hover {
+    color: rgb(94, 94, 94);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem 0;
+}
+
+.description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 2.5rem;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    margin-bottom: 2rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 480px;
+}
+
+.fileInput {
+    padding: 1.5rem;
+    border: 2px dashed #d1d1d1;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    color: #555;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.fileInput:hover {
+    border-color: #b1b1b1;
+    background-color: #f9f9f9;
+}
+
+.submitButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.5rem;
+    background-color: #A90404;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(169, 4, 4, 0.2);
+}
+
+.submitButton:hover:not(:disabled) {
+    background-color: #8A0303;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(169, 4, 4, 0.3);
+}
+
+.submitButton:disabled {
+    background-color: #e5e5e5;
+    color: #a3a3a3;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Specific button colors for distinct actions if needed */
+.submitButton.yellow {
+    background-color: #1a1a1a; /* Replaced yellow with a sleek black for import */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.submitButton.yellow:hover:not(:disabled) {
+    background-color: #000000;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.errorBox {
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem;
+    background-color: #fcf1f1;
+    border: 1px solid #fad4d4;
+    border-radius: 8px;
+    color: #A90404;
+    font-size: 0.95rem;
+}
+
+.resultsHeader {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem 0;
+    color: #1a1a1a;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.statBox {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+}
+
+.statNumber {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
+}
+
+.statLabel {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.statBox.success .statNumber { color: #16a34a; }
+.statBox.warning .statNumber { color: #d97706; }
+.statBox.danger .statNumber { color: #dc2626; }
+
+.logHeader {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: #333;
+}
+
+.logBox {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    color: #555;
+    padding: 1.25rem;
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.logLine {
+    margin-bottom: 0.35rem;
+    border-bottom: 1px solid #f5f5f5;
+    padding-bottom: 0.35rem;
+}
+.logLine:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.downloadButton {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: #fdfdfd;
+    border: 1.8px solid #b1b1b1;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.downloadButton:hover {
+    background-color: #fafafa;
+    border-color: #1a1a1a;
+}
