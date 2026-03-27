@@ -39,7 +39,12 @@ export default function Filtros({ subcategoriaMap }: Props) {
     // Handle select change on mobile: navigate to the selected ambiente
     function handleAmbienteSelect(e: React.ChangeEvent<HTMLSelectElement>) {
         const value = e.target.value
-        router.push(value ? `/catalogo/${value}` : '/catalogo')
+        router.push(value ? `/catalogo/${value}` : '/catalogo', { scroll: false })
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     return (
@@ -56,6 +61,8 @@ export default function Filtros({ subcategoriaMap }: Props) {
                             key={slug}
                             href={href}
                             className={`${styles.filtro_button} ${isActive ? styles.active : ''}`}
+                            onClick={scrollToTop}
+                            scroll={false}
                         >
                             {label}
                         </Link>
@@ -89,6 +96,8 @@ export default function Filtros({ subcategoriaMap }: Props) {
                                 key={slug}
                                 href={href}
                                 className={`${styles.subcategoria_link} ${isActive ? styles.subcategoriaActive : ''}`}
+                                onClick={scrollToTop}
+                                scroll={false}
                             >
                                 {label}
                             </Link>

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import styles from './Pagination.module.css'
 
@@ -27,6 +29,10 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
         return `${basePath}?page=${page}`
     }
 
+    const handleScrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
     // Show up to 5 page numbers centered around the current page
     const delta = 2
     const pages: number[] = []
@@ -39,7 +45,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
 
             {/* Previous */}
             {currentPage > 1 ? (
-                <Link href={pageHref(currentPage - 1)} className={styles.page_btn}>
+                <Link href={pageHref(currentPage - 1)} className={styles.page_btn} onClick={handleScrollToTop} scroll={false}>
                     ←
                 </Link>
             ) : (
@@ -49,7 +55,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
             {/* First page + ellipsis */}
             {pages[0] > 1 && (
                 <>
-                    <Link href={pageHref(1)} className={styles.page_btn}>1</Link>
+                    <Link href={pageHref(1)} className={styles.page_btn} onClick={handleScrollToTop} scroll={false}>1</Link>
                     {pages[0] > 2 && <span className={styles.ellipsis}>…</span>}
                 </>
             )}
@@ -60,6 +66,8 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
                     key={page}
                     href={pageHref(page)}
                     className={`${styles.page_btn} ${page === currentPage ? styles.active : ''}`}
+                    onClick={handleScrollToTop}
+                    scroll={false}
                 >
                     {page}
                 </Link>
@@ -69,13 +77,13 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
             {pages[pages.length - 1] < totalPages && (
                 <>
                     {pages[pages.length - 1] < totalPages - 1 && <span className={styles.ellipsis}>…</span>}
-                    <Link href={pageHref(totalPages)} className={styles.page_btn}>{totalPages}</Link>
+                    <Link href={pageHref(totalPages)} className={styles.page_btn} onClick={handleScrollToTop} scroll={false}>{totalPages}</Link>
                 </>
             )}
 
             {/* Next */}
             {currentPage < totalPages ? (
-                <Link href={pageHref(currentPage + 1)} className={styles.page_btn}>
+                <Link href={pageHref(currentPage + 1)} className={styles.page_btn} onClick={handleScrollToTop} scroll={false}>
                     →
                 </Link>
             ) : (
