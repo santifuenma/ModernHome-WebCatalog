@@ -6,7 +6,7 @@ export default function Navbar() {
     return (
         <nav className={styles.navbar}>
             <a 
-                href="https://api.whatsapp.com/message/M4RDJQKE3ALUJ1?autoload=1&app_absent=0&utm_source=ig" 
+                href="https://linktr.ee/modernhome.vzl?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGn-FFycyf4MX8ivW5uZ7LuRp38ziqSzB9b5Asoij4S81AKg-QB-XOQ1TnUZgQ_aem_05JpnblucvgQ8BUmGn7LHg" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className={styles.contactLink}
