@@ -50,7 +50,7 @@
 
 @media (max-width: 600px) {
     .contactLink {
-        left: 15px;
+        left: 30px;
         font-size: 0px;
         /* Hide text on very small screens, keep icon if any */
         gap: 0;
@@ -59,6 +59,7 @@
     .contactLink svg {
         width: 22px;
         height: 22px;
+        opacity: 0.8;
     }
 
     .admin_icon {
