@@ -1,10 +1,26 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import Image, { ImageProps } from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Product } from '@/features/products/product.types'
 import styles from './ProductDetails.module.css'
+
+function FadeInImage({ src, alt, className, fill, width, height, priority }: any) {
+    const [loaded, setLoaded] = useState(false)
+    return (
+        <Image
+            src={src}
+            alt={alt}
+            fill={fill}
+            width={width}
+            height={height}
+            priority={priority}
+            className={`${className} ${loaded ? styles.loaded : styles.loading}`}
+            onLoad={() => setLoaded(true)}
+        />
+    )
+}
 
 interface ProductDetailsProps {
     product: Product
@@ -38,16 +54,16 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             </div>
 
             <div className={styles.productContentContainer}>
-
                 <div className={styles.productImagesContainer}>
                     {/* IMAGEN PRINCIPAL */}
                     <div className={styles.mainImageContainer}>
                         <div className={styles.mainImageWrapper} key={selectedImage}>
                             {selectedImage && (
-                                <Image
+                                <FadeInImage
                                     src={selectedImage}
                                     alt={product.name}
                                     fill
+                                    priority
                                     className={styles.image}
                                 />
                             )}
@@ -59,7 +75,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                             .filter(img => img.url !== selectedImage)
                             .map((img, index) => (
                                 <div key={index} className={styles.thumbnailWrapper} onClick={() => setSelectedImage(img.url)}>
-                                    <Image
+                                    <FadeInImage
                                         src={img.url}
                                         alt={img.alt || `${product.name} imagen ${index + 1}`}
                                         width={200}
@@ -115,10 +131,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                             <div className={styles.swatches}>
                                 {product.materialSwatches.map((swatch, index) => (
                                     <div key={index} className={styles.swatch}>
-                                        <Image
+                                        <FadeInImage
                                             src={swatch.image}
                                             alt={swatch.name || `material ${index + 1}`}
                                             fill
+                                            className={styles.image}
                                         />
                                     </div>
                                 ))}

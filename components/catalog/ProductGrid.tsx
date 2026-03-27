@@ -11,8 +11,10 @@ interface ProductGridProps {
 
 export default function ProductGrid({ products, priorityCount = 4 }: ProductGridProps) {
 
+    const gridKey = products.map(p => p.id).join('-')
+
     return (
-        <section className={styles.grid_section}>
+        <section className={`${styles.grid_section} animate-fade-in`} key={gridKey}>
             <div className={styles.grid_container}>
 
                 {products.map((product, index) => {
