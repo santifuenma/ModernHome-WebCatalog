@@ -24,11 +24,16 @@ const nextConfig = {
                     key: 'Content-Security-Policy',
                     value: [
                         "default-src 'self'",
-                        "script-src 'self' 'unsafe-inline'",
-                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                        // Cloudinary Upload Widget loads from upload-widget.cloudinary.com
+                        "script-src 'self' 'unsafe-inline' https://upload-widget.cloudinary.com",
+                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://upload-widget.cloudinary.com",
                         "font-src 'self' https://fonts.gstatic.com",
-                        "img-src 'self' data: blob: https://res.cloudinary.com",
-                        "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com",
+                        // Widget also loads thumbnails/previews from res.cloudinary.com
+                        "img-src 'self' data: blob: https://res.cloudinary.com https://upload-widget.cloudinary.com",
+                        // Widget uploads directly to Cloudinary API and needs its own connect endpoints
+                        "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cloudinary.com https://upload-widget.cloudinary.com https://res.cloudinary.com",
+                        // Widget renders inside an iframe hosted on upload-widget.cloudinary.com
+                        "frame-src https://upload-widget.cloudinary.com",
                         "object-src 'none'",
                         "frame-ancestors 'none'",
                     ].join('; '),
