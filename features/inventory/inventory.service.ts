@@ -36,12 +36,12 @@ export async function compareInventoryExcel(buffer: Buffer): Promise<CompareResu
         inputRowsMap.set(code, row)
     }
 
-    // 2. Fetch DB Products
+    // 2. Fetch DB Products (join with product_stores)
     const supabase = await createSupabaseServerClient()
     const { data: dbProducts, error } = await supabase
         .from('products')
-        .select('code, name, stock, store, brand, ambiente, subcategoria')
-        .eq('is_active', true) // We compare against active inventory
+        .select('code, name, stock, brand, ambiente, subcategoria, product_stores(store_code)')
+        .eq('is_active', true)
     
     if (error) throw new Error(error.message)
 
@@ -67,14 +67,16 @@ export async function compareInventoryExcel(buffer: Buffer): Promise<CompareResu
     const oldProductsObj: any[] = []
     for (const code of dbCodes) {
         if (!inputCodes.has(code)) {
-            // Re-map DB format to a recognizable Excel-like format for the user
             const p = dbRowsMap.get(code)
+            const storesStr = Array.isArray(p.product_stores)
+                ? p.product_stores.map((s: { store_code: string }) => s.store_code).join(', ')
+                : ''
             oldProductsObj.push({
                 'Código': p.code,
                 'Descripción': p.name,
                 'Marca': p.brand,
                 'Stock': p.stock,
-                'Store': p.store,
+                'Stores': storesStr,
                 'Ambiente': p.ambiente,
                 'Subcategoria': p.subcategoria
             })
@@ -192,11 +194,11 @@ export async function importProductsFromExcel(buffer: Buffer): Promise<ImportRes
                 slug,
                 brand,
                 designer: null,
-                store: store || 'LM',
                 stock,
                 ambiente: 'general',
                 subcategoria: 'general',
-                is_active: true
+                is_active: true,
+                _store: store || 'LM',  // temporal: se mueve a product_stores tras el insert
             })
         } else {
             // Existing Product - check stock
@@ -218,18 +220,45 @@ export async function importProductsFromExcel(buffer: Buffer): Promise<ImportRes
     if (toInsert.length > 0) {
         for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
             const batch = toInsert.slice(i, i + BATCH_SIZE)
-            log(`Inserting batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length} new items)...`)
+
+            // Separar el campo _store (helper temporal) antes de insertar en products
+            const storeByCode: Record<string, string> = {}
+            const dbBatch = batch.map(({ _store, ...rest }: any) => {
+                storeByCode[rest.code] = _store
+                return rest
+            })
+
+            log(`Inserting batch ${Math.floor(i / BATCH_SIZE) + 1} (${dbBatch.length} new items)...`)
 
             try {
-                const { error } = await supabase
+                const { data: inserted, error } = await supabase
                     .from('products')
-                    .insert(batch)
+                    .insert(dbBatch)
+                    .select('id, code')
 
                 if (error) {
                     log(`Batch error on insert: ${error.message}`)
-                    errorCount += batch.length
+                    errorCount += dbBatch.length
                 } else {
-                    successCount += batch.length
+                    successCount += dbBatch.length
+
+                    // Insertar en product_stores para cada producto nuevo
+                    if (inserted && inserted.length > 0) {
+                        const storeRows = inserted
+                            .filter((p: any) => storeByCode[p.code])
+                            .map((p: any) => ({
+                                product_id: p.id,
+                                store_code: storeByCode[p.code],
+                            }))
+                        if (storeRows.length > 0) {
+                            const { error: storeError } = await supabase
+                                .from('product_stores')
+                                .insert(storeRows)
+                            if (storeError) {
+                                log(`Warning: product_stores insert error: ${storeError.message}`)
+                            }
+                        }
+                    }
                 }
             } catch (err: any) {
                 log(`Unexpected error in insert batch: ${err.message}`)

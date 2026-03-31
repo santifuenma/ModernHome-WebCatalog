@@ -78,7 +78,7 @@ export interface Product {
 
     // ── Campos de negocio (DB only — no se muestran en la UI por ahora) ──
     code?: string           // Código interno del producto (ej: 'MH-001')
-    store?: StoreCode       // Código de tienda (LM | SM | DP | CT | BT)
+    stores?: StoreCode[]    // Tiendas en las que está disponible (many-to-many)
     stock?: number          // Unidades disponibles
     is_active?: boolean     // Si el producto está publicado
     created_at?: string     // Fecha de creación (ISO string)
@@ -100,6 +100,7 @@ export interface ProductCard {
 
     image: string
     is_active?: boolean
+    stores?: StoreCode[]    // Tiendas asignadas (para filtros en admin)
 }
 
 // ======================================================

@@ -7,9 +7,9 @@ import {
     createProduct, updateProduct, deleteProduct, 
     addProductImage, removeProductImage,
     addProductSwatch, removeProductSwatch,
-    setProductDownload, removeProductDownload 
+    setProductDownload, removeProductDownload,
+    setProductStores
 } from '@/features/products/product.service'
-import { StoreCode } from '@/features/products/product.types'
 
 /**
  * requireAuth
@@ -29,13 +29,15 @@ export async function saveProduct(formData: FormData) {
     const id = formData.get('id') as string | null
     const isEditing = !!id
 
+    // Leer las tiendas seleccionadas (múltiples valores del mismo campo 'stores')
+    const selectedStores = formData.getAll('stores') as string[]
+
     const payload = {
         code: formData.get('code') as string,
         name: formData.get('name') as string,
-        slug: formData.get('slug') as string, // We might auto-generate it if missing
+        slug: formData.get('slug') as string,
         brand: formData.get('brand') as string,
         designer: formData.get('designer') as string || undefined,
-        store: formData.get('store') as StoreCode,
         stock: parseInt(formData.get('stock') as string || '0', 10),
         ambiente: formData.get('ambiente') as string,
         subcategoria: formData.get('subcategoria') as string,
@@ -50,8 +52,10 @@ export async function saveProduct(formData: FormData) {
 
     if (isEditing && id) {
         await updateProduct(id, payload)
+        await setProductStores(id, selectedStores)
     } else {
-        await createProduct(payload)
+        const newId = await createProduct(payload)
+        await setProductStores(newId, selectedStores)
     }
 
     revalidatePath('/admin/products')

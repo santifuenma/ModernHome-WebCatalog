@@ -43,13 +43,14 @@ MODERN HOME CATALOG/
 │   │   ├── subcategoria.service.ts # getSubcategoriasByAmbiente()
 │   │   └── subcategoria.types.ts   # Interfaz Subcategoria { label, slug, ambiente }
 │   └── products/                   # Feature de Productos
-│       ├── mockProducts.ts         # Datos de muestra para desarrollo
-│       ├── product.repository.ts   # Acceso a DB con paginación real (.range()), select mínimo y COUNT paralelo
-│       ├── product.service.ts      # Lógica de negocio — delega paginación a la DB
-│       └── product.types.ts        # Tipos e interfaces TypeScript del dominio
+│       ├── product.repository.ts   # Acceso a DB: paginación real, select mínimo, JOIN con product_stores (many-to-many)
+│       ├── product.service.ts      # Lógica de negocio — delega paginación a la DB, expone setProductStores
+│       └── product.types.ts        # Tipos: Product (stores: StoreCode[]), ProductCard, StoreCode, STORE_LABELS
 ├── infrastructure/                 # 🧱 Implementaciones técnicas externas
 │   ├── cloudinary/                 # Integración con Cloudinary
 │   └── supabase/                   # Integración con Supabase (cliente/servidor)
+├── supabase/
+│   └── migrations/                 # Scripts SQL de migración (ej: product_stores.sql)
 ├── utils/                          # 🛠️ Utilidades (Errores, Validadores, Respuestas)
 ├── public/                         # 🖼️ Recursos estáticos (Accesibles públicamente)
 │   └── icons/                      # Logos e imágenes del catálogo y la app

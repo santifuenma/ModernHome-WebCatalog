@@ -2,7 +2,7 @@
 
 import { Subcategoria } from '@/features/subcategorias/subcategoria.types'
 import { saveProduct } from '@/app/admin/actions'
-import { Product } from '@/features/products/product.types'
+import { Product, STORE_LABELS, StoreCode } from '@/features/products/product.types'
 import { useState } from 'react'
 
 interface ProductFormProps {
@@ -18,8 +18,15 @@ export function ProductForm({ initialData, ambientes, subcategoriaMap }: Product
     const [selectedAmbiente, setSelectedAmbiente] = useState(initialData?.ambiente || 'general')
     const [selectedSubcategoria, setSelectedSubcategoria] = useState(initialData?.subcategoria || '')
     const [isNewSubcategoria, setIsNewSubcategoria] = useState(false)
+    const [selectedStores, setSelectedStores] = useState<StoreCode[]>(initialData?.stores ?? [])
 
     const availableSubcategorias = subcategoriaMap[selectedAmbiente] || []
+
+    const toggleStore = (code: StoreCode) => {
+        setSelectedStores(prev =>
+            prev.includes(code) ? prev.filter(s => s !== code) : [...prev, code]
+        )
+    }
 
     return (
         <form 
@@ -67,8 +74,47 @@ export function ProductForm({ initialData, ambientes, subcategoriaMap }: Product
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label>Store *</label>
-                <input required type="text" name="store" defaultValue={initialData?.store || 'LM'} style={inputStyle} />
+                <label>Tiendas</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}>
+                    {(Object.entries(STORE_LABELS) as [StoreCode, string][]).map(([code, label]) => (
+                        <label
+                            key={code}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '6px 12px',
+                                borderRadius: '20px',
+                                border: '2px solid',
+                                borderColor: selectedStores.includes(code) ? '#0070f3' : '#ccc',
+                                backgroundColor: selectedStores.includes(code) ? '#e8f0fe' : 'transparent',
+                                cursor: 'pointer',
+                                fontWeight: selectedStores.includes(code) ? 600 : 400,
+                                transition: 'all 0.15s ease',
+                                userSelect: 'none',
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                name="stores"
+                                value={code}
+                                checked={selectedStores.includes(code)}
+                                onChange={() => toggleStore(code)}
+                                style={{ display: 'none' }}
+                            />
+                            <span style={{
+                                width: '8px', height: '8px', borderRadius: '50%',
+                                backgroundColor: selectedStores.includes(code) ? '#0070f3' : '#ccc',
+                                flexShrink: 0,
+                            }} />
+                            <span style={{ fontSize: '13px' }}>{code}</span>
+                            <span style={{ fontSize: '12px', color: '#666' }}>{label}</span>
+                        </label>
+                    ))}
+                </div>
+                {selectedStores.length === 0 && (
+                    <span style={{ fontSize: '12px', color: '#999' }}>Sin tienda asignada (el producto no aparece en filtros de tienda)</span>
+                )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>

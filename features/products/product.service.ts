@@ -18,6 +18,8 @@ import {
     dbSetProductDownload,
     dbRemoveProductDownload,
     dbGetAllUniqueSwatches,
+    dbGetProductStores,
+    dbSetProductStores,
     PaginatedProducts,
     AdminFilters,
 } from './product.repository'
@@ -187,4 +189,16 @@ export async function removeProductDownload(productId: string): Promise<void> {
 
 export async function getAllUniqueSwatches(): Promise<MaterialSwatch[]> {
     return dbGetAllUniqueSwatches()
+}
+
+// ======================================================
+// Tiendas del producto (many-to-many)
+// ======================================================
+
+export async function getProductStores(productId: string): Promise<string[]> {
+    return dbGetProductStores(productId)
+}
+
+export async function setProductStores(productId: string, storeCodes: string[]): Promise<void> {
+    return dbSetProductStores(productId, storeCodes)
 }

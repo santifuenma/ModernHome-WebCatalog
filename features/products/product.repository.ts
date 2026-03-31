@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/infrastructure/supabase/server'
-import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload } from './product.types'
+import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload, StoreCode } from './product.types'
 
 /**
  * product.repository.ts
@@ -19,7 +19,6 @@ interface ProductRow {
     slug: string
     brand: string
     designer: string | null
-    store: string | null
     stock: number | null
     ambiente: string
     subcategoria: string
@@ -31,6 +30,7 @@ interface ProductRow {
     product_images: ImageRow[]
     product_material_swatches: SwatchRow[]
     product_downloads: DownloadRow[]
+    product_stores: ProductStoreRow[]
 }
 
 // Fila ligera para la grilla — solo campos de ProductCard + imagen principal
@@ -43,6 +43,7 @@ interface ProductCardRow {
     subcategoria: string
     is_active: boolean | null
     product_images: Pick<ImageRow, 'cloudinary_public_id' | 'is_main'>[]
+    product_stores: Pick<ProductStoreRow, 'store_code'>[]
 }
 
 interface ImageRow {
@@ -63,6 +64,10 @@ interface DownloadRow {
     id: string
     name: string
     url: string
+}
+
+interface ProductStoreRow {
+    store_code: string
 }
 
 // ─── Resultado paginado ───────────────────────────────────────────────────────
@@ -105,7 +110,7 @@ function toProduct(row: ProductRow): Product {
         slug: row.slug,
         brand: row.brand,
         designer: row.designer ?? undefined,
-        store: row.store as Product['store'],
+        stores: (row.product_stores ?? []).map(s => s.store_code as StoreCode),
         stock: row.stock ?? undefined,
         ambiente: row.ambiente,
         subcategoria: row.subcategoria,
@@ -149,6 +154,7 @@ function toProductCard(row: ProductCardRow): ProductCard {
         subcategoria: row.subcategoria,
         is_active: row.is_active ?? true,
         image: mainImage ? buildCloudinaryUrl(mainImage.cloudinary_public_id, true) : '',
+        stores: (row.product_stores ?? []).map(s => s.store_code as StoreCode),
     }
 }
 
@@ -168,7 +174,8 @@ const PRODUCT_CARD_SELECT = `
     ambiente,
     subcategoria,
     is_active,
-    product_images ( cloudinary_public_id, is_main )
+    product_images ( cloudinary_public_id, is_main ),
+    product_stores ( store_code )
 `
 
 /**
@@ -179,7 +186,8 @@ const PRODUCT_FULL_SELECT = `
     *,
     product_images ( id, cloudinary_public_id, alt, is_main, position ),
     product_material_swatches ( id, name, cloudinary_public_id ),
-    product_downloads ( id, name, url )
+    product_downloads ( id, name, url ),
+    product_stores ( store_code )
 `
 
 // ─── Repository functions ─────────────────────────────────────────────────────
@@ -328,7 +336,7 @@ export async function dbGetProductById(id: string): Promise<Product | null> {
 
 /**
  * dbGetProductsByStore
- * Returns paginated products for a specific store code (LM, SM, DP, CT, BT).
+ * Returns paginated products for a specific store code via product_stores junction.
  */
 export async function dbGetProductsByStore(
     store: string,
@@ -343,15 +351,15 @@ export async function dbGetProductsByStore(
         supabase
             .from('products')
             .select(PRODUCT_CARD_SELECT)
-            .eq('store', store)
+            .eq('product_stores.store_code', store)
             .eq('is_active', true)
             .order('created_at', { ascending: false })
             .order('id', { ascending: true })
             .range(from, to),
         supabase
             .from('products')
-            .select('id', { count: 'exact', head: true })
-            .eq('store', store)
+            .select('id, product_stores!inner(store_code)', { count: 'exact', head: true })
+            .eq('product_stores.store_code', store)
             .eq('is_active', true),
     ])
 
@@ -464,15 +472,16 @@ export async function dbSearchProductsAdmin(
         // Text search
         if (filters.query) {
             const searchQuery = `%${filters.query}%`
-            chain = chain.or(`code.eq."${filters.query}",name.ilike."${searchQuery}"`)
+            chain = chain.or(`code.ilike."${searchQuery}",name.ilike."${searchQuery}"`)
         }
 
         // Status
         if (filters.status === 'active') chain = chain.eq('is_active', true)
         else if (filters.status === 'hidden') chain = chain.eq('is_active', false)
 
-        // Store
-        if (filters.store) chain = chain.eq('store', filters.store)
+        // Store — filtra vía la tabla junction product_stores
+        // Nota: el inner join ya se aplica abajo condicionalmente; aquí solo añadimos el filtro de valor
+        if (filters.store) chain = chain.eq('product_stores.store_code', filters.store)
 
         // Ambiente
         if (filters.ambiente) chain = chain.eq('ambiente', filters.ambiente)
@@ -487,19 +496,30 @@ export async function dbSearchProductsAdmin(
         return chain
     }
 
-    // Images filter requires different select strings
-    let dataQuery = supabase.from('products').select(PRODUCT_CARD_SELECT)
-    let countQuery = supabase.from('products').select('id', { count: 'exact', head: true })
+    // Construir queries base. Si hay filtro por tienda, usamos inner join en product_stores.
+    const storeInnerJoin = filters.store
+        ? PRODUCT_CARD_SELECT.replace('product_stores ( store_code )', 'product_stores!inner ( store_code )')
+        : PRODUCT_CARD_SELECT
+
+    let dataQuery = supabase.from('products').select(storeInnerJoin)
+    let countQuery = filters.store
+        ? supabase.from('products').select('id, product_stores!inner(store_code)', { count: 'exact', head: true })
+        : supabase.from('products').select('id', { count: 'exact', head: true })
 
     if (filters.images === 'with') {
-        dataQuery = supabase.from('products').select(PRODUCT_CARD_SELECT).not('product_images', 'is', null)
-        // For count we need inner join to ensure at least 1 image exists
-        const countSelect = 'id, product_images!inner(id)'
-        countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true })
+        dataQuery = supabase.from('products').select(
+            storeInnerJoin.replace('product_images ( cloudinary_public_id, is_main )', 'product_images!inner ( cloudinary_public_id, is_main )')
+        ).not('product_images', 'is', null)
+        const countImgSelect = filters.store
+            ? 'id, product_images!inner(id), product_stores!inner(store_code)'
+            : 'id, product_images!inner(id)'
+        countQuery = supabase.from('products').select(countImgSelect, { count: 'exact', head: true })
     } else if (filters.images === 'without') {
         // Products with NO images: filter where product_images is null
-        dataQuery = supabase.from('products').select(PRODUCT_CARD_SELECT).is('product_images', null)
-        countQuery = supabase.from('products').select('id', { count: 'exact', head: true }).is('product_images', null)
+        dataQuery = supabase.from('products').select(storeInnerJoin).is('product_images', null)
+        countQuery = filters.store
+            ? supabase.from('products').select('id, product_stores!inner(store_code)', { count: 'exact', head: true }).is('product_images', null)
+            : supabase.from('products').select('id', { count: 'exact', head: true }).is('product_images', null)
     }
 
     const [dataResult, countResult] = await Promise.all([
@@ -699,6 +719,53 @@ export async function dbGetAllUniqueSwatches(): Promise<MaterialSwatch[]> {
     }
 
     return Array.from(uniqueMap.values())
+}
+
+// ─── Product Stores CRUD ──────────────────────────────────────────────
+
+/**
+ * dbGetProductStores
+ * Returns the list of store codes assigned to a product.
+ */
+export async function dbGetProductStores(productId: string): Promise<string[]> {
+    const supabase = await createSupabaseServerClient()
+    const { data, error } = await supabase
+        .from('product_stores')
+        .select('store_code')
+        .eq('product_id', productId)
+
+    if (error) throw new Error(`dbGetProductStores: ${error.message}`)
+    return (data ?? []).map(r => r.store_code)
+}
+
+/**
+ * dbSetProductStores
+ * Replaces all store assignments for a product with the provided list.
+ * Uses a delete-then-insert strategy (safe for small lists like store codes).
+ */
+export async function dbSetProductStores(
+    productId: string,
+    storeCodes: string[]
+): Promise<void> {
+    const supabase = await createSupabaseServerClient()
+
+    // 1. Remove all current assignments
+    const { error: deleteError } = await supabase
+        .from('product_stores')
+        .delete()
+        .eq('product_id', productId)
+
+    if (deleteError) throw new Error(`dbSetProductStores (delete): ${deleteError.message}`)
+
+    // 2. Insert the new assignments (skip if empty)
+    if (storeCodes.length === 0) return
+
+    const rows = storeCodes.map(code => ({ product_id: productId, store_code: code }))
+    const { error: insertError } = await supabase
+        .from('product_stores')
+        .insert(rows)
+
+    if (insertError) throw new Error(`dbSetProductStores (insert): ${insertError.message}`)
 }
 
 /**
