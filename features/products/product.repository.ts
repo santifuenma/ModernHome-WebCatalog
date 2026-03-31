@@ -240,10 +240,12 @@ export async function dbGetProductsByAmbiente(
     const [dataResult, countResult] = await Promise.all([
         supabase
             .from('products')
-            .select(PRODUCT_CARD_SELECT)
+            .select(PRODUCT_CARD_SELECT.replace(
+                'product_images ( cloudinary_public_id, is_main )',
+                'product_images!inner ( cloudinary_public_id, is_main )'
+            ))
             .eq('ambiente', ambiente)
             .eq('is_active', true)
-            .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
             .order('id', { ascending: true })
             .range(from, to),
@@ -256,7 +258,7 @@ export async function dbGetProductsByAmbiente(
 
     if (dataResult.error) throw new Error(`dbGetProductsByAmbiente: ${dataResult.error.message}`)
     return {
-        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        items: (dataResult.data as unknown as ProductCardRow[]).map(toProductCard),
         totalItems: countResult.count ?? 0,
     }
 }
@@ -278,11 +280,13 @@ export async function dbGetProductsBySubcategoria(
     const [dataResult, countResult] = await Promise.all([
         supabase
             .from('products')
-            .select(PRODUCT_CARD_SELECT)
+            .select(PRODUCT_CARD_SELECT.replace(
+                'product_images ( cloudinary_public_id, is_main )',
+                'product_images!inner ( cloudinary_public_id, is_main )'
+            ))
             .eq('ambiente', ambiente)
             .eq('subcategoria', subcategoria)
             .eq('is_active', true)
-            .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
             .order('id', { ascending: true })
             .range(from, to),
@@ -296,7 +300,7 @@ export async function dbGetProductsBySubcategoria(
 
     if (dataResult.error) throw new Error(`dbGetProductsBySubcategoria: ${dataResult.error.message}`)
     return {
-        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        items: (dataResult.data as unknown as ProductCardRow[]).map(toProductCard),
         totalItems: countResult.count ?? 0,
     }
 }
