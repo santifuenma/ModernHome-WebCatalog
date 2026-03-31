@@ -179,6 +179,24 @@ const PRODUCT_CARD_SELECT = `
 `
 
 /**
+ * PRODUCT_CARD_SELECT_IMG
+ * Igual que PRODUCT_CARD_SELECT pero con product_images!inner.
+ * El !inner actúa como INNER JOIN: excluye automáticamente productos sin imágenes.
+ * Usar en todas las queries públicas del catálogo para no mostrar productos sin foto.
+ */
+const PRODUCT_CARD_SELECT_IMG = `
+    id,
+    name,
+    slug,
+    brand,
+    ambiente,
+    subcategoria,
+    is_active,
+    product_images!inner ( cloudinary_public_id, is_main ),
+    product_stores ( store_code )
+`
+
+/**
  * PRODUCT_FULL_SELECT
  * Select completo para la página de detalle de producto.
  */
@@ -205,9 +223,8 @@ export async function dbGetAllProducts(page: number, pageSize: number): Promise<
     const [dataResult, countResult] = await Promise.all([
         supabase
             .from('products')
-            .select(PRODUCT_CARD_SELECT)
+            .select(PRODUCT_CARD_SELECT_IMG)
             .eq('is_active', true)
-            .not('product_images', 'is', null)
             .order('created_at', { ascending: false })
             .order('id', { ascending: true })
             .range(from, to),
@@ -240,10 +257,7 @@ export async function dbGetProductsByAmbiente(
     const [dataResult, countResult] = await Promise.all([
         supabase
             .from('products')
-            .select(PRODUCT_CARD_SELECT.replace(
-                'product_images ( cloudinary_public_id, is_main )',
-                'product_images!inner ( cloudinary_public_id, is_main )'
-            ))
+            .select(PRODUCT_CARD_SELECT_IMG)
             .eq('ambiente', ambiente)
             .eq('is_active', true)
             .order('created_at', { ascending: false })
@@ -258,7 +272,7 @@ export async function dbGetProductsByAmbiente(
 
     if (dataResult.error) throw new Error(`dbGetProductsByAmbiente: ${dataResult.error.message}`)
     return {
-        items: (dataResult.data as unknown as ProductCardRow[]).map(toProductCard),
+        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
         totalItems: countResult.count ?? 0,
     }
 }
@@ -280,10 +294,7 @@ export async function dbGetProductsBySubcategoria(
     const [dataResult, countResult] = await Promise.all([
         supabase
             .from('products')
-            .select(PRODUCT_CARD_SELECT.replace(
-                'product_images ( cloudinary_public_id, is_main )',
-                'product_images!inner ( cloudinary_public_id, is_main )'
-            ))
+            .select(PRODUCT_CARD_SELECT_IMG)
             .eq('ambiente', ambiente)
             .eq('subcategoria', subcategoria)
             .eq('is_active', true)
