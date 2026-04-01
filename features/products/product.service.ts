@@ -23,7 +23,7 @@ import {
     PaginatedProducts,
     AdminFilters,
 } from './product.repository'
-import { Product, ProductCard, MaterialSwatch } from './product.types'
+import { MaterialSwatch, Product, ProductCard, ProductStore } from './product.types'
 
 export const PAGE_SIZE = 21
 
@@ -195,10 +195,10 @@ export async function getAllUniqueSwatches(): Promise<MaterialSwatch[]> {
 // Tiendas del producto (many-to-many)
 // ======================================================
 
-export async function getProductStores(productId: string): Promise<string[]> {
+export async function getProductStores(productId: string): Promise<ProductStore[]> {
     return dbGetProductStores(productId)
 }
 
-export async function setProductStores(productId: string, storeCodes: string[]): Promise<void> {
-    return dbSetProductStores(productId, storeCodes)
+export async function setProductStores(productId: string, stores: { storeCode: string, stock?: number }[]): Promise<void> {
+    return dbSetProductStores(productId, stores)
 }

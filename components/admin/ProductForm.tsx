@@ -18,7 +18,9 @@ export function ProductForm({ initialData, ambientes, subcategoriaMap }: Product
     const [selectedAmbiente, setSelectedAmbiente] = useState(initialData?.ambiente || 'general')
     const [selectedSubcategoria, setSelectedSubcategoria] = useState(initialData?.subcategoria || '')
     const [isNewSubcategoria, setIsNewSubcategoria] = useState(false)
-    const [selectedStores, setSelectedStores] = useState<StoreCode[]>(initialData?.stores ?? [])
+    const [selectedStores, setSelectedStores] = useState<StoreCode[]>(
+        initialData?.stores?.map(s => s.storeCode) ?? []
+    )
 
     const availableSubcategorias = subcategoriaMap[selectedAmbiente] || []
 
@@ -118,8 +120,10 @@ export function ProductForm({ initialData, ambientes, subcategoriaMap }: Product
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <label>Stock *</label>
-                <input required type="number" name="stock" defaultValue={initialData?.stock ?? 0} style={inputStyle} />
+                <label>Stock</label>
+                <p style={{ margin: 0, fontSize: '13px', color: '#888', padding: '8px 10px', background: '#f5f5f5', borderRadius: '6px' }}>
+                    📆 El stock se gestiona por tienda desde las operaciones de inventario (importar Excel).
+                </p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>

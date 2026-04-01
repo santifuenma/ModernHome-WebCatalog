@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from '@/infrastructure/supabase/server'
-import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload, StoreCode } from './product.types'
+import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload, StoreCode, ProductStore } from './product.types'
 
 /**
  * product.repository.ts
@@ -43,7 +43,7 @@ interface ProductCardRow {
     subcategoria: string
     is_active: boolean | null
     product_images: Pick<ImageRow, 'cloudinary_public_id' | 'is_main'>[]
-    product_stores: Pick<ProductStoreRow, 'store_code'>[]
+    product_stores: Pick<ProductStoreRow, 'store_code' | 'stock'>[]
 }
 
 interface ImageRow {
@@ -68,6 +68,7 @@ interface DownloadRow {
 
 interface ProductStoreRow {
     store_code: string
+    stock: number
 }
 
 // ─── Resultado paginado ───────────────────────────────────────────────────────
@@ -110,8 +111,10 @@ function toProduct(row: ProductRow): Product {
         slug: row.slug,
         brand: row.brand,
         designer: row.designer ?? undefined,
-        stores: (row.product_stores ?? []).map(s => s.store_code as StoreCode),
-        stock: row.stock ?? undefined,
+        stores: (row.product_stores ?? []).map(s => ({
+            storeCode: s.store_code as StoreCode,
+            stock: s.stock ?? 0,
+        })) as ProductStore[],
         ambiente: row.ambiente,
         subcategoria: row.subcategoria,
         dimensions: row.dimensions ?? [],
@@ -154,7 +157,10 @@ function toProductCard(row: ProductCardRow): ProductCard {
         subcategoria: row.subcategoria,
         is_active: row.is_active ?? true,
         image: mainImage ? buildCloudinaryUrl(mainImage.cloudinary_public_id, true) : '',
-        stores: (row.product_stores ?? []).map(s => s.store_code as StoreCode),
+        stores: (row.product_stores ?? []).map(s => ({
+            storeCode: s.store_code as StoreCode,
+            stock: s.stock ?? 0,
+        })) as ProductStore[],
     }
 }
 
@@ -175,14 +181,13 @@ const PRODUCT_CARD_SELECT = `
     subcategoria,
     is_active,
     product_images ( cloudinary_public_id, is_main ),
-    product_stores ( store_code )
+    product_stores ( store_code, stock )
 `
 
 /**
  * PRODUCT_CARD_SELECT_IMG
  * Igual que PRODUCT_CARD_SELECT pero con product_images!inner.
  * El !inner actúa como INNER JOIN: excluye automáticamente productos sin imágenes.
- * Usar en todas las queries públicas del catálogo para no mostrar productos sin foto.
  */
 const PRODUCT_CARD_SELECT_IMG = `
     id,
@@ -193,7 +198,7 @@ const PRODUCT_CARD_SELECT_IMG = `
     subcategoria,
     is_active,
     product_images!inner ( cloudinary_public_id, is_main ),
-    product_stores ( store_code )
+    product_stores ( store_code, stock )
 `
 
 /**
@@ -740,47 +745,73 @@ export async function dbGetAllUniqueSwatches(): Promise<MaterialSwatch[]> {
 
 /**
  * dbGetProductStores
- * Returns the list of store codes assigned to a product.
+ * Returns the store assignments (with stock) for a product.
  */
-export async function dbGetProductStores(productId: string): Promise<string[]> {
+export async function dbGetProductStores(productId: string): Promise<ProductStore[]> {
     const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
         .from('product_stores')
-        .select('store_code')
+        .select('store_code, stock')
         .eq('product_id', productId)
 
     if (error) throw new Error(`dbGetProductStores: ${error.message}`)
-    return (data ?? []).map(r => r.store_code)
+    return (data ?? []).map(r => ({
+        storeCode: r.store_code as StoreCode,
+        stock: r.stock ?? 0,
+    }))
 }
 
 /**
  * dbSetProductStores
- * Replaces all store assignments for a product with the provided list.
- * Uses a delete-then-insert strategy (safe for small lists like store codes).
+ * Smart upsert: preserves existing stock when stock is not provided (admin form).
+ * Accepts explicit stock values when called from inventory imports.
+ *
+ * - Stores no longer in the list are deleted.
+ * - New stores are inserted with stock (default 0 if not provided).
+ * - Existing stores keep their current stock unless a new stock value is given.
  */
 export async function dbSetProductStores(
     productId: string,
-    storeCodes: string[]
+    stores: { storeCode: string, stock?: number }[]
 ): Promise<void> {
     const supabase = await createSupabaseServerClient()
 
-    // 1. Remove all current assignments
-    const { error: deleteError } = await supabase
+    // 1. Fetch current assignments to preserve their stock
+    const { data: current } = await supabase
         .from('product_stores')
-        .delete()
+        .select('store_code, stock')
         .eq('product_id', productId)
 
-    if (deleteError) throw new Error(`dbSetProductStores (delete): ${deleteError.message}`)
+    const currentMap = new Map<string, number>(
+        (current ?? []).map(r => [r.store_code, r.stock ?? 0])
+    )
+    const newCodes = new Set(stores.map(s => s.storeCode))
 
-    // 2. Insert the new assignments (skip if empty)
-    if (storeCodes.length === 0) return
+    // 2. Delete stores that are no longer in the list
+    const toDelete = (current ?? []).filter(r => !newCodes.has(r.store_code)).map(r => r.store_code)
+    if (toDelete.length > 0) {
+        const { error: deleteError } = await supabase
+            .from('product_stores')
+            .delete()
+            .eq('product_id', productId)
+            .in('store_code', toDelete)
+        if (deleteError) throw new Error(`dbSetProductStores (delete): ${deleteError.message}`)
+    }
 
-    const rows = storeCodes.map(code => ({ product_id: productId, store_code: code }))
-    const { error: insertError } = await supabase
+    // 3. Upsert new/existing stores (preserve stock unless explicitly overridden)
+    if (stores.length === 0) return
+
+    const rows = stores.map(s => ({
+        product_id: productId,
+        store_code: s.storeCode,
+        stock: s.stock !== undefined ? s.stock : (currentMap.get(s.storeCode) ?? 0),
+    }))
+
+    const { error: upsertError } = await supabase
         .from('product_stores')
-        .insert(rows)
+        .upsert(rows, { onConflict: 'product_id,store_code' })
 
-    if (insertError) throw new Error(`dbSetProductStores (insert): ${insertError.message}`)
+    if (upsertError) throw new Error(`dbSetProductStores (upsert): ${upsertError.message}`)
 }
 
 /**

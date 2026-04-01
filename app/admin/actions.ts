@@ -30,7 +30,9 @@ export async function saveProduct(formData: FormData) {
     const isEditing = !!id
 
     // Leer las tiendas seleccionadas (múltiples valores del mismo campo 'stores')
-    const selectedStores = formData.getAll('stores') as string[]
+    const selectedStoreCodes = formData.getAll('stores') as string[]
+    // Convertir al formato {storeCode, stock?} — stock se preserva del valor existente en DB
+    const selectedStores = selectedStoreCodes.map(code => ({ storeCode: code }))
 
     const payload = {
         code: formData.get('code') as string,
@@ -38,7 +40,6 @@ export async function saveProduct(formData: FormData) {
         slug: formData.get('slug') as string,
         brand: formData.get('brand') as string,
         designer: formData.get('designer') as string || undefined,
-        stock: parseInt(formData.get('stock') as string || '0', 10),
         ambiente: formData.get('ambiente') as string,
         subcategoria: formData.get('subcategoria') as string,
         url: formData.get('url') as string || undefined,
@@ -110,34 +111,31 @@ export async function detachDownload(productId: string) {
     revalidatePath(`/catalogo`)
 }
 
-import { compareInventoryExcel, importProductsFromExcel } from '@/features/inventory/inventory.service'
+import { compareInventoryExcel, importProductsFromExcel, removeProductsFromStore } from '@/features/inventory/inventory.service'
 
 export async function compareInventoryAction(formData: FormData) {
     await requireAuth()
     const file = formData.get('file') as File
+    const store = formData.get('store') as string
     if (!file) throw new Error('No file provided')
+    if (!store) throw new Error('No store selected')
 
     const buffer = Buffer.from(await file.arrayBuffer())
-    const result = await compareInventoryExcel(buffer)
-
-    return result
+    return compareInventoryExcel(buffer, store)
 }
 
 export async function importProductsAction(formData: FormData) {
     await requireAuth()
     const file = formData.get('file') as File
+    const store = formData.get('store') as string
     if (!file) throw new Error('No file provided')
+    if (!store) throw new Error('No store selected')
 
-    // Read the File into a Buffer
     const buffer = Buffer.from(await file.arrayBuffer())
-    
-    // Call the core import logic
-    const result = await importProductsFromExcel(buffer)
-    
-    // Revalidate the product lists so new products appear immediately
+    const result = await importProductsFromExcel(buffer, store)
+
     revalidatePath('/admin/products')
     revalidatePath('/catalogo')
-
     return result
 }
 
@@ -149,22 +147,22 @@ export async function exportCatalogAction(includeHidden: boolean = false): Promi
     return base64
 }
 
-import { deactivateProductsFromExcel } from '@/features/inventory/inventory.service'
-
-export async function deactivateProductsAction(formData: FormData) {
+export async function removeFromStoreAction(formData: FormData) {
     await requireAuth()
     const file = formData.get('file') as File
+    const store = formData.get('store') as string
     if (!file) throw new Error('No file provided')
+    if (!store) throw new Error('No store selected')
 
-    // Read the File into a Buffer
     const buffer = Buffer.from(await file.arrayBuffer())
-    
-    // Call the core deactivation logic
-    const result = await deactivateProductsFromExcel(buffer)
-    
-    // Revalidate the product lists so changes appear immediately
+    const result = await removeProductsFromStore(buffer, store)
+
     revalidatePath('/admin/products')
     revalidatePath('/catalogo')
-
     return result
+}
+
+// Legacy alias — must be a real function in 'use server' files (re-exports are not allowed)
+export async function deactivateProductsAction(formData: FormData) {
+    return removeFromStoreAction(formData)
 }

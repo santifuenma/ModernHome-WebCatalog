@@ -13,6 +13,15 @@ export const STORE_LABELS: Record<StoreCode, string> = {
     BT: 'Barquisimeto',
 }
 
+// ======================================================
+// PRODUCT STORE (asignación de tienda con stock propio)
+// ======================================================
+
+export interface ProductStore {
+    storeCode: StoreCode
+    stock: number
+}
+
 
 
 export interface ProductImage {
@@ -76,12 +85,11 @@ export interface Product {
     // Enlace externo al producto
     url?: string
 
-    // ── Campos de negocio (DB only — no se muestran en la UI por ahora) ──
-    code?: string           // Código interno del producto (ej: 'MH-001')
-    stores?: StoreCode[]    // Tiendas en las que está disponible (many-to-many)
-    stock?: number          // Unidades disponibles
-    is_active?: boolean     // Si el producto está publicado
-    created_at?: string     // Fecha de creación (ISO string)
+    // ── Campos de negocio (DB only) ──
+    code?: string            // Código interno del producto (ej: 'MH-001')
+    stores?: ProductStore[]  // Asignaciones de tienda con stock propio (many-to-many)
+    is_active?: boolean      // Si el producto está publicado
+    created_at?: string      // Fecha de creación (ISO string)
 }
 
 // ======================================================
@@ -100,7 +108,7 @@ export interface ProductCard {
 
     image: string
     is_active?: boolean
-    stores?: StoreCode[]    // Tiendas asignadas (para filtros en admin)
+    stores?: ProductStore[]  // Asignaciones de tienda con stock propio (para filtros admin)
 }
 
 // ======================================================
