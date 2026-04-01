@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { getAmbientes } from '@/features/ambientes/ambiente.service';
 import { Subcategoria } from '@/features/subcategorias/subcategoria.types';
+import { STORE_LABELS, StoreCode } from '@/features/products/product.types';
 import styles from './Filtros.module.css';
-
-const STORES = ['LM', 'SM', 'DP', 'CT', 'BT'];
 
 /**
  * Filtros
@@ -76,7 +75,9 @@ export default function Filtros({ subcategoriaMap }: Props) {
                     onChange={handleStoreSelect}
                 >
                     <option value="">Todas las tiendas</option>
-                    {STORES.map(s => <option key={s} value={s}>{s}</option>)}
+                    {Object.entries(STORE_LABELS).map(([code, name]) => (
+                        <option key={code} value={code}>{name}</option>
+                    ))}
                 </select>
 
                 {ambientes.map(({ label, slug }) => {
@@ -105,8 +106,8 @@ export default function Filtros({ subcategoriaMap }: Props) {
                     onChange={handleStoreSelect}
                 >
                     <option value="">Todas las tiendas</option>
-                    {STORES.map(s => (
-                        <option key={s} value={s}>Tienda {s}</option>
+                    {Object.entries(STORE_LABELS).map(([code, name]) => (
+                        <option key={code} value={code}>{name}</option>
                     ))}
                 </select>
 
