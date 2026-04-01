@@ -169,20 +169,10 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         if (p.code) dbCodeToId.set(p.code, p.id)
     }
 
-    // Fetch existing product_stores for this storeCode
-    const { data: existingAssignments } = await supabase
-        .from('product_stores')
-        .select('product_id, stock')
-        .eq('store_code', storeCode)
-
-    const storeProductIdSet = new Set<string>((existingAssignments || []).map((s: any) => s.product_id))
-    const storeStockMap = new Map<string, number>((existingAssignments || []).map((s: any) => [s.product_id, s.stock ?? 0]))
-
     // Classify each Excel row
-    const toInsertProducts: any[] = []      // brand-new products
-    const toInsertStoreAssignments: { productId: string, stock: number }[] = []  // existing product, new store
-    const toUpdateStock: { productId: string, stock: number }[] = []             // existing product, existing store, stock changed
-    const toReactivate: string[] = []       // existing product IDs that should be reactivated
+    const toInsertProducts: any[] = []    // brand-new products (not in DB yet)
+    const toUpsertStore: { productId: string, stock: number }[] = []  // all existing products → upsert store assignment + stock
+    const toReactivate: string[] = []     // all existing product IDs → set is_active = true
 
     for (const row of rawRows) {
         const code = (row['Código'] || '').toString().trim()
@@ -192,35 +182,25 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         if (!code) continue
 
         if (!dbCodeToId.has(code)) {
-            // Brand-new product
+            // Brand-new product — create + assign store with stock
             const slug = `${slugify(name || code)}-${slugify(code)}`
             toInsertProducts.push({ code, name: name || code, slug, brand, designer: null, ambiente: 'general', subcategoria: 'general', is_active: true, _stock: stock })
         } else {
             const productId = dbCodeToId.get(code)!
-            // Every existing product found in the Excel should be reactivated
+            // Existing product: upsert store assignment and reactivate
+            toUpsertStore.push({ productId, stock })
             toReactivate.push(productId)
-
-            if (!storeProductIdSet.has(productId)) {
-                // Existing product, not yet in this store → add store assignment
-                toInsertStoreAssignments.push({ productId, stock })
-            } else {
-                // Already in store → always update stock (also handles stock=0 on reactivation)
-                if (storeStockMap.get(productId) !== stock) {
-                    toUpdateStock.push({ productId, stock })
-                }
-            }
         }
     }
 
     log(`New products: ${toInsertProducts.length}`)
-    log(`Products to add to store ${storeCode}: ${toInsertStoreAssignments.length}`)
-    log(`Products with stock update: ${toUpdateStock.length}`)
+    log(`Existing products to upsert in store ${storeCode}: ${toUpsertStore.length}`)
 
     let successCount = 0
     let updatedCount = 0
     let errorCount = 0
 
-    // 1. Insert new products + add them to product_stores
+    // 1. Insert brand-new products + their store assignment
     for (let i = 0; i < toInsertProducts.length; i += BATCH_SIZE) {
         const batch = toInsertProducts.slice(i, i + BATCH_SIZE)
         const stockByCode: Record<string, number> = {}
@@ -247,7 +227,7 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
                     stock: stockByCode[p.code] ?? 0,
                 }))
                 if (storeRows.length > 0) {
-                    const { error: se } = await supabase.from('product_stores').insert(storeRows)
+                    const { error: se } = await supabase.from('product_stores').upsert(storeRows, { onConflict: 'product_id,store_code' })
                     if (se) log(`Warning: product_stores insert error: ${se.message}`)
                 }
             }
@@ -257,41 +237,34 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         }
     }
 
-    // 2. Add store assignments for existing products not yet in this store
-    if (toInsertStoreAssignments.length > 0) {
-        const rows = toInsertStoreAssignments.map(a => ({ product_id: a.productId, store_code: storeCode, stock: a.stock }))
-        const { error } = await supabase.from('product_stores').insert(rows)
-        if (error) {
-            log(`Error adding store assignments: ${error.message}`)
-            errorCount += rows.length
-        } else {
-            successCount += rows.length
-            log(`Added ${rows.length} store assignments for ${storeCode}.`)
-        }
-    }
-
-    // 3. Update stock for products already in this store
-    const CHUNK = 20
-    for (let i = 0; i < toUpdateStock.length; i += CHUNK) {
-        const chunk = toUpdateStock.slice(i, i + CHUNK)
-        await Promise.all(chunk.map(async item => {
+    // 2. UPSERT store assignments for all existing products (handles both new store + stock update)
+    //    Using upsert with onConflict so it always writes the correct stock regardless of current state
+    if (toUpsertStore.length > 0) {
+        const CHUNK = 50
+        for (let i = 0; i < toUpsertStore.length; i += CHUNK) {
+            const chunk = toUpsertStore.slice(i, i + CHUNK)
+            const rows = chunk.map(a => ({
+                product_id: a.productId,
+                store_code: storeCode,
+                stock: a.stock,
+            }))
             const { error } = await supabase
                 .from('product_stores')
-                .update({ stock: item.stock })
-                .eq('product_id', item.productId)
-                .eq('store_code', storeCode)
+                .upsert(rows, { onConflict: 'product_id,store_code' })
+
             if (error) {
-                log(`Stock update error for product ${item.productId}: ${error.message}`)
-                errorCount++
+                log(`Upsert store error (batch ${Math.floor(i / CHUNK) + 1}): ${error.message}`)
+                errorCount += chunk.length
             } else {
-                updatedCount++
+                updatedCount += chunk.length
             }
-        }))
+        }
+        log(`Upserted ${toUpsertStore.length} store assignments with updated stock.`)
     }
 
-    // 4. Reactivate existing products found in the Excel (is_active = true)
+    // 3. Reactivate all existing products found in the Excel (is_active = true)
     if (toReactivate.length > 0) {
-        log(`Reactivating ${toReactivate.length} products found in this Excel...`)
+        log(`Reactivating ${toReactivate.length} products...`)
         const CHUNK = 50
         let reactivated = 0
         for (let i = 0; i < toReactivate.length; i += CHUNK) {
@@ -312,6 +285,7 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
     log(`Done. Created: ${successCount}, Stock updated: ${updatedCount}, Errors: ${errorCount}`)
     return { successCount, updatedCount, errorCount, logs }
 }
+
 
 // ─── 3. removeProductsFromStore ───────────────────────────────────────────────
 /**
