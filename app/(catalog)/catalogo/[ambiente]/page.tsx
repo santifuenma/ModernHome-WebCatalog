@@ -18,8 +18,9 @@ export default async function AmbientePage(props: AmbientePageProps) {
     const { ambiente } = await props.params
     const { page, store } = await props.searchParams
     const currentPage = parseInt(page ?? '1', 10)
+    const activeStore = store ?? 'LM'
 
-    const { items, totalPages } = await getProductsByAmbiente(ambiente, currentPage, store)
+    const { items, totalPages } = await getProductsByAmbiente(ambiente, currentPage, activeStore)
 
     return (
         <>

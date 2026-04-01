@@ -9,8 +9,9 @@ interface CatalogoPageProps {
 export default async function CatalogoPage(props: CatalogoPageProps) {
     const { page, store } = await props.searchParams
     const currentPage = parseInt(page ?? '1', 10)
+    const activeStore = store ?? 'LM'
 
-    const { items, totalPages } = await getProductCards(currentPage, store)
+    const { items, totalPages } = await getProductCards(currentPage, activeStore)
 
     return (
         <>

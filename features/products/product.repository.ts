@@ -886,3 +886,30 @@ export async function dbGetAllActiveSubcategories(): Promise<Record<string, { la
 
     return grouped
 }
+
+/**
+ * dbGetActiveStores
+ * Fetches all store codes that have stock > 0 for active products with images.
+ */
+export async function dbGetActiveStores(): Promise<StoreCode[]> {
+    const supabase = await createSupabaseServerClient()
+    
+    const { data, error } = await supabase
+        .from('products')
+        .select('product_stores!inner(store_code, stock), product_images!inner(id)')
+        .eq('is_active', true)
+
+    if (error) throw new Error(`dbGetActiveStores: ${error.message}`)
+
+    const stores = new Set<string>()
+    for (const row of data || []) {
+        if (!row.product_stores) continue
+        for (const store of row.product_stores as any) {
+            if (store.stock > 0) {
+                stores.add(store.store_code)
+            }
+        }
+    }
+
+    return Array.from(stores) as StoreCode[]
+}

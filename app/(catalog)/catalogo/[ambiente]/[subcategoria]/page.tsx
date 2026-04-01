@@ -11,8 +11,9 @@ export default async function SubcategoriaPage(props: SubcategoriaPageProps) {
     const { ambiente, subcategoria } = await props.params
     const { page, store } = await props.searchParams
     const currentPage = parseInt(page ?? '1', 10)
+    const activeStore = store ?? 'LM'
 
-    const { items, totalPages } = await getProductsBySubcategoria(ambiente, subcategoria, currentPage, store)
+    const { items, totalPages } = await getProductsBySubcategoria(ambiente, subcategoria, currentPage, activeStore)
 
     return (
         <>

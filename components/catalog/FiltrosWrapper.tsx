@@ -3,12 +3,14 @@
 import { usePathname } from 'next/navigation';
 import Filtros from './Filtros';
 import { Subcategoria } from '@/features/subcategorias/subcategoria.types';
+import { StoreCode } from '@/features/products/product.types';
 
 interface Props {
     subcategoriaMap: Record<string, Subcategoria[]>;
+    activeStores: StoreCode[];
 }
 
-export default function FiltrosWrapper({ subcategoriaMap }: Props) {
+export default function FiltrosWrapper({ subcategoriaMap, activeStores }: Props) {
     const pathname = usePathname();
 
     // The route pattern for product pages is /catalogo/[ambiente]/[subcategoria]/[producto]
@@ -23,5 +25,5 @@ export default function FiltrosWrapper({ subcategoriaMap }: Props) {
         return null;
     }
 
-    return <Filtros subcategoriaMap={subcategoriaMap} />;
+    return <Filtros subcategoriaMap={subcategoriaMap} activeStores={activeStores} />;
 }

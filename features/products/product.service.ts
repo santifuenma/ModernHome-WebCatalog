@@ -20,10 +20,11 @@ import {
     dbGetAllUniqueSwatches,
     dbGetProductStores,
     dbSetProductStores,
+    dbGetActiveStores,
     PaginatedProducts,
     AdminFilters,
 } from './product.repository'
-import { MaterialSwatch, Product, ProductCard, ProductStore } from './product.types'
+import { MaterialSwatch, Product, ProductCard, ProductStore, StoreCode } from './product.types'
 
 export const PAGE_SIZE = 21
 
@@ -201,6 +202,14 @@ export async function getProductStores(productId: string): Promise<ProductStore[
     return dbGetProductStores(productId)
 }
 
-export async function setProductStores(productId: string, stores: { storeCode: string, stock?: number }[]): Promise<void> {
+export async function setProductStores(productId: string, stores: ProductStore[]): Promise<void> {
     return dbSetProductStores(productId, stores)
+}
+
+// ======================================================
+// Get globally active stores
+// ======================================================
+
+export async function getActiveStores(): Promise<StoreCode[]> {
+    return dbGetActiveStores()
 }

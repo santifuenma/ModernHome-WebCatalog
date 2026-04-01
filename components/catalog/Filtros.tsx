@@ -16,15 +16,16 @@ import styles from './Filtros.module.css';
 
 interface Props {
     subcategoriaMap: Record<string, Subcategoria[]>;
+    activeStores: StoreCode[];
 }
 
-export default function Filtros({ subcategoriaMap }: Props) {
+export default function Filtros({ subcategoriaMap, activeStores }: Props) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
     const ambientes = getAmbientes();
 
-    const currentStore = searchParams.get('store') ?? '';
+    const currentStore = searchParams.get('store') ?? 'LM';
     const storeQuery = currentStore ? `?store=${currentStore}` : '';
 
     // Extract active ambiente from the URL path
@@ -74,7 +75,10 @@ export default function Filtros({ subcategoriaMap }: Props) {
                     value={currentStore}
                     onChange={handleStoreSelect}
                 >
-                    {Object.entries(STORE_LABELS).map(([code, name]) => (
+
+                    {Object.entries(STORE_LABELS)
+                        .filter(([code]) => activeStores.includes(code as StoreCode))
+                        .map(([code, name]) => (
                         <option key={code} value={code}>{name}</option>
                     ))}
                 </select>
@@ -104,8 +108,9 @@ export default function Filtros({ subcategoriaMap }: Props) {
                     value={currentStore}
                     onChange={handleStoreSelect}
                 >
-                    <option value="">Todas las tiendas</option>
-                    {Object.entries(STORE_LABELS).map(([code, name]) => (
+                    {Object.entries(STORE_LABELS)
+                        .filter(([code]) => activeStores.includes(code as StoreCode))
+                        .map(([code, name]) => (
                         <option key={code} value={code}>{name}</option>
                     ))}
                 </select>
