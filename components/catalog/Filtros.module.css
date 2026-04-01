@@ -68,9 +68,9 @@
 .active {
     background-color: rgb(242, 242, 242);
     border-color: #A90404;
-    font-weight: 700;
+    border: 2px solid #A90404;
     color: #A90404;
-    border: 2.5px solid #A90404;
+    font-weight: 600;
 }
 
 /* ─── SUBCATEGORÍAS ROW ──────────────────────────────────────────────── */
@@ -122,7 +122,7 @@
     border: 1.8px solid var(--color-text-muted);
     color: var(--color-text);
     background-color: white;
-    border: 2.5px solid #A90404;
+    border: 2px solid #A90404;
     color: #A90404;
     font-size: 13px;
     font-weight: 500;
@@ -145,30 +145,26 @@
 
 /* Specific styling for the desktop store select */
 .store_select_desktop {
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 28px;
-    padding-left: 28px;
     cursor: pointer;
     font-family: inherit;
     outline: none;
     text-align-last: center;
+    width: auto !important;
+    min-width: 130px !important;
+
 }
 
 
 /* Active state: red border when an ambiente is selected */
 .select_active {
-    border: 2.5px solid #A90404;
+    border: 2px solid #A90404;
     color: #A90404;
-    font-weight: 700;
+    font-weight: 600;
     background-color: rgb(242, 242, 242);
 }
 
 /* ─── BREAKPOINT: swap buttons → select at 680px ─────────────────────── */
-@media (max-width: 680px) {
+@media (max-width: 796px) {
 
     /* Hide the button row */
     .filtros_content {

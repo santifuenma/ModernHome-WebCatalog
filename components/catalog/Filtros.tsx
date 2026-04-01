@@ -54,7 +54,7 @@ export default function Filtros({ subcategoriaMap }: Props) {
         const params = new URLSearchParams(searchParams.toString())
         if (value) params.set('store', value)
         else params.delete('store')
-        
+
         router.push(`${pathname}?${params.toString()}`, { scroll: false })
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -74,7 +74,6 @@ export default function Filtros({ subcategoriaMap }: Props) {
                     value={currentStore}
                     onChange={handleStoreSelect}
                 >
-                    <option value="">Todas las tiendas</option>
                     {Object.entries(STORE_LABELS).map(([code, name]) => (
                         <option key={code} value={code}>{name}</option>
                     ))}

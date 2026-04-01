@@ -845,10 +845,10 @@ export async function dbSetProductStores(
 export async function dbGetAllActiveSubcategories(): Promise<Record<string, { label: string, slug: string, ambiente: string }[]>> {
     const supabase = await createSupabaseServerClient()
     
-    // We only need the ambiente and subcategoria fields of active products
+    // We only need the ambiente and subcategoria fields of active products that have images
     const { data, error } = await supabase
         .from('products')
-        .select('ambiente, subcategoria')
+        .select('ambiente, subcategoria, product_images!inner(id)')
         .eq('is_active', true)
 
     if (error) throw new Error(`dbGetAllActiveSubcategories: ${error.message}`)
