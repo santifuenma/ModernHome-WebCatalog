@@ -184,7 +184,19 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         if (!dbCodeToId.has(code)) {
             // Brand-new product — create + assign store with stock
             const slug = `${slugify(name || code)}-${slugify(code)}`
-            toInsertProducts.push({ code, name: name || code, slug, brand, designer: null, ambiente: 'general', subcategoria: 'general', is_active: true, _stock: stock })
+            toInsertProducts.push({ 
+                code, 
+                name: name || code, 
+                slug, 
+                brand, 
+                designer: null, 
+                ambiente: 'general', 
+                subcategoria: 'general', 
+                is_active: true, 
+                store: [], // satisfy legacy constraint
+                stock: 0,  // satisfy legacy constraint
+                _stock: stock 
+            })
         } else {
             const productId = dbCodeToId.get(code)!
             // Existing product: upsert store assignment and reactivate
