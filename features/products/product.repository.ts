@@ -499,8 +499,7 @@ export async function dbSearchProductsAdmin(
         if (filters.status === 'active') chain = chain.eq('is_active', true)
         else if (filters.status === 'hidden') chain = chain.eq('is_active', false)
 
-        // Store — filtra vía la tabla junction product_stores
-        // Nota: el inner join ya se aplica abajo condicionalmente; aquí solo añadimos el filtro de valor
+        // Store — filtra via junction product_stores (inner join ya aplicado condicionalmente en select)
         if (filters.store) chain = chain.eq('product_stores.store_code', filters.store)
 
         // Ambiente
@@ -509,34 +508,41 @@ export async function dbSearchProductsAdmin(
         // Subcategoria
         if (filters.subcategoria) chain = chain.eq('subcategoria', filters.subcategoria)
 
-        // Stock
-        if (filters.stock === 'instock') chain = chain.gt('stock', 0)
-        else if (filters.stock === 'nostock') chain = chain.eq('stock', 0)
+        // Stock — ahora vive en product_stores. Filtramos con un inner join en esa relación.
+        // instock: existe al menos una asignación de tienda con stock > 0
+        // nostock: no existe ninguna asignación con stock > 0
+        if (filters.stock === 'instock') chain = chain.gt('product_stores.stock', 0)
+        else if (filters.stock === 'nostock') chain = chain.eq('product_stores.stock', 0)
 
         return chain
     }
 
-    // Construir queries base. Si hay filtro por tienda, usamos inner join en product_stores.
-    const storeInnerJoin = filters.store
-        ? PRODUCT_CARD_SELECT.replace('product_stores ( store_code )', 'product_stores!inner ( store_code )')
+    // Construir select base. Si hay filtro por tienda, usamos inner join en product_stores.
+    const storeSelect = filters.store
+        ? PRODUCT_CARD_SELECT.replace(
+            'product_stores ( store_code, stock )',
+            'product_stores!inner ( store_code, stock )'
+          )
         : PRODUCT_CARD_SELECT
 
-    let dataQuery = supabase.from('products').select(storeInnerJoin)
+    let dataQuery = supabase.from('products').select(storeSelect)
     let countQuery = filters.store
         ? supabase.from('products').select('id, product_stores!inner(store_code)', { count: 'exact', head: true })
         : supabase.from('products').select('id', { count: 'exact', head: true })
 
     if (filters.images === 'with') {
-        dataQuery = supabase.from('products').select(
-            storeInnerJoin.replace('product_images ( cloudinary_public_id, is_main )', 'product_images!inner ( cloudinary_public_id, is_main )')
-        ).not('product_images', 'is', null)
+        // Use !inner on product_images to only return products that have images
+        const imgSelect = storeSelect.replace(
+            'product_images ( cloudinary_public_id, is_main )',
+            'product_images!inner ( cloudinary_public_id, is_main )'
+        )
+        dataQuery = supabase.from('products').select(imgSelect)
         const countImgSelect = filters.store
             ? 'id, product_images!inner(id), product_stores!inner(store_code)'
             : 'id, product_images!inner(id)'
         countQuery = supabase.from('products').select(countImgSelect, { count: 'exact', head: true })
     } else if (filters.images === 'without') {
-        // Products with NO images: filter where product_images is null
-        dataQuery = supabase.from('products').select(storeInnerJoin).is('product_images', null)
+        dataQuery = supabase.from('products').select(storeSelect).is('product_images', null)
         countQuery = filters.store
             ? supabase.from('products').select('id, product_stores!inner(store_code)', { count: 'exact', head: true }).is('product_images', null)
             : supabase.from('products').select('id', { count: 'exact', head: true }).is('product_images', null)
