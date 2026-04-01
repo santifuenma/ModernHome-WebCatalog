@@ -182,6 +182,7 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
     const toInsertProducts: any[] = []      // brand-new products
     const toInsertStoreAssignments: { productId: string, stock: number }[] = []  // existing product, new store
     const toUpdateStock: { productId: string, stock: number }[] = []             // existing product, existing store, stock changed
+    const toReactivate: string[] = []       // existing product IDs that should be reactivated
 
     for (const row of rawRows) {
         const code = (row['Código'] || '').toString().trim()
@@ -196,11 +197,14 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
             toInsertProducts.push({ code, name: name || code, slug, brand, designer: null, ambiente: 'general', subcategoria: 'general', is_active: true, _stock: stock })
         } else {
             const productId = dbCodeToId.get(code)!
+            // Every existing product found in the Excel should be reactivated
+            toReactivate.push(productId)
+
             if (!storeProductIdSet.has(productId)) {
                 // Existing product, not yet in this store → add store assignment
                 toInsertStoreAssignments.push({ productId, stock })
             } else {
-                // Already in store → update stock if changed
+                // Already in store → always update stock (also handles stock=0 on reactivation)
                 if (storeStockMap.get(productId) !== stock) {
                     toUpdateStock.push({ productId, stock })
                 }
@@ -283,6 +287,26 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
                 updatedCount++
             }
         }))
+    }
+
+    // 4. Reactivate existing products found in the Excel (is_active = true)
+    if (toReactivate.length > 0) {
+        log(`Reactivating ${toReactivate.length} products found in this Excel...`)
+        const CHUNK = 50
+        let reactivated = 0
+        for (let i = 0; i < toReactivate.length; i += CHUNK) {
+            const chunk = toReactivate.slice(i, i + CHUNK)
+            const { error } = await supabase
+                .from('products')
+                .update({ is_active: true })
+                .in('id', chunk)
+            if (error) {
+                log(`Reactivation error: ${error.message}`)
+            } else {
+                reactivated += chunk.length
+            }
+        }
+        log(`Reactivated: ${reactivated} products.`)
     }
 
     log(`Done. Created: ${successCount}, Stock updated: ${updatedCount}, Errors: ${errorCount}`)

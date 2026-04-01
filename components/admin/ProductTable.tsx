@@ -20,6 +20,7 @@ export function ProductTable({ products }: ProductTableProps) {
                         <th className={styles.th}>Código</th>
                         <th className={styles.th}>Nombre</th>
                         <th className={styles.th}>Marca</th>
+                        <th className={styles.th}>Stock por Tienda</th>
                         <th className={styles.th}>Acciones</th>
                     </tr>
                 </thead>
@@ -28,9 +29,9 @@ export function ProductTable({ products }: ProductTableProps) {
                         <tr key={product.id} className={styles.tr}>
                             <td className={styles.td}>
                                 {product.image ? (
-                                    <img 
-                                        src={product.image} 
-                                        alt={product.name} 
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
                                         className={styles.productImage}
                                     />
                                 ) : (
@@ -55,7 +56,24 @@ export function ProductTable({ products }: ProductTableProps) {
                             </td>
                             <td className={styles.td}>{product.brand}</td>
                             <td className={styles.td}>
-                                <Link 
+                                {product.stores && product.stores.length > 0 ? (
+                                    <div className={styles.stockList}>
+                                        {product.stores.map(s => (
+                                            <span
+                                                key={s.storeCode}
+                                                className={`${styles.stockPill} ${s.stock > 0 ? styles.instock : styles.nostock}`}
+                                                title={`${s.storeCode}: ${s.stock} uds.`}
+                                            >
+                                                {s.storeCode}: {s.stock}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <span className={styles.noStores}>Sin tienda</span>
+                                )}
+                            </td>
+                            <td className={styles.td}>
+                                <Link
                                     href={`/admin/products/${product.id}`}
                                     className={styles.editButton}
                                 >
