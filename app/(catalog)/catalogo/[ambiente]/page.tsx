@@ -11,15 +11,15 @@ export function generateStaticParams() {
 
 interface AmbientePageProps {
     params: Promise<{ ambiente: string }>
-    searchParams: Promise<{ page?: string }>
+    searchParams: Promise<{ page?: string; store?: string }>
 }
 
 export default async function AmbientePage(props: AmbientePageProps) {
     const { ambiente } = await props.params
-    const { page } = await props.searchParams
+    const { page, store } = await props.searchParams
     const currentPage = parseInt(page ?? '1', 10)
 
-    const { items, totalPages } = await getProductsByAmbiente(ambiente, currentPage)
+    const { items, totalPages } = await getProductsByAmbiente(ambiente, currentPage, store)
 
     return (
         <>

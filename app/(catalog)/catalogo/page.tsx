@@ -3,14 +3,14 @@ import Pagination from "@/components/ui/Pagination"
 import { getProductCards } from "@/features/products/product.service"
 
 interface CatalogoPageProps {
-    searchParams: Promise<{ page?: string }>
+    searchParams: Promise<{ page?: string; store?: string }>
 }
 
 export default async function CatalogoPage(props: CatalogoPageProps) {
-    const { page } = await props.searchParams
+    const { page, store } = await props.searchParams
     const currentPage = parseInt(page ?? '1', 10)
 
-    const { items, totalPages } = await getProductCards(currentPage)
+    const { items, totalPages } = await getProductCards(currentPage, store)
 
     return (
         <>

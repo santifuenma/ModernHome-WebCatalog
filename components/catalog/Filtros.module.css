@@ -141,6 +141,21 @@
     /* Remove browser default orange focus ring */
 }
 
+/* Specific styling for the desktop store select */
+.store_select_desktop {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 28px;
+    padding-left: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    outline: none;
+}
+
+
 /* Active state: red border when an ambiente is selected */
 .select_active {
     border: 2.5px solid #A90404;
@@ -160,8 +175,10 @@
     /* Show the select wrapper */
     .select_mobile_wrapper {
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 12px;
         padding: 14px 16px;
         width: 100%;
     }

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import styles from './Pagination.module.css'
 
 interface PaginationProps {
@@ -24,9 +25,13 @@ interface PaginationProps {
 export default function Pagination({ currentPage, totalPages, basePath }: PaginationProps) {
     if (totalPages <= 1) return null
 
-    // Build href for a given page number
+    const searchParams = useSearchParams()
+
+    // Build href for a given page number, preserving existing query params (e.g. ?store=LM)
     function pageHref(page: number) {
-        return `${basePath}?page=${page}`
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('page', page.toString())
+        return `${basePath}?${params.toString()}`
     }
 
     const handleScrollToTop = () => {

@@ -220,28 +220,35 @@ const PRODUCT_FULL_SELECT = `
  * Returns paginated active products for the main catalog page.
  * Uses DB-level .range() — never fetches more rows than needed.
  */
-export async function dbGetAllProducts(page: number, pageSize: number): Promise<PaginatedProducts> {
+export async function dbGetAllProducts(page: number, pageSize: number, store?: string): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
+    const storeSelect = store 
+        ? PRODUCT_CARD_SELECT_IMG.replace('product_stores ( store_code, stock )', 'product_stores!inner ( store_code, stock )') 
+        : PRODUCT_CARD_SELECT_IMG
+    
+    const countSelect = store 
+        ? 'id, product_images!inner(id), product_stores!inner(store_code)' 
+        : 'id, product_images!inner(id)'
+
+    let dataQuery = supabase.from('products').select(storeSelect).eq('is_active', true)
+    let countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true }).eq('is_active', true)
+
+    if (store) {
+        dataQuery = dataQuery.eq('product_stores.store_code', store)
+        countQuery = countQuery.eq('product_stores.store_code', store)
+    }
+
     const [dataResult, countResult] = await Promise.all([
-        supabase
-            .from('products')
-            .select(PRODUCT_CARD_SELECT_IMG)
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: true })
-            .range(from, to),
-        supabase
-            .from('products')
-            .select('id, product_images!inner(id)', { count: 'exact', head: true })
-            .eq('is_active', true),
+        dataQuery.order('created_at', { ascending: false }).order('id', { ascending: true }).range(from, to),
+        countQuery
     ])
 
     if (dataResult.error) throw new Error(`dbGetAllProducts: ${dataResult.error.message}`)
     return {
-        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        items: (dataResult.data as unknown as ProductCardRow[]).map(toProductCard),
         totalItems: countResult.count ?? 0,
     }
 }
@@ -254,30 +261,36 @@ export async function dbGetProductsByAmbiente(
     ambiente: string,
     page: number,
     pageSize: number,
+    store?: string
 ): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
+    const storeSelect = store 
+        ? PRODUCT_CARD_SELECT_IMG.replace('product_stores ( store_code, stock )', 'product_stores!inner ( store_code, stock )') 
+        : PRODUCT_CARD_SELECT_IMG
+    
+    const countSelect = store 
+        ? 'id, product_images!inner(id), product_stores!inner(store_code)' 
+        : 'id, product_images!inner(id)'
+
+    let dataQuery = supabase.from('products').select(storeSelect).eq('ambiente', ambiente).eq('is_active', true)
+    let countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true }).eq('ambiente', ambiente).eq('is_active', true)
+
+    if (store) {
+        dataQuery = dataQuery.eq('product_stores.store_code', store)
+        countQuery = countQuery.eq('product_stores.store_code', store)
+    }
+
     const [dataResult, countResult] = await Promise.all([
-        supabase
-            .from('products')
-            .select(PRODUCT_CARD_SELECT_IMG)
-            .eq('ambiente', ambiente)
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: true })
-            .range(from, to),
-        supabase
-            .from('products')
-            .select('id, product_images!inner(id)', { count: 'exact', head: true })
-            .eq('ambiente', ambiente)
-            .eq('is_active', true),
+        dataQuery.order('created_at', { ascending: false }).order('id', { ascending: true }).range(from, to),
+        countQuery
     ])
 
     if (dataResult.error) throw new Error(`dbGetProductsByAmbiente: ${dataResult.error.message}`)
     return {
-        items: (dataResult.data as ProductCardRow[]).map(toProductCard),
+        items: (dataResult.data as unknown as ProductCardRow[]).map(toProductCard),
         totalItems: countResult.count ?? 0,
     }
 }
@@ -291,27 +304,31 @@ export async function dbGetProductsBySubcategoria(
     subcategoria: string,
     page: number,
     pageSize: number,
+    store?: string
 ): Promise<PaginatedProducts> {
     const supabase = await createSupabaseServerClient()
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
+    const storeSelect = store 
+        ? PRODUCT_CARD_SELECT_IMG.replace('product_stores ( store_code, stock )', 'product_stores!inner ( store_code, stock )') 
+        : PRODUCT_CARD_SELECT_IMG
+    
+    const countSelect = store 
+        ? 'id, product_images!inner(id), product_stores!inner(store_code)' 
+        : 'id, product_images!inner(id)'
+
+    let dataQuery = supabase.from('products').select(storeSelect).eq('ambiente', ambiente).eq('subcategoria', subcategoria).eq('is_active', true)
+    let countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true }).eq('ambiente', ambiente).eq('subcategoria', subcategoria).eq('is_active', true)
+
+    if (store) {
+        dataQuery = dataQuery.eq('product_stores.store_code', store)
+        countQuery = countQuery.eq('product_stores.store_code', store)
+    }
+
     const [dataResult, countResult] = await Promise.all([
-        supabase
-            .from('products')
-            .select(PRODUCT_CARD_SELECT_IMG)
-            .eq('ambiente', ambiente)
-            .eq('subcategoria', subcategoria)
-            .eq('is_active', true)
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: true })
-            .range(from, to),
-        supabase
-            .from('products')
-            .select('id, product_images!inner(id)', { count: 'exact', head: true })
-            .eq('ambiente', ambiente)
-            .eq('subcategoria', subcategoria)
-            .eq('is_active', true),
+        dataQuery.order('created_at', { ascending: false }).order('id', { ascending: true }).range(from, to),
+        countQuery
     ])
 
     if (dataResult.error) throw new Error(`dbGetProductsBySubcategoria: ${dataResult.error.message}`)

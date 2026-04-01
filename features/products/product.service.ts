@@ -61,8 +61,8 @@ function toResult(
  * No extra caching — the DB-level .range() already ensures only 20 rows are fetched.
  * New products appear immediately on the next request.
  */
-export async function getProductCards(page = 1): Promise<PaginatedResult<ProductCard>> {
-    const result = await dbGetAllProducts(page, PAGE_SIZE)
+export async function getProductCards(page = 1, store?: string): Promise<PaginatedResult<ProductCard>> {
+    const result = await dbGetAllProducts(page, PAGE_SIZE, store)
     return toResult(result, page)
 }
 
@@ -82,8 +82,9 @@ export async function getProducts(): Promise<ProductCard[]> {
 export async function getProductsByAmbiente(
     ambiente: string,
     page = 1,
+    store?: string
 ): Promise<PaginatedResult<ProductCard>> {
-    const result = await dbGetProductsByAmbiente(ambiente, page, PAGE_SIZE)
+    const result = await dbGetProductsByAmbiente(ambiente, page, PAGE_SIZE, store)
     return toResult(result, page)
 }
 
@@ -95,8 +96,9 @@ export async function getProductsBySubcategoria(
     ambiente: string,
     subcategoria: string,
     page = 1,
+    store?: string
 ): Promise<PaginatedResult<ProductCard>> {
-    const result = await dbGetProductsBySubcategoria(ambiente, subcategoria, page, PAGE_SIZE)
+    const result = await dbGetProductsBySubcategoria(ambiente, subcategoria, page, PAGE_SIZE, store)
     return toResult(result, page)
 }
 

@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { getAmbientes } from '@/features/ambientes/ambiente.service';
 import { Subcategoria } from '@/features/subcategorias/subcategoria.types';
 import styles from './Filtros.module.css';
+
+const STORES = ['LM', 'SM', 'DP', 'CT', 'BT'];
 
 /**
  * Filtros
@@ -20,7 +22,11 @@ interface Props {
 export default function Filtros({ subcategoriaMap }: Props) {
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const ambientes = getAmbientes();
+
+    const currentStore = searchParams.get('store') ?? '';
+    const storeQuery = currentStore ? `?store=${currentStore}` : '';
 
     // Extract active ambiente from the URL path
     // e.g. /catalogo/sala or /catalogo/sala/sofas → "sala"
@@ -39,7 +45,18 @@ export default function Filtros({ subcategoriaMap }: Props) {
     // Handle select change on mobile: navigate to the selected ambiente
     function handleAmbienteSelect(e: React.ChangeEvent<HTMLSelectElement>) {
         const value = e.target.value
-        router.push(value ? `/catalogo/${value}` : '/catalogo', { scroll: false })
+        router.push(value ? `/catalogo/${value}${storeQuery}` : `/catalogo${storeQuery}`, { scroll: false })
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    // Handle store selection
+    function handleStoreSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+        const value = e.target.value
+        const params = new URLSearchParams(searchParams.toString())
+        if (value) params.set('store', value)
+        else params.delete('store')
+        
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -50,11 +67,21 @@ export default function Filtros({ subcategoriaMap }: Props) {
     return (
         <div className={styles.filtros_bar}>
 
-            {/* ─── FILA 1 DESKTOP: botones de ambiente ─── */}
+            {/* ─── FILA 1 DESKTOP: botones de ambiente y tienda ─── */}
             <div className={styles.filtros_content}>
+                {/* Selector de tienda (Desktop) */}
+                <select
+                    className={`${styles.filtro_button} ${styles.store_select_desktop} ${currentStore ? styles.active : ''}`}
+                    value={currentStore}
+                    onChange={handleStoreSelect}
+                >
+                    <option value="">Todas las tiendas</option>
+                    {STORES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
                 {ambientes.map(({ label, slug }) => {
                     const isActive = activeAmbiente === slug
-                    const href = isActive ? '/catalogo' : `/catalogo/${slug}`
+                    const href = isActive ? `/catalogo${storeQuery}` : `/catalogo/${slug}${storeQuery}`
 
                     return (
                         <Link
@@ -70,8 +97,19 @@ export default function Filtros({ subcategoriaMap }: Props) {
                 })}
             </div>
 
-            {/* ─── FILA 1 MOBILE: select desplegable de ambiente ─── */}
+            {/* ─── FILA 1 MOBILE: selects desplegables (Tienda y Ambiente) ─── */}
             <div className={styles.select_mobile_wrapper}>
+                <select
+                    className={`${styles.select_mobile} ${currentStore ? styles.select_active : ''}`}
+                    value={currentStore}
+                    onChange={handleStoreSelect}
+                >
+                    <option value="">Todas las tiendas</option>
+                    {STORES.map(s => (
+                        <option key={s} value={s}>Tienda {s}</option>
+                    ))}
+                </select>
+
                 <select
                     className={`${styles.select_mobile} ${activeAmbiente ? styles.select_active : ''}`}
                     value={activeAmbiente ?? ''}
@@ -89,7 +127,7 @@ export default function Filtros({ subcategoriaMap }: Props) {
                 <div className={styles.subcategorias_content}>
                     {subcategorias.map(({ label, slug }) => {
                         const isActive = activeSubcategoria === slug
-                        const href = `/catalogo/${activeAmbiente}/${slug}`
+                        const href = `/catalogo/${activeAmbiente}/${slug}${storeQuery}`
 
                         return (
                             <Link
