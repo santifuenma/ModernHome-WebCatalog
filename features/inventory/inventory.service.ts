@@ -169,10 +169,9 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         if (p.code) dbCodeToId.set(p.code, p.id)
     }
 
-    // Classify each Excel row
-    const toInsertProducts: any[] = []    // brand-new products (not in DB yet)
-    const toUpsertStore: { productId: string, stock: number }[] = []  // all existing products → upsert store assignment + stock
-    const toReactivate: string[] = []     // all existing product IDs → set is_active = true
+    // Classify each Excel row (deduplicating by code)
+    const newProductsMap = new Map<string, any>()
+    const existingProductsMap = new Map<string, any>()
 
     for (const row of rawRows) {
         const code = (row['Código'] || '').toString().trim()
@@ -184,7 +183,7 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         if (!dbCodeToId.has(code)) {
             // Brand-new product — create + assign store with stock
             const slug = `${slugify(name || code)}-${slugify(code)}`
-            toInsertProducts.push({ 
+            newProductsMap.set(code, { 
                 code, 
                 name: name || code, 
                 slug, 
@@ -200,10 +199,13 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
         } else {
             const productId = dbCodeToId.get(code)!
             // Existing product: upsert store assignment and reactivate
-            toUpsertStore.push({ productId, stock })
-            toReactivate.push(productId)
+            existingProductsMap.set(code, { productId, stock })
         }
     }
+
+    const toInsertProducts = Array.from(newProductsMap.values())
+    const toUpsertStore = Array.from(existingProductsMap.values())
+    const toReactivate = Array.from(new Set(toUpsertStore.map(x => x.productId)))
 
     log(`New products: ${toInsertProducts.length}`)
     log(`Existing products to upsert in store ${storeCode}: ${toUpsertStore.length}`)
