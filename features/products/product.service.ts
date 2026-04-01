@@ -202,7 +202,7 @@ export async function getProductStores(productId: string): Promise<ProductStore[
     return dbGetProductStores(productId)
 }
 
-export async function setProductStores(productId: string, stores: ProductStore[]): Promise<void> {
+export async function setProductStores(productId: string, stores: { storeCode: string, stock?: number }[]): Promise<void> {
     return dbSetProductStores(productId, stores)
 }
 
