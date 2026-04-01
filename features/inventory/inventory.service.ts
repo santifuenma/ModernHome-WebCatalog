@@ -157,15 +157,24 @@ export async function importProductsFromExcel(buffer: Buffer, storeCode: string)
 
     const supabase = await createSupabaseServerClient()
 
-    // Fetch all existing products (code → id)
+    // Fetch all existing products (code → id) bypassing the 1000-row default limit
     log('Fetching existing products from database...')
-    const { data: dbProducts, error: dbError } = await supabase
-        .from('products')
-        .select('id, code')
-    if (dbError) throw new Error(dbError.message)
+    let allDbProducts: any[] = []
+    let page = 0
+    const pageSize = 1000
+    while (true) {
+        const { data, error } = await supabase
+            .from('products')
+            .select('id, code')
+            .range(page * pageSize, (page + 1) * pageSize - 1)
+        if (error) throw new Error(error.message)
+        if (data) allDbProducts = allDbProducts.concat(data)
+        if (!data || data.length < pageSize) break
+        page++
+    }
 
     const dbCodeToId = new Map<string, string>()
-    for (const p of dbProducts || []) {
+    for (const p of allDbProducts) {
         if (p.code) dbCodeToId.set(p.code, p.id)
     }
 
