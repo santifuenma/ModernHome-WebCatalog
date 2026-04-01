@@ -27,7 +27,7 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const VALID_STORES = ['LM', 'SM', 'DP', 'CT', 'BT']
+const VALID_STORES = ['LM', 'SM', 'V', 'CT', 'BT']
 const BATCH_SIZE = 100
 
 interface ExcelRow {

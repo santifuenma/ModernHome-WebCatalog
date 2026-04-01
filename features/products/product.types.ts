@@ -3,13 +3,13 @@
 // Maps to the `store` column in the DB (LM, SM, DP, CT, BT)
 // ======================================================
 
-export type StoreCode = 'LM' | 'SM' | 'DP' | 'CT' | 'BT'
+export type StoreCode = 'LM' | 'SM' | 'V' | 'CT' | 'BT'
 
 export const STORE_LABELS: Record<StoreCode, string> = {
     LM: 'Las Mercedes',
-    SM: 'Santa Monica',
-    DP: 'Depósito',
-    CT: 'Castellana',
+    SM: 'Santa Mónica',
+    V: 'Valencia',
+    CT: 'La Castellana',
     BT: 'Barquisimeto',
 }
 

@@ -2,9 +2,8 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback, useState } from 'react'
+import { STORE_LABELS } from '@/features/products/product.types'
 import styles from './ProductFiltersBar.module.css'
-
-const STORES = ['LM', 'SM', 'DP', 'CT', 'BT']
 
 interface AmbienteData {
     label: string
@@ -119,7 +118,7 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
                     <span className={styles.label}>Tienda</span>
                     <select className={styles.select} value={current.store} onChange={e => update('store', e.target.value)}>
                         <option value="">Todas</option>
-                        {STORES.map(s => <option key={s} value={s}>{s}</option>)}
+                        {Object.entries(STORE_LABELS).map(([code, name]) => <option key={code} value={code}>{name}</option>)}
                     </select>
                 </div>
 

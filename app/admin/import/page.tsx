@@ -3,15 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { importProductsAction } from '@/app/admin/actions'
+import { STORE_LABELS } from '@/features/products/product.types'
 import styles from '../operations.module.css'
 
-const STORES = [
-    { code: 'LM', label: 'Las Mercedes' },
-    { code: 'SM', label: 'Santa Mónica' },
-    { code: 'DP', label: 'Depósito' },
-    { code: 'CT', label: 'Castellana' },
-    { code: 'BT', label: 'Barquisimeto' },
-]
+const STORES = Object.entries(STORE_LABELS).map(([code, label]) => ({ code, label }))
 
 export default function ImportProductsPage() {
     const [loading, setLoading] = useState(false)
