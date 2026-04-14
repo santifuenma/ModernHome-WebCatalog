@@ -60,7 +60,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
 
             <div className={styles.headerRow}>
                 <div className={styles.titleWrapper}>
-                    <h1 className={styles.title}>Products Manager</h1>
+                    <h1 className={styles.title}>Gestión de Productos</h1>
                     <p className={styles.subtitle}>
                         {data.totalItems} producto{data.totalItems !== 1 ? 's' : ''} encontrado{data.totalItems !== 1 ? 's' : ''}
                     </p>

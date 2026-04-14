@@ -1,0 +1,533 @@
+/* ================================================================
+   Shared button utilities — used by ImageUploader, SwatchesManager,
+   DownloadsManager and any other admin sub-component
+   ================================================================ */
+
+/* Neutral outline → turns red on hover (same as editButton in ProductTable) */
+.btnOutline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    background: transparent;
+    border: 1.8px solid #b1b1b1;
+    border-radius: 8px;
+    color: #555;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btnOutline:hover:not(:disabled) {
+    border-color: #A90404;
+    color: #A90404;
+    background-color: #fdf2f2;
+}
+
+.btnOutline:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Danger — eliminar, quitar (borde rojo desde el principio) */
+.btnDanger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    background: transparent;
+    border: 1.8px solid #f5c6c6;
+    border-radius: 8px;
+    color: #A90404;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+}
+
+.btnDanger:hover:not(:disabled) {
+    background-color: #fdf2f2;
+    border-color: #A90404;
+}
+
+.btnDanger:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Solid red — for × overlay buttons on top of images */
+.btnDangerSolid {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #A90404;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.15s;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+
+.btnDangerSolid:hover:not(:disabled) {
+    background: #8A0303;
+    transform: scale(1.1);
+}
+
+.btnDangerSolid:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ================================================================
+   ProductForm.module.css
+   Diseño coherente con el sistema admin: tokens, bordes, tipografía
+   ================================================================ */
+
+/* ── Wrapper de página ─────────────────────────────────────────── */
+
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+}
+
+/* ── Header de la página ───────────────────────────────────────── */
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-bottom: 1.75rem;
+}
+
+.backLink:hover {
+    color: #555;
+}
+
+.pageHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.pageTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.deleteButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    background: transparent;
+    border: 1.8px solid #e8e6e1;
+    color: #888;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.deleteButton:hover {
+    border-color: #A90404;
+    color: #A90404;
+    background: #fdf2f2;
+}
+
+/* ── Layout principal (2 columnas en desktop) ──────────────────── */
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.75rem;
+    align-items: start;
+}
+
+.mainCol {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.sideCol {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    position: sticky;
+    top: 80px; /* Altura del topBar del admin */
+}
+
+/* ── Card genérica (contenedor de sección) ─────────────────────── */
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.sectionTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 0 0 1.25rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e8e6e1;
+}
+
+/* ── Formulario ────────────────────────────────────────────────── */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.input,
+.select,
+.textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    background: #ffffff;
+    border: 1.8px solid #b1b1b1;
+    border-radius: 8px;
+    color: #333;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+    border-color: #A90404;
+    box-shadow: 0 0 0 1px #A90404;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+    color: #ccc;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+/* Native select styling */
+select.select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+/* ── Botón guardar ─────────────────────────────────────────────── */
+
+.submitButton {
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background-color: #A90404;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(169, 4, 4, 0.2);
+    margin-top: 0.5rem;
+}
+
+.submitButton:hover:not(:disabled) {
+    background-color: #8A0303;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(169, 4, 4, 0.3);
+}
+
+.submitButton:disabled {
+    background-color: #e5e5e5;
+    color: #a3a3a3;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ── Selector de tiendas (chips) ───────────────────────────────── */
+
+.storeGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.storeChip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    border: 1.8px solid #e8e6e1;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 400;
+    transition: all 0.15s ease;
+    user-select: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: #555;
+    text-align: left;
+    width: 100%;
+}
+
+.storeChip:hover {
+    border-color: #b1b1b1;
+    background: #fafaf9;
+}
+
+.storeChipActive {
+    border-color: #0070f3;
+    background: #e8f0fe;
+    color: #0052cc;
+    font-weight: 600;
+}
+
+.storeDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d1d1;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.storeDotActive {
+    background: #0070f3;
+}
+
+.storeCode {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.storeName {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: 400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.storeChipActive .storeName {
+    color: #3b82f6;
+}
+
+.noStoreHint {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: #aaa;
+    font-style: italic;
+}
+
+/* ── Panel de stock ────────────────────────────────────────────── */
+
+.stockPanel {
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    background: #f8f9ff;
+    border: 1px solid #dde3f8;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.stockPanelTitle {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #6a7abf;
+    margin: 0 0 0.1rem 0;
+}
+
+.stockRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.stockLabel {
+    flex: 1;
+    min-width: 0;
+}
+
+.stockCode {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: 0.02em;
+}
+
+.stockStoreName {
+    font-size: 0.72rem;
+    color: #888;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stockControl {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.8px solid #b1b1b1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.stockBtn {
+    width: 30px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.stockBtn:hover {
+    background: #f3f4f6;
+    color: #A90404;
+}
+
+.stockInput {
+    width: 52px;
+    height: 32px;
+    border: none;
+    border-left: 1.5px solid #e8e6e1;
+    border-right: 1.5px solid #e8e6e1;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    background: transparent;
+    outline: none;
+    font-family: inherit;
+    /* Hide native spinners */
+    -moz-appearance: textfield;
+}
+
+.stockInput::-webkit-outer-spin-button,
+.stockInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stockUnits {
+    font-size: 0.75rem;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+/* ── Secciones de media (imágenes, swatches, descargables) ─────── */
+
+.mediaSections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sideCol {
+        position: static;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+    }
+
+    .page {
+        padding: 1.5rem 1rem;
+    }
+}

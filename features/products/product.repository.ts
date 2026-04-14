@@ -210,7 +210,7 @@ const PRODUCT_FULL_SELECT = `
     product_images ( id, cloudinary_public_id, alt, is_main, position ),
     product_material_swatches ( id, name, cloudinary_public_id ),
     product_downloads ( id, name, url ),
-    product_stores ( store_code )
+    product_stores ( store_code, stock )
 `
 
 // ─── Repository functions ─────────────────────────────────────────────────────

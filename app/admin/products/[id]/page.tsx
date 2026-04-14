@@ -1,13 +1,11 @@
 import { getProductById, getAllUniqueSwatches } from '@/features/products/product.service'
 import { getAmbientes } from '@/features/ambientes/ambiente.service'
 import { getAllActiveSubcategorias } from '@/features/subcategorias/subcategoria.service'
-import { ProductForm } from '@/components/admin/ProductForm'
-import { ImageUploader } from '@/components/admin/ImageUploader'
-import { SwatchesManager } from '@/components/admin/SwatchesManager'
-import { DownloadsManager } from '@/components/admin/DownloadsManager'
 import { removeProduct } from '@/app/admin/actions'
+import { ProductEditShell } from '@/components/admin/ProductEditShell'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import styles from '@/components/admin/ProductForm.module.css'
 
 interface EditProductPageProps {
     params: Promise<{ id: string }>
@@ -27,47 +25,41 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     }
 
     return (
-        <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
-            <Link href="/admin/products" style={{ color: '#0070f3', textDecoration: 'none' }}>
-                &larr; Back to Products
+        <div className={styles.page}>
+            {/* Back link */}
+            <Link href="/admin/products" className={styles.backLink}>
+                ← Volver a productos
             </Link>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-                <h1>Edit Product: {product.code}</h1>
-                
+
+            {/* Page header */}
+            <div className={styles.pageHeader}>
+                <h1 className={styles.pageTitle}>
+                    {product.code ?? 'Producto sin código'}
+                </h1>
+
                 <form action={async () => {
                     'use server'
                     await removeProduct(product.id)
                 }}>
-                    <button 
-                        type="submit" 
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#e00',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Delete Product
+                    <button type="submit" className={styles.deleteButton}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                        </svg>
+                        Eliminar producto
                     </button>
                 </form>
             </div>
 
-            <ProductForm initialData={product} ambientes={ambientes} subcategoriaMap={subcategoriaMap} />
-
-            <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #eaeaea' }} />
-
-            <ImageUploader productId={product.id} images={product.images} />
-
-            <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #eaeaea' }} />
-
-            <SwatchesManager productId={product.id} swatches={product.materialSwatches || []} availableSwatches={availableSwatches} />
-
-            <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #eaeaea' }} />
-
-            <DownloadsManager productId={product.id} download={product.download} />
+            {/* Main layout — 2 columns */}
+            <ProductEditShell
+                product={product}
+                ambientes={ambientes}
+                subcategoriaMap={subcategoriaMap}
+                availableSwatches={availableSwatches}
+            />
         </div>
     )
 }

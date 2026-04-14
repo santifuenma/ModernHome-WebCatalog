@@ -31,8 +31,11 @@ export async function saveProduct(formData: FormData) {
 
     // Leer las tiendas seleccionadas (múltiples valores del mismo campo 'stores')
     const selectedStoreCodes = formData.getAll('stores') as string[]
-    // Convertir al formato {storeCode, stock?} — stock se preserva del valor existente en DB
-    const selectedStores = selectedStoreCodes.map(code => ({ storeCode: code }))
+    // Leer el stock por tienda desde los campos stock_<CODIGO> del formulario
+    const selectedStores = selectedStoreCodes.map(code => ({
+        storeCode: code,
+        stock: Number(formData.get(`stock_${code}`) ?? 0),
+    }))
 
     const payload = {
         code: formData.get('code') as string,
