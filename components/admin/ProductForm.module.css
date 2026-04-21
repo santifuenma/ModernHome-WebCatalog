@@ -165,6 +165,51 @@
     background: #fdf2f2;
 }
 
+/* Botón ocultar/publicar — gris neutro cuando activo (ocultar), verde cuando oculto (publicar) */
+.toggleButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    background: transparent;
+    border: 1.8px solid #e8e6e1;
+    color: #888;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.toggleButton:hover {
+    border-color: #b1b1b1;
+    color: #555;
+    background: #f8f8f8;
+}
+
+/* Variante verde — cuando el producto está oculto y el botón es "Publicar" */
+.toggleButtonPublish {
+    border-color: #c6e8c8;
+    color: #1a7f29;
+}
+
+.toggleButtonPublish:hover {
+    border-color: #1a7f29;
+    background: #f0faf0;
+    color: #1a7f29;
+}
+
+/* Grupo de acciones del header */
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
 /* ── Layout principal (2 columnas en desktop) ──────────────────── */
 
 .layout {

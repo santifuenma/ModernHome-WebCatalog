@@ -73,6 +73,14 @@ export async function removeProduct(id: string) {
     redirect('/admin/products')
 }
 
+export async function toggleProductVisibility(id: string, currentIsActive: boolean) {
+    await requireAuth()
+    await updateProduct(id, { is_active: !currentIsActive })
+    revalidatePath(`/admin/products/${id}`)
+    revalidatePath('/admin/products')
+    revalidatePath('/catalogo')
+}
+
 export async function attachImage(productId: string, cloudinaryPublicId: string) {
     await requireAuth()
     await addProductImage(productId, cloudinaryPublicId, false) // Defaulting to not main for simplicity, or handle it via UI setup

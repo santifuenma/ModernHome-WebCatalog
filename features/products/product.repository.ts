@@ -237,8 +237,8 @@ export async function dbGetAllProducts(page: number, pageSize: number, store?: s
     let countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true }).eq('is_active', true)
 
     if (store) {
-        dataQuery = dataQuery.eq('product_stores.store_code', store)
-        countQuery = countQuery.eq('product_stores.store_code', store)
+        dataQuery = dataQuery.eq('product_stores.store_code', store).gt('product_stores.stock', 0)
+        countQuery = countQuery.eq('product_stores.store_code', store).gt('product_stores.stock', 0)
     }
 
     const [dataResult, countResult] = await Promise.all([
@@ -279,8 +279,8 @@ export async function dbGetProductsByAmbiente(
     let countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true }).eq('ambiente', ambiente).eq('is_active', true)
 
     if (store) {
-        dataQuery = dataQuery.eq('product_stores.store_code', store)
-        countQuery = countQuery.eq('product_stores.store_code', store)
+        dataQuery = dataQuery.eq('product_stores.store_code', store).gt('product_stores.stock', 0)
+        countQuery = countQuery.eq('product_stores.store_code', store).gt('product_stores.stock', 0)
     }
 
     const [dataResult, countResult] = await Promise.all([
@@ -322,8 +322,8 @@ export async function dbGetProductsBySubcategoria(
     let countQuery = supabase.from('products').select(countSelect, { count: 'exact', head: true }).eq('ambiente', ambiente).eq('subcategoria', subcategoria).eq('is_active', true)
 
     if (store) {
-        dataQuery = dataQuery.eq('product_stores.store_code', store)
-        countQuery = countQuery.eq('product_stores.store_code', store)
+        dataQuery = dataQuery.eq('product_stores.store_code', store).gt('product_stores.stock', 0)
+        countQuery = countQuery.eq('product_stores.store_code', store).gt('product_stores.stock', 0)
     }
 
     const [dataResult, countResult] = await Promise.all([
