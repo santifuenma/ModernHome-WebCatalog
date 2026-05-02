@@ -40,6 +40,7 @@ MODERN HOME CATALOG/
 │   │   └── FiltrosWrapper.tsx      # Oculta los filtros en páginas de detalle
 │   └── layout/                     # Componentes estructurales de la web
 │       ├── Filtros.tsx             # Barra de filtros por ambiente/subcategoría
+│       │                           # (selector de tienda desactivado temporalmente)
 │       ├── Navbar.tsx              # Barra de navegación principal con selector de tienda
 │       └── ProductGrid.tsx         # Cuadrícula de productos del catálogo
 ├── features/                       # 💡 Lógica de negocio por funcionalidad

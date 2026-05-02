@@ -1,0 +1,72 @@
+[
+  {
+    "code": "7007-MTV",
+    "dimensions": "Largo: 200 cm\nAncho: 40 cm\nAlto: 45 cm",
+    "materials": "Tapa en cerámica\nDetalles en vidrio ámbar\nEstructura de acero inoxidable"
+  },
+  {
+    "code": "756-MC",
+    "dimensions": "Largo: 200 cm\nAncho: 40 cm\nAlto: 49 cm",
+    "materials": "Tapa en cerámica\nDetalles en vidrio ámbar\nEstructura de acero inoxidable"
+  },
+  {
+    "code": "777-MC",
+    "dimensions": "Largo: 180 cm\nAncho: 34 cm",
+    "materials": "Detalles en polipiel\nTapa en cerámica\nDetalles en vidrio ámbar\nEstructura de acero inoxidable"
+  },
+  {
+    "code": "9235-GREY",
+    "dimensions": "Alto: 79 cm\nAncho: 48 cm\nProfundidad: 49 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "9255-GREY",
+    "dimensions": "Alto: 92 cm\nAncho: 46 cm\nProfundidad: 45 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "961-WHITE",
+    "dimensions": "Alto: 76 cm\nAncho: 46 cm\nProfundidad: 40 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "981-WHITE",
+    "dimensions": "Alto: 85 cm\nAncho: 46 cm\nProfundidad: 47 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "MN-625",
+    "dimensions": "Ancho: 60 cm\nProfundidad: 53.3 cm\nAlto: 74.6 cm",
+    "materials": "Cuerpo de MDF"
+  },
+  {
+    "code": "T-11",
+    "dimensions": "Largo: 220 cm\nAncho: 110 cm\nAlto: 75 cm",
+    "materials": "Estructura de madera de fresno\nPatas de acero inoxidable"
+  },
+  {
+    "code": "433T-G-JG19",
+    "dimensions": "Diámetro: 150 cm\nAlto: 76 cm",
+    "materials": "Tapa en vidrio beige (JG19)\nBase inferior en panel de madera\nPatas con acabado nogal"
+  },
+  {
+    "code": "488D-M21",
+    "dimensions": "Largo: 122 cm\nAncho: 85 cm\nAlto: 42 cm",
+    "materials": "Tapa giratoria en cerámica blanca Jazz\nVidrio templado transparente\nEstructura en metal oscuro"
+  },
+  {
+    "code": "HN75-PU1001",
+    "dimensions": "Ancho: 55.5 cm\nProfundidad: 46.5 cm\nAlto: 81.5 cm",
+    "materials": "Asiento tapizado en polipiel color crema\nPatas en metal negro"
+  },
+  {
+    "code": "HN81-EDITH90",
+    "dimensions": "Ancho: 56 cm\nProfundidad: 53 cm\nAlto: 83 cm",
+    "materials": "Asiento tapizado en tela EDITH 90\nPatas en madera maciza con acabado nogal"
+  },
+  {
+    "code": "N468T-G",
+    "dimensions": "Largo: 200 cm\nAncho: 95 cm\nAlto: 76 cm",
+    "materials": "Tapa en vidrio beige\nBase en pintura mate beige\nBorde de base en pintura gris espacial"
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "code": "6343",
+    "dimensions": "Largo: 200 cm\nAncho: 100 cm\nAlto: 75 cm",
+    "materials": "Base de metal\nTapa en cerámica brillante"
+  },
+  {
+    "code": "7023-MC",
+    "dimensions": "Largo: 104 cm\nAncho: 104 cm\nAlto: 38 cm",
+    "materials": "Cuerpo en chapa de madera\nTapa en mármol"
+  },
+  {
+    "code": "9137-COFFEE",
+    "dimensions": "Alto: 79 cm\nAncho: 47.5 cm\nProfundidad: 44.5 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en tela Teddy"
+  },
+  {
+    "code": "9196-BEIGE",
+    "dimensions": "Alto: 83 cm\nAncho: 42 cm\nProfundidad: 47 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "9235-BLACK",
+    "dimensions": "Alto: 79 cm\nAncho: 48 cm\nProfundidad: 49 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "9235-GREY-PG",
+    "dimensions": "Alto: 79 cm\nAncho: 48 cm\nProfundidad: 49 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "9255-GREY",
+    "dimensions": "Alto: 92 cm\nAncho: 46 cm\nProfundidad: 45 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  },
+  {
+    "code": "945-BLACK",
+    "dimensions": "Alto: 84 cm\nAncho: 43.5 cm\nProfundidad: 43 cm",
+    "materials": "Estructura de metal\nAsiento y respaldo tapizado en polipiel"
+  }
+]

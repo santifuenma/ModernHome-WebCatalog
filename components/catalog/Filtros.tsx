@@ -67,21 +67,20 @@ export default function Filtros({ subcategoriaMap, activeStores }: Props) {
     return (
         <div className={styles.filtros_bar}>
 
-            {/* ─── FILA 1 DESKTOP: botones de ambiente y tienda ─── */}
+            {/* ─── FILA 1 DESKTOP: botones de ambiente ─── */}
             <div className={styles.filtros_content}>
-                {/* Selector de tienda (Desktop) */}
-                <select
+                {/* Selector de tienda (Desktop) — desactivado temporalmente */}
+                {/* <select
                     className={`${styles.filtro_button} ${styles.store_select_desktop} ${currentStore ? styles.active : ''}`}
                     value={currentStore}
                     onChange={handleStoreSelect}
                 >
-
                     {Object.entries(STORE_LABELS)
                         .filter(([code]) => activeStores.includes(code as StoreCode))
                         .map(([code, name]) => (
                         <option key={code} value={code}>{name}</option>
                     ))}
-                </select>
+                </select> */}
 
                 {ambientes.map(({ label, slug }) => {
                     const isActive = activeAmbiente === slug
@@ -101,9 +100,10 @@ export default function Filtros({ subcategoriaMap, activeStores }: Props) {
                 })}
             </div>
 
-            {/* ─── FILA 1 MOBILE: selects desplegables (Tienda y Ambiente) ─── */}
+            {/* ─── FILA 1 MOBILE: selects desplegables (Ambiente) ─── */}
             <div className={styles.select_mobile_wrapper}>
-                <select
+                {/* Selector de tienda (Mobile) — desactivado temporalmente */}
+                {/* <select
                     className={`${styles.select_mobile} ${currentStore ? styles.select_active : ''}`}
                     value={currentStore}
                     onChange={handleStoreSelect}
@@ -113,7 +113,7 @@ export default function Filtros({ subcategoriaMap, activeStores }: Props) {
                         .map(([code, name]) => (
                         <option key={code} value={code}>{name}</option>
                     ))}
-                </select>
+                </select> */}
 
                 <select
                     className={`${styles.select_mobile} ${activeAmbiente ? styles.select_active : ''}`}
