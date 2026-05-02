@@ -25,7 +25,7 @@ export default function Filtros({ subcategoriaMap, activeStores }: Props) {
     const searchParams = useSearchParams();
     const ambientes = getAmbientes();
 
-    const currentStore = searchParams.get('store') ?? 'LM';
+    const currentStore = searchParams.get('store');
     const storeQuery = currentStore ? `?store=${currentStore}` : '';
 
     // Extract active ambiente from the URL path
