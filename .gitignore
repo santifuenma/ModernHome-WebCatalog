@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# data files — inventario Excel y JSONs de batch (datos temporales, no van al repo)
+/data/
+scripts/*.json
