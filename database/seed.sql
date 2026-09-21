@@ -20,8 +20,8 @@ INSERT INTO products (
     slug,
     brand,
     designer,
-    store,
-    stock,
+    store,                              -- Columna heredada (modelo de una sola tienda): la tabla aún la exige
+    stock,                              -- Columna heredada: el stock real por tienda está en product_stores (paso 1b)
     ambiente,
     subcategoria,
     dimensions,
@@ -50,6 +50,17 @@ INSERT INTO products (
         'Patas metálicas'
     ],
     TRUE
+);
+
+
+-- 1b. Asignar el producto a su tienda con su stock
+-- Códigos de tienda: LM | SM | V | CT | BT
+
+INSERT INTO product_stores (product_id, store_code, stock)
+VALUES (
+    (SELECT id FROM products WHERE slug = 'dorian'),
+    'LM',                               -- Las Mercedes
+    1
 );
 
 
@@ -115,10 +126,12 @@ VALUES
 -- Ejecuta esto para confirmar que los datos se insertaron correctamente:
 -- =============================================================================
 -- SELECT p.name, p.slug, p.ambiente, p.subcategoria,
+--        COUNT(DISTINCT pst.id) AS stores,
 --        COUNT(DISTINCT pi.id) AS images,
 --        COUNT(DISTINCT ps.id) AS swatches,
 --        COUNT(DISTINCT pd.id) AS downloads
 -- FROM products p
+-- LEFT JOIN product_stores pst ON pst.product_id = p.id
 -- LEFT JOIN product_images pi ON pi.product_id = p.id
 -- LEFT JOIN product_material_swatches ps ON ps.product_id = p.id
 -- LEFT JOIN product_downloads pd ON pd.product_id = p.id
