@@ -1,77 +1,115 @@
 -- =============================================================================
--- MODERN HOME CATALOG — Database Schema
--- Compatible with Supabase (PostgreSQL)
+-- MODERN HOME CATALOG — Database schema (reference)
+-- PostgreSQL / Supabase
 --
--- Aligned with the Product model defined in:
---   features/products/product.types.ts
+-- Reconstructed from the live Supabase project (column names and value types)
+-- and from how the application code reads and writes each table. It is not a
+-- pg_dump: items marked "(assumed)" could not be read from the API.
 --
--- Images are stored in Cloudinary. Only the cloudinary_public_id is stored.
--- Store codes: LM | SM | DP | CT | BT
+-- Safe to run on an existing database: every statement uses IF NOT EXISTS, so
+-- tables and indexes that already exist are left untouched.
+--
+-- Tables
+--   products                   one row per product (catalog data)
+--   product_stores             stores that carry a product, with stock per store
+--   product_images             gallery (Cloudinary public ids; the UI allows 4)
+--   product_material_swatches  small previews of materials or finishes
+--   product_downloads          downloadable file (e.g. technical sheet, 3D model)
+--
+-- Store codes (product_stores.store_code):
+--   LM Las Mercedes | SM Santa Mónica | V Valencia | CT La Castellana | BT Barquisimeto
+--   Source of truth: STORE_LABELS in features/products/product.types.ts
+--
+-- Notes
+--   - Ambientes and subcategorías have no table: they are the distinct values
+--     of products.ambiente / products.subcategoria among published products.
+--   - Images live in Cloudinary; only cloudinary_public_id is stored here.
 -- =============================================================================
 
 
 -- =============================================================================
 -- TABLE: products
--- Main product record. Maps to the Product interface.
+-- Maps to the Product model in features/products/product.types.ts.
 -- =============================================================================
 
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
 
-    id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Identification
-    code                TEXT        UNIQUE NOT NULL,       -- Internal furniture code (e.g. "MH-001")
-    name                TEXT        NOT NULL,
-    slug                TEXT        UNIQUE NOT NULL,       -- URL segment used in routing (e.g. "dorian")
+    code          text        NOT NULL UNIQUE,   -- internal code (e.g. "MH-001"); key used by the Excel import (unique: assumed)
+    name          text        NOT NULL,
+    slug          text        NOT NULL UNIQUE,   -- URL segment (e.g. "dorian") (unique: assumed)
 
     -- Info
-    brand               TEXT        NOT NULL,
-    designer            TEXT,                              -- Optional (maps to Product.designer?)
+    brand         text        NOT NULL,
+    designer      text,                          -- optional
 
-    -- Store
-    -- Valid codes: LM (Las Mercedes), SM (Santa Monica), DP (Depósito), CT (Castellana), BT (Barquisimeto)
-    store               TEXT        NOT NULL,
+    -- LEGACY single-store columns. Stores and stock now live in product_stores.
+    -- The table still has them and the Excel importer keeps filling them with
+    -- placeholder values, so new rows must provide them (NOT NULL: assumed).
+    store         text        NOT NULL,
+    stock         integer     DEFAULT 0,
 
-    -- Stock
-    stock               INTEGER     DEFAULT 0,
+    -- Catalog organisation.
+    -- ambiente = 'general' means "not classified yet": the public catalog
+    -- hides those products until an admin assigns a real ambiente.
+    ambiente      text        NOT NULL,          -- e.g. sala, comedor, dormitorio, exterior, complementos
+    subcategoria  text        NOT NULL,          -- e.g. camas, sofas, mesas
 
-    -- Catalog organization (maps to Product.ambiente / Product.subcategoria)
-    ambiente            TEXT        NOT NULL,              -- e.g. dormitorio, sala, comedor
-    subcategoria        TEXT        NOT NULL,              -- e.g. camas, sofas, mesas
+    -- External link to the product
+    url           text,
 
-    -- External link
-    url                 TEXT,                              -- URL del producto (externo)
+    -- Characteristics (lists of free text; one entry per line in the admin form)
+    dimensions    text[],
+    materials     text[],
 
-    -- Characteristics (stored as arrays — maps to Product.dimensions[] and Product.materials[])
-    dimensions          TEXT[],                            -- e.g. ARRAY['200x160x90cm', 'King: 200x200cm']
-    materials           TEXT[],                            -- e.g. ARRAY['Madera de roble', 'Tela lino']
+    -- Publication status. false = hidden from the public catalog.
+    is_active     boolean     DEFAULT true,
+    created_at    timestamp   DEFAULT now()
 
-    -- Status
-    is_active           BOOLEAN     DEFAULT TRUE,
-    created_at          TIMESTAMP   DEFAULT NOW()
+);
+
+
+-- =============================================================================
+-- TABLE: product_stores
+-- Many-to-many between products and stores, with independent stock per store.
+-- Written by the admin form and by the Excel importer / remover.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS product_stores (
+
+    id          uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    product_id  uuid         NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+
+    -- One of: LM | SM | V | CT | BT  (no CHECK constraint is assumed)
+    store_code  text         NOT NULL,
+
+    stock       integer      NOT NULL DEFAULT 0,
+    created_at  timestamptz  DEFAULT now(),
+
+    -- Required by the upserts in the code: onConflict: 'product_id,store_code'
+    UNIQUE (product_id, store_code)
 
 );
 
 
 -- =============================================================================
 -- TABLE: product_images
--- One-to-many: each product can have multiple images (max 4 in the UI).
--- Maps to ProductImage { url, alt, isMain }.
--- Only stores cloudinary_public_id, NOT binary data.
+-- One-to-many: the gallery of a product. Only the Cloudinary reference is stored.
 -- =============================================================================
 
-CREATE TABLE product_images (
+CREATE TABLE IF NOT EXISTS product_images (
 
-    id                      UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                    uuid     PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    product_id              UUID    REFERENCES products(id) ON DELETE CASCADE,
+    product_id            uuid     NOT NULL REFERENCES products(id) ON DELETE CASCADE,
 
-    -- Cloudinary reference only (e.g. "catalogo/dorian/main")
-    cloudinary_public_id    TEXT    NOT NULL,
-
-    alt                     TEXT,                   -- Maps to ProductImage.alt
-    is_main                 BOOLEAN DEFAULT FALSE,  -- Maps to ProductImage.isMain
-    position                INTEGER                 -- Display order (0 = first)
+    cloudinary_public_id  text     NOT NULL,     -- e.g. "catalogo/dorian/main"
+    alt                   text,
+    is_main               boolean  DEFAULT false,
+    position              integer                -- display order (0 = first)
 
 );
 
@@ -79,79 +117,67 @@ CREATE TABLE product_images (
 -- =============================================================================
 -- TABLE: product_material_swatches
 -- Small preview images of available materials or finishes.
--- Maps to MaterialSwatch { name, image }.
 -- =============================================================================
 
-CREATE TABLE product_material_swatches (
+CREATE TABLE IF NOT EXISTS product_material_swatches (
 
-    id                      UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                    uuid  PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    product_id              UUID    REFERENCES products(id) ON DELETE CASCADE,
+    product_id            uuid  NOT NULL REFERENCES products(id) ON DELETE CASCADE,
 
-    name                    TEXT,                   -- Maps to MaterialSwatch.name (e.g. "Lino beige")
-
-    -- Cloudinary reference (maps to MaterialSwatch.image)
-    cloudinary_public_id    TEXT    NOT NULL
+    name                  text,                  -- e.g. "Lino beige"
+    cloudinary_public_id  text  NOT NULL
 
 );
 
 
 -- =============================================================================
 -- TABLE: product_downloads
--- Downloadable files such as 3D models.
--- Maps to ProductDownload { name, url }.
+-- Downloadable file of a product (the admin UI manages one per product).
 -- =============================================================================
 
-CREATE TABLE product_downloads (
+CREATE TABLE IF NOT EXISTS product_downloads (
 
-    id          UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          uuid  PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    product_id  UUID    REFERENCES products(id) ON DELETE CASCADE,
+    product_id  uuid  NOT NULL REFERENCES products(id) ON DELETE CASCADE,
 
-    name        TEXT    NOT NULL,   -- Maps to ProductDownload.name (e.g. "Descargar modelo 3D")
-    url         TEXT    NOT NULL    -- Maps to ProductDownload.url
+    name        text  NOT NULL,                  -- e.g. "Descargar modelo 3D"
+    url         text  NOT NULL
 
 );
 
 
 -- =============================================================================
 -- INDEXES
--- Optimized for catalog filtering patterns used in the service layer:
---   getProductsByAmbiente(ambiente)
---   getProductsBySubcategoria(subcategoria)
+-- Tuned for the query patterns in features/products/product.repository.ts.
+-- The public catalog always filters by is_active = true and then by ambiente or
+-- subcategoria, and orders by created_at DESC.
 -- =============================================================================
 
-CREATE INDEX idx_products_slug          ON products(slug);
-CREATE INDEX idx_products_ambiente      ON products(ambiente);
-CREATE INDEX idx_products_subcategoria  ON products(subcategoria);
-CREATE INDEX idx_products_store         ON products(store);
-CREATE INDEX idx_products_is_active     ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_ambiente      ON products(ambiente);
+CREATE INDEX IF NOT EXISTS idx_products_subcategoria  ON products(subcategoria);
+CREATE INDEX IF NOT EXISTS idx_products_is_active     ON products(is_active);
 
--- Speed up joins from sub-tables back to products
-CREATE INDEX idx_product_images_product_id      ON product_images(product_id);
-CREATE INDEX idx_product_swatches_product_id    ON product_material_swatches(product_id);
-CREATE INDEX idx_product_downloads_product_id   ON product_downloads(product_id);
-
--- =============================================================================
--- COMPOSITE & PARTIAL INDEXES (optimized for 4000+ products)
--- The catalog always filters with is_active = true AND (ambiente OR subcategoria).
--- Composite indexes are faster than two separate indexes for these patterns.
--- =============================================================================
-
--- Used by: getProductsByAmbiente → WHERE is_active = true AND ambiente = X
-CREATE INDEX idx_products_active_ambiente
+-- getProductsByAmbiente     -> WHERE is_active = true AND ambiente = X
+CREATE INDEX IF NOT EXISTS idx_products_active_ambiente
     ON products(is_active, ambiente);
 
--- Used by: getProductsBySubcategoria → WHERE is_active = true AND subcategoria = X
-CREATE INDEX idx_products_active_subcategoria
+-- getProductsBySubcategoria -> WHERE is_active = true AND subcategoria = X
+CREATE INDEX IF NOT EXISTS idx_products_active_subcategoria
     ON products(is_active, subcategoria);
 
--- Used by: getProductsByStore → WHERE is_active = true AND store = X
-CREATE INDEX idx_products_active_store
-    ON products(is_active, store);
-
--- Partial index: only indexes active products (smaller index, faster scans).
--- Used by: getProductCards → WHERE is_active = true ORDER BY created_at DESC
-CREATE INDEX idx_products_active_created_at
+-- getProductCards -> WHERE is_active = true ORDER BY created_at DESC
+-- Partial index: only published products (smaller and faster to scan).
+CREATE INDEX IF NOT EXISTS idx_products_active_created_at
     ON products(created_at DESC)
     WHERE is_active = true;
+
+-- Filtering by store goes through product_stores
+-- (the (product_id, store_code) UNIQUE constraint already covers lookups by product).
+CREATE INDEX IF NOT EXISTS idx_product_stores_store_code ON product_stores(store_code);
+
+-- Speed up joins from the sub-tables back to products
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id    ON product_images(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_swatches_product_id  ON product_material_swatches(product_id);
+CREATE INDEX IF NOT EXISTS idx_product_downloads_product_id ON product_downloads(product_id);
