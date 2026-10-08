@@ -56,7 +56,8 @@ export function ProductFiltersBar({ ambienteMap }: ProductFiltersBarProps) {
         update('q', inputValue.trim())
     }
 
-    const hasFilters = Object.values(current).some(v => v !== '') || inputValue !== current.q
+    // Cualquier parámetro salvo la página cuenta (incluidos los que pone la búsqueda con IA: mat, minw...)
+    const hasFilters = Array.from(searchParams.keys()).some(k => k !== 'page') || inputValue !== current.q
 
     const currentAmbienteSlug = current.ambiente
     const subcategoriasForAmbiente = ambienteMap[currentAmbienteSlug] ?? []

@@ -69,6 +69,7 @@ Un mismo producto puede estar disponible en varias tiendas, cada una con su prop
 
 - **Acceso con correo y contraseña** (Supabase Auth).
 - **Gestión de productos:** listado paginado con búsqueda y filtros por estado (activos, ocultos), imágenes (con o sin), tienda, ambiente, subcategoría y stock (con o sin).
+- **Búsqueda con IA:** un campo en lenguaje natural sobre el listado (*"mesas de comedor de madera de más de 2 m"*, *"sofás en Valencia con stock"*). Claude (API de Anthropic, Haiku 4.5 por defecto) la traduce a filtros (ambiente, subcategoría, tienda, stock, estado, imágenes, materiales y medidas en cm), que se aplican en la URL como cualquier otro filtro. Los filtros entendidos se muestran como etiquetas que se pueden quitar una a una. Solo funciona con sesión de admin, está limitada a 10 búsquedas por minuto y usuario, y cuesta unos 0,003 USD por búsqueda.
 - **Edición de producto:** código, nombre, marca, diseñador, ambiente, subcategoría, dimensiones y materiales (uno por línea), tiendas con su stock, imágenes, muestras de material y archivo descargable. El *slug* se genera solo si se deja vacío.
 - **Publicar u ocultar** un producto sin borrarlo, o eliminarlo.
 - **Importador de inventario:** sube el Excel de una tienda y crea los productos nuevos, los asigna a la tienda y actualiza su stock.
@@ -264,7 +265,7 @@ app/
   admin/                Panel: login, gestión de productos, importador, comparador y baja por tienda
     actions.ts          Server Actions: productos, imágenes, muestras, descargables e inventario
 components/
-  admin/                Tabla, filtros, formulario y gestores de imágenes, muestras y descargas
+  admin/                Tabla, filtros, búsqueda con IA, formulario y gestores de imágenes, muestras y descargas
   catalog/              Cuadrícula, ficha de producto y barra de filtros
   layout/               Navbar
   ui/                   Paginación y wrapper de imágenes de Cloudinary
@@ -273,13 +274,13 @@ features/
   ambientes/            Ambientes del catálogo
   subcategorias/        Subcategorías del catálogo
   inventory/            Importación, comparación y exportación de inventario en Excel
-  ai-search/            Búsqueda en lenguaje natural con la API de Anthropic: esquema de filtros (Zod), prompt y servicio (aún sin conectar al panel)
+  ai-search/            Búsqueda en lenguaje natural con la API de Anthropic: esquema de filtros (Zod), prompt, servicio, validación campo a campo y límite de peticiones
 infrastructure/
   supabase/             Clientes de Supabase: servidor, navegador y middleware
   cloudinary/           Cliente de Cloudinary
 database/
   schema.sql            Esquema de las cinco tablas (se puede ejecutar sobre una base de datos existente)
-  migrations/           Cambios de esquema para bases ya creadas (001: medidas en cm · 002: texto de búsqueda de materiales)
+  migrations/           Cambios de esquema para bases ya creadas (001: medidas en cm · 002: texto de búsqueda de materiales · 003: búsqueda sin tildes)
   seed.sql              Producto de ejemplo con tienda, imágenes, muestras y descargable
 public/icons/           Logotipo e iconos
 scripts/                Utilidades de uso único (importación, tiendas, backfill de medidas) y prueba manual de la búsqueda con IA
