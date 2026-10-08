@@ -64,11 +64,44 @@ CREATE TABLE IF NOT EXISTS products (
     dimensions    text[],
     materials     text[],
 
+    -- Numeric copy of `dimensions` (centimetres), used only to filter by range.
+    -- Derived by features/products/dimensions.parser.ts; NULL = no such measure.
+    -- On an existing database, add them with database/migrations/001_add_dimension_columns.sql
+    width_cm      numeric,                       -- front side ("Largo", or "Ancho" if no "Largo")
+    depth_cm      numeric,                       -- other horizontal side ("Profundidad", or "Ancho" if "Largo")
+    height_cm     numeric,                       -- "Alto"
+
+    -- Lowercase, accent-free text copy of `materials`, used only to search with ilike.
+    -- Kept in sync by the trigger below; see database/migrations/002 and 003
+    materials_search text,
+
     -- Publication status. false = hidden from the public catalog.
     is_active     boolean     DEFAULT true,
     created_at    timestamp   DEFAULT now()
 
 );
+
+-- Keeps products.materials_search in sync with products.materials on every
+-- insert or change of materials (whatever writes the row).
+CREATE OR REPLACE FUNCTION products_set_materials_search()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+    NEW.materials_search := lower(translate(
+        array_to_string(NEW.materials, ' | '),
+        'áéíóúüñÁÉÍÓÚÜÑ', 'aeiouunAEIOUUN'
+    ));
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_products_materials_search ON products;
+
+CREATE TRIGGER trg_products_materials_search
+    BEFORE INSERT OR UPDATE OF materials ON products
+    FOR EACH ROW EXECUTE FUNCTION products_set_materials_search();
 
 
 -- =============================================================================

@@ -10,17 +10,23 @@ import {
     setProductDownload, removeProductDownload,
     setProductStores
 } from '@/features/products/product.service'
+import { dbGetAllActiveSubcategories } from '@/features/products/product.repository'
+import { getAmbientes } from '@/features/ambientes/ambiente.service'
+import { runAiSearch } from '@/features/ai-search/ai-search.search'
+import { createRateLimiter } from '@/features/ai-search/rate-limit'
 
 /**
  * requireAuth
  * Called at the top of every Server Action.
  * Validates the Supabase session server-side — throws immediately if unauthorized.
  * This is a second line of defence in case middleware is somehow bypassed.
+ * Returns the authenticated user (most actions ignore it).
  */
 async function requireAuth() {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Unauthorized: no active admin session.')
+    return user
 }
 
 
@@ -176,4 +182,38 @@ export async function removeFromStoreAction(formData: FormData) {
 // Legacy alias — must be a real function in 'use server' files (re-exports are not allowed)
 export async function deactivateProductsAction(formData: FormData) {
     return removeFromStoreAction(formData)
+}
+
+// ─── AI SEARCH ─────────────────────────────────────────────────────────────────
+
+// 10 búsquedas con IA por minuto y usuario: frena bucles y dobles clics, que gastan saldo de la API.
+const aiSearchLimiter = createRateLimiter({ limit: 10, windowMs: 60_000 })
+
+/**
+ * aiSearchProducts
+ * Convierte una frase en lenguaje natural en la URL del listado de productos ya filtrado.
+ * Solo con sesión de admin: cada llamada cuesta dinero (API de Anthropic).
+ * Los errores esperados (IA caída, límite de peticiones...) se devuelven como { ok: false }.
+ */
+export async function aiSearchProducts(text: string) {
+    const user = await requireAuth()
+
+    const limit = aiSearchLimiter.check(user.id)
+    if (!limit.allowed) {
+        return {
+            ok: false as const,
+            code: 'rate_limit' as const,
+            error: `Demasiadas búsquedas seguidas. Espera ${limit.retryAfterSec} s e inténtalo de nuevo.`,
+        }
+    }
+
+    // Mismos valores que ofrece el panel en sus desplegables
+    const subcategoriaMap = await dbGetAllActiveSubcategories()
+    const catalog = {
+        ambientes: getAmbientes().map(a => a.slug),
+        subcategorias: [...new Set(Object.values(subcategoriaMap).flat().map(s => s.slug))],
+    }
+
+    // Una Server Action se puede invocar con cualquier dato: no damos por hecho que sea texto
+    return runAiSearch(typeof text === 'string' ? text : '', catalog)
 }

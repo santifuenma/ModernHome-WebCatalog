@@ -23,9 +23,10 @@ interface PaginationProps {
  * Uses ?page=N query param to navigate between pages.
  */
 export default function Pagination({ currentPage, totalPages, basePath }: PaginationProps) {
-    if (totalPages <= 1) return null
-
+    // Los hooks van antes de cualquier return: si no, el número de hooks cambiaría entre renders
     const searchParams = useSearchParams()
+
+    if (totalPages <= 1) return null
 
     // Build href for a given page number, preserving existing query params (e.g. ?store=LM)
     function pageHref(page: number) {

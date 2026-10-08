@@ -25,6 +25,7 @@ import {
     AdminFilters,
 } from './product.repository'
 import { MaterialSwatch, Product, ProductCard, ProductStore, StoreCode } from './product.types'
+import { toDimensionColumns } from './dimensions.parser'
 
 export const PAGE_SIZE = 21
 
@@ -154,12 +155,23 @@ export async function searchProductsAdmin(filters: AdminFilters, page = 1): Prom
     return toResult(result, page)
 }
 
+/**
+ * Si el guardado incluye `dimensions`, recalcula las columnas numéricas
+ * para que no se desincronicen del texto. Si no lo incluye (p. ej. ocultar
+ * un producto), no las toca.
+ */
+function withDimensionColumns<T extends { dimensions?: string[] }>(data: T) {
+    return data.dimensions === undefined
+        ? data
+        : { ...data, ...toDimensionColumns(data.dimensions) }
+}
+
 export async function createProduct(data: Partial<Product>): Promise<string> {
-    return dbCreateProduct(data)
+    return dbCreateProduct(withDimensionColumns(data))
 }
 
 export async function updateProduct(id: string, data: Partial<Product>): Promise<void> {
-    return dbUpdateProduct(id, data)
+    return dbUpdateProduct(id, withDimensionColumns(data))
 }
 
 export async function deleteProduct(id: string): Promise<void> {

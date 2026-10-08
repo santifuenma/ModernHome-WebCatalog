@@ -576,3 +576,17 @@ select.select {
         padding: 1.5rem 1rem;
     }
 }
+
+.hint {
+    font-size: 0.78rem;
+    color: #888;
+    line-height: 1.4;
+}
+
+.hint p {
+    margin: 0.2rem 0 0;
+}
+
+.hintWarning {
+    color: #9a6700;
+}
