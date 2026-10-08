@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS products (
     depth_cm      numeric,                       -- other horizontal side ("Profundidad", or "Ancho" if "Largo")
     height_cm     numeric,                       -- "Alto"
 
-    -- Lowercase text copy of `materials`, used only to search with ilike.
-    -- Kept in sync by the trigger below; see database/migrations/002_add_materials_search.sql
+    -- Lowercase, accent-free text copy of `materials`, used only to search with ilike.
+    -- Kept in sync by the trigger below; see database/migrations/002 and 003
     materials_search text,
 
     -- Publication status. false = hidden from the public catalog.
@@ -89,7 +89,10 @@ LANGUAGE plpgsql
 SET search_path = ''
 AS $$
 BEGIN
-    NEW.materials_search := lower(array_to_string(NEW.materials, ' | '));
+    NEW.materials_search := lower(translate(
+        array_to_string(NEW.materials, ' | '),
+        'áéíóúüñÁÉÍÓÚÜÑ', 'aeiouunAEIOUUN'
+    ));
     RETURN NEW;
 END;
 $$;

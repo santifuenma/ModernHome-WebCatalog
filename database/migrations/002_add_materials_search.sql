@@ -11,8 +11,8 @@
 -- writes the row (admin panel, scripts, SQL editor). It is only a search aid:
 -- products.materials stays the source of truth shown on the product page.
 --
--- Note: ilike ignores case but NOT accents ("marmol" does not match "mármol").
--- Safe to run more than once.
+-- Note: ilike ignores case but NOT accents; migration 003 makes the search
+-- accent-insensitive. Safe to run more than once.
 -- =============================================================================
 
 ALTER TABLE products

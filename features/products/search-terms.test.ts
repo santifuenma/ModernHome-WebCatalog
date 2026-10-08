@@ -6,12 +6,16 @@ describe('sanitizeSearchTerms', () => {
         expect(sanitizeSearchTerms(['Madera', ' NOGAL ', 'mdf'])).toEqual(['madera', 'nogal', 'mdf'])
     })
 
-    it('conserva tildes y espacios internos', () => {
-        expect(sanitizeSearchTerms(['mármol', 'madera maciza'])).toEqual(['mármol', 'madera maciza'])
+    it('quita las tildes, igual que la base de datos', () => {
+        expect(sanitizeSearchTerms(['mármol', 'MÁRMOL', 'ñandú', 'pingüino'])).toEqual(['marmol', 'marmol', 'nandu', 'pinguino'])
+    })
+
+    it('conserva los espacios internos y las letras fuera de la tabla', () => {
+        expect(sanitizeSearchTerms(['madera maciza', 'façade'])).toEqual(['madera maciza', 'façade'])
     })
 
     it('descarta palabras vacías o que quedan vacías tras limpiar', () => {
-        expect(sanitizeSearchTerms(['mármol', '%', '', '  ', '(),'])).toEqual(['mármol'])
+        expect(sanitizeSearchTerms(['mármol', '%', '', '  ', '(),'])).toEqual(['marmol'])
     })
 
     it('elimina los caracteres con significado en el filtro', () => {
