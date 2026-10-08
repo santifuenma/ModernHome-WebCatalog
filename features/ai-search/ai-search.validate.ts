@@ -11,6 +11,9 @@ export interface ValidationResult {
     dropped: string[]
 }
 
+/** Etiqueta con la que se avisa de campos que la IA devolvió y no existen en el esquema. */
+export const UNKNOWN_FIELDS = 'campos desconocidos'
+
 const MEASURE_LIMIT = 1000
 
 // Ningún mueble del catálogo pasa de unos 430 cm. Por encima de esto casi seguro es un error de unidades de la IA
@@ -55,11 +58,12 @@ export function validateFilters(raw: unknown, catalog: Catalog): ValidationResul
     const shape = buildFilterSchema(catalog.ambientes, catalog.subcategorias).shape as Record<string, z.ZodType>
     const kept: Record<string, unknown> = {}
     const dropped: string[] = []
+    let hasUnknownFields = false
 
     for (const [key, original] of Object.entries(raw)) {
         // hasOwn y no `shape[key]`: así "constructor" o "__proto__" cuentan como campos desconocidos
         if (!Object.hasOwn(shape, key)) {
-            dropped.push(key)
+            hasUnknownFields = true
             continue
         }
 
@@ -74,6 +78,10 @@ export function validateFilters(raw: unknown, catalog: Catalog): ValidationResul
         if (parsed.success && parsed.data !== undefined) kept[key] = parsed.data
         else dropped.push(key)
     }
+
+    // Los nombres de campos desconocidos NO se devuelven: se muestran al admin y salen del modelo,
+    // así que podrían llevar texto arbitrario. Se avisa con una etiqueta fija.
+    if (hasUnknownFields) dropped.push(UNKNOWN_FIELDS)
 
     // Medidas sin efecto: "mínimo 0" y "máximo 1000" no filtran nada (la IA a veces las rellena "por completar")
     for (const [min, max] of RANGES) {

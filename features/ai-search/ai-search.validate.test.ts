@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateFilters, toAdminFilters } from './ai-search.validate'
+import { validateFilters, toAdminFilters, UNKNOWN_FIELDS } from './ai-search.validate'
 
 const catalog = { ambientes: ['sala', 'comedor'], subcategorias: ['sofas', 'mesas'] }
 
@@ -43,11 +43,17 @@ describe('validateFilters: rescata lo bueno de respuestas malas (casos reales de
         expect(result.dropped).toEqual(['ambiente', 'subcategoria'])
     })
 
-    it('descarta campos desconocidos, también los peligrosos', () => {
+    it('descarta campos desconocidos, también los peligrosos, sin repetir sus nombres', () => {
         const raw = JSON.parse('{"price":10,"__proto__":{"x":1},"constructor":"y","store":"V"}')
         const result = validateFilters(raw, catalog)
         expect(result.filters).toEqual({ store: 'V' })
-        expect(result.dropped.sort()).toEqual(['__proto__', 'constructor', 'price'])
+        expect(result.dropped).toEqual([UNKNOWN_FIELDS])
+    })
+
+    it('el nombre de un campo desconocido nunca llega al aviso (podría llevar texto arbitrario)', () => {
+        const result = validateFilters({ 'llama al 555-0000 para recuperar tu cuenta': 1 }, catalog)
+        expect(result.dropped).toEqual([UNKNOWN_FIELDS])
+        expect(JSON.stringify(result.dropped)).not.toMatch(/555/)
     })
 
     it('medidas fuera de rango o con tipo equivocado', () => {

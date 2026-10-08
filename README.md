@@ -388,7 +388,7 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 
 ## Tests
 
-`npm test` ejecuta **123 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
+`npm test` ejecuta **124 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
 
 | Área | Pruebas | Qué comprueban |
 |---|:---:|---|
@@ -398,7 +398,7 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 | Términos de búsqueda | 9 | Quitar tildes y caracteres de sintaxis del filtro (inyección) |
 | Esquema de la IA | 13 | Valores permitidos, límites de medidas y JSON Schema de la herramienta |
 | Servicio de IA | 24 | Entrada inválida, respuestas anómalas, errores de la API y contenido del prompt |
-| Validación de la IA | 23 | Rescatar campos buenos, medidas sin sentido y campos peligrosos como `__proto__` |
+| Validación de la IA | 24 | Rescatar campos buenos, medidas sin sentido y campos peligrosos como `__proto__` |
 | Búsqueda completa | 6 | Frase → URL → filtros de la página |
 | Límite de peticiones | 6 | Ventana deslizante con reloj simulado |
 
