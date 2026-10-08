@@ -4,6 +4,7 @@ import { Subcategoria } from '@/features/subcategorias/subcategoria.types'
 import { saveProduct } from '@/app/admin/actions'
 import { Product, STORE_LABELS, StoreCode } from '@/features/products/product.types'
 import { useState } from 'react'
+import { parseDimensions } from '@/features/products/dimensions.parser'
 import styles from './ProductForm.module.css'
 
 // ─────────────────────────────────────────────────────────────────
@@ -23,6 +24,16 @@ interface ProductFormProps {
     stockByStore?: Record<string, number>
 }
 
+function describeMeasures(d: ReturnType<typeof parseDimensions>): string {
+    const parts = [
+        d.widthCm !== null && `Ancho ${d.widthCm}`,
+        d.depthCm !== null && `Profundidad ${d.depthCm}`,
+        d.heightCm !== null && `Alto ${d.heightCm}`,
+    ].filter(Boolean)
+
+    return parts.length > 0 ? parts.join(' · ') + ' cm' : 'ninguna medida reconocida'
+}
+
 export function ProductForm({ initialData, ambientes, subcategoriaMap, selectedStores: controlledStores, stockByStore: controlledStock }: ProductFormProps) {
     const isEditing = !!initialData
     const isControlled = controlledStores !== undefined
@@ -34,6 +45,10 @@ export function ProductForm({ initialData, ambientes, subcategoriaMap, selectedS
     )
     const [selectedSubcategoria, setSelectedSubcategoria] = useState(initialData?.subcategoria || '')
     const [isNewSubcategoria, setIsNewSubcategoria] = useState(false)
+
+    // Vista previa de qué medidas entenderá el buscador (el parser corre en el navegador)
+    const [dimensionsText, setDimensionsText] = useState(initialData?.dimensions?.join('\n') ?? '')
+    const parsedDimensions = parseDimensions(dimensionsText.split('\n'))
 
     // Uncontrolled state (only used in standalone / create mode)
     const [localStores, setLocalStores] = useState<StoreCode[]>(
@@ -231,10 +246,24 @@ export function ProductForm({ initialData, ambientes, subcategoriaMap, selectedS
                 <label className={styles.label}>Dimensiones (una por línea)</label>
                 <textarea
                     name="dimensions"
-                    defaultValue={initialData?.dimensions?.join('\n')}
+                    value={dimensionsText}
+                    onChange={e => setDimensionsText(e.target.value)}
                     rows={3}
                     className={styles.textarea}
                 />
+
+                {dimensionsText.trim() && (
+                    <div className={styles.hint}>
+                        <p>Para las búsquedas: {describeMeasures(parsedDimensions)}</p>
+                        {parsedDimensions.unparsed.length > 0 && (
+                            <p className={styles.hintWarning}>
+                                Sin interpretar: {parsedDimensions.unparsed.join(' | ')}
+                                <br />
+                                Se mostrará en la ficha, pero no se usará en las búsquedas por medida.
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Standalone mode (create): show the store panel embedded in the form */}
