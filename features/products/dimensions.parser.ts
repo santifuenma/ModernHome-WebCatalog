@@ -93,3 +93,9 @@ export function parseDimensions(lines: string[] | null | undefined): ParsedDimen
         unparsed,
     }
 }
+
+/** Columnas numéricas de `products` derivadas del texto de `dimensions`. */
+export function toDimensionColumns(lines: string[] | null | undefined) {
+    const d = parseDimensions(lines)
+    return { width_cm: d.widthCm, depth_cm: d.depthCm, height_cm: d.heightCm }
+}

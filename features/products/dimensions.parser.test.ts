@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseDimensions } from './dimensions.parser'
+import { parseDimensions, toDimensionColumns } from './dimensions.parser'
 
 describe('parseDimensions', () => {
     it('Largo + Ancho + Alto: el Ancho es la profundidad', () => {
@@ -98,5 +98,17 @@ describe('parseDimensions', () => {
         expect(parseDimensions(undefined)).toEqual(vacio)
         expect(parseDimensions([])).toEqual(vacio)
         expect(parseDimensions(['', '   '])).toEqual(vacio)
+    })
+})
+
+describe('toDimensionColumns', () => {
+    it('devuelve los nombres de columna de la base de datos', () => {
+        expect(toDimensionColumns(['Largo: 200 cm', 'Ancho: 100 cm', 'Alto: 78 cm'])).toEqual({
+            width_cm: 200, depth_cm: 100, height_cm: 78,
+        })
+    })
+
+    it('un campo vacío deja las tres columnas en null', () => {
+        expect(toDimensionColumns([])).toEqual({ width_cm: null, depth_cm: null, height_cm: null })
     })
 })
