@@ -273,6 +273,7 @@ features/
   ambientes/            Ambientes del catálogo
   subcategorias/        Subcategorías del catálogo
   inventory/            Importación, comparación y exportación de inventario en Excel
+  ai-search/            Búsqueda en lenguaje natural con la API de Anthropic: esquema de filtros (Zod), prompt y servicio (aún sin conectar al panel)
 infrastructure/
   supabase/             Clientes de Supabase: servidor, navegador y middleware
   cloudinary/           Cliente de Cloudinary
@@ -281,7 +282,7 @@ database/
   migrations/           Cambios de esquema para bases ya creadas (001: medidas en cm · 002: texto de búsqueda de materiales)
   seed.sql              Producto de ejemplo con tienda, imágenes, muestras y descargable
 public/icons/           Logotipo e iconos
-scripts/                Utilidades de uso único (importación, tiendas, backfill de medidas)
+scripts/                Utilidades de uso único (importación, tiendas, backfill de medidas) y prueba manual de la búsqueda con IA
 middleware.ts           Protección de /admin y refresco de la sesión
 vitest.config.mts       Configuración de Vitest (alias `@`, pruebas junto al código en `*.test.ts`)
 next.config.mjs         Cabeceras de seguridad, CSP e imágenes remotas
