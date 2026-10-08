@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseAdminFilters } from './admin-search-params'
+import { parseAdminFilters, toSearchParams } from './admin-search-params'
 
 describe('parseAdminFilters', () => {
     it('convierte los textos numéricos a número', () => {
@@ -46,5 +46,47 @@ describe('parseAdminFilters', () => {
     it('sin parámetros no activa ningún filtro', () => {
         const f = parseAdminFilters({})
         expect(Object.values(f).every(v => v === undefined)).toBe(true)
+    })
+})
+
+describe('toSearchParams', () => {
+    it('escribe los nombres de parámetro que lee parseAdminFilters', () => {
+        const params = toSearchParams({
+            query: 'dorian', status: 'hidden', images: 'without', store: 'V',
+            ambiente: 'comedor', subcategoria: 'mesas', stock: 'nostock',
+            materials: ['madera', 'nogal'],
+            minWidthCm: 200, maxWidthCm: 300, minDepthCm: 80, maxDepthCm: 120, minHeightCm: 70, maxHeightCm: 80.5,
+        })
+        expect(Object.fromEntries(params)).toEqual({
+            q: 'dorian', status: 'hidden', images: 'without', store: 'V',
+            ambiente: 'comedor', subcategoria: 'mesas', stock: 'nostock',
+            mat: 'madera,nogal',
+            minw: '200', maxw: '300', mind: '80', maxd: '120', minh: '70', maxh: '80.5',
+        })
+    })
+
+    it('sin filtros devuelve parámetros vacíos', () => {
+        expect(toSearchParams({}).toString()).toBe('')
+    })
+
+    it('no escribe los campos vacíos ni la lista de materiales vacía', () => {
+        expect(toSearchParams({ query: '  ', materials: [], store: '' }).toString()).toBe('')
+    })
+
+    it('conserva el cero como valor (mínimo 0 es un número válido)', () => {
+        expect(toSearchParams({ minHeightCm: 0 }).get('minh')).toBe('0')
+    })
+
+    it('una coma dentro de un material no rompe la lista', () => {
+        expect(toSearchParams({ materials: ['madera, nogal', 'mdf'] }).get('mat')).toBe('madera nogal,mdf')
+    })
+
+    it('ida y vuelta: parseAdminFilters(toSearchParams(f)) devuelve f', () => {
+        const filters = {
+            query: 'dorian', status: 'active' as const, store: 'SM', ambiente: 'sala',
+            materials: ['madera', 'mdf'], minWidthCm: 190.5, maxHeightCm: 80,
+        }
+        const back = parseAdminFilters(Object.fromEntries(toSearchParams(filters)))
+        expect(back).toMatchObject(filters)
     })
 })

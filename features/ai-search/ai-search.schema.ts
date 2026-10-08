@@ -4,7 +4,7 @@ import { STORE_LABELS, StoreCode } from '@/features/products/product.types'
 const STORE_CODES = Object.keys(STORE_LABELS) as [StoreCode, ...StoreCode[]]
 
 /** Enum opcional con los valores del momento. Si la lista está vacía, el campo no acepta nada. */
-function optionalEnum(values: string[]): z.ZodType<string | undefined> {
+function optionalEnum(values: string[]): z.ZodOptional<z.ZodType<string>> {
     return values.length > 0
         ? z.enum(values as [string, ...string[]]).optional()
         : z.never().optional()
