@@ -24,14 +24,22 @@ const LABEL_ALIASES: Record<string, Label> = {
     largo: 'largo',
     ancho: 'ancho',
     profundidad: 'profundidad',
+    profundo: 'profundidad',
     fondo: 'profundidad',
     alto: 'alto',
     altura: 'alto',
     diametro: 'diametro',
 }
 
-// "Largo: 114.3 cm" | "Alto: 77,5 cm" | "Ancho: 100" (sin unidad = cm)
-const LINE_REGEX = /^\s*([^:]+?)\s*:\s*(\d+(?:[.,]\d+)?)\s*(cm|m)?\s*$/i
+// "Largo: 114.3 cm" | "Alto. 25 cm" | "Ancho: 241–244 cm" | "Ancho: 8'" | "Alto: 108 cm (nota)"
+// | "Ancho: 48 cm*" | "Largo: 199.5 cm / 239,5 cm" (mesa extensible)
+// Grupos: 1 etiqueta · 2 número · 3 segundo número del rango · 4 unidad
+//         5 número tras "/" · 6 su unidad · 7 nota entre paréntesis
+// (sin unidad = cm)
+const LINE_REGEX =
+    /^\s*([^:.\d]+?)\s*[:.]\s*(\d+(?:[.,]\d+)?)(?:\s*[–-]\s*(\d+(?:[.,]\d+)?))?\s*(cm|m|')?(?:\s*\/\s*(\d+(?:[.,]\d+)?)\s*(cm|m|')?)?\s*\*?\s*(?:aprox\.?)?\s*(?:\(([^)]*)\))?\s*$/i
+
+const CM_PER_FOOT = 30.48
 
 function normalizeLabel(raw: string): string {
     return raw
@@ -43,7 +51,8 @@ function normalizeLabel(raw: string): string {
 
 function toCm(value: string, unit?: string): number {
     const n = Number(value.replace(',', '.'))
-    const cm = unit?.toLowerCase() === 'm' ? n * 100 : n
+    const u = unit?.toLowerCase()
+    const cm = u === 'm' ? n * 100 : u === "'" ? n * CM_PER_FOOT : n
     return Math.round(cm * 10) / 10 // evita 1.2 * 100 = 120.00000000000001
 }
 
@@ -57,11 +66,22 @@ export function parseDimensions(lines: string[] | null | undefined): ParsedDimen
         const match = LINE_REGEX.exec(line)
         const label = match ? LABEL_ALIASES[normalizeLabel(match[1])] : undefined
 
-        if (!match || !label) {
+        // "(grosor)" / "(espesor)": no es una medida del producto, es el espesor de una alfombra
+        const isThickness = match ? /grosor|espesor/i.test(match[7] ?? '') : false
+
+        if (!match || !label || isThickness) {
             unparsed.push(line)
             continue
         }
-        found[label] = toCm(match[2], match[3])
+
+        // Rango "241–244" o alternativas "199.5 / 239.5": se guarda el valor mayor.
+        // Si solo una de las partes lleva unidad, se aplica a todas.
+        const unitA = match[4] ?? match[6]
+        const unitB = match[6] ?? match[4]
+        const values = [toCm(match[2], unitA)]
+        if (match[3] !== undefined) values.push(toCm(match[3], unitA))
+        if (match[5] !== undefined) values.push(toCm(match[5], unitB))
+        found[label] = Math.max(...values)
     }
 
     const hasLargo = found.largo !== undefined

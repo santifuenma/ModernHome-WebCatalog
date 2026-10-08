@@ -142,7 +142,7 @@ La aplicación usa cinco tablas de Supabase (PostgreSQL). Las imágenes no se gu
 
 | Tabla | Contenido |
 |---|---|
-| `products` | Ficha del producto: código, nombre, *slug*, marca, diseñador, ambiente, subcategoría, dimensiones y materiales (listas de texto), enlace externo y estado de publicación (`is_active`). |
+| `products` | Ficha del producto: código, nombre, *slug*, marca, diseñador, ambiente, subcategoría, dimensiones y materiales (listas de texto), medidas numéricas en cm derivadas de las dimensiones (`width_cm`, `depth_cm`, `height_cm`), enlace externo y estado de publicación (`is_active`). |
 | `product_stores` | Asignación de un producto a una tienda, con su stock. Combinación única `(product_id, store_code)`. |
 | `product_images` | Galería del producto: imagen de Cloudinary, si es la principal y su posición. |
 | `product_material_swatches` | Muestras de material: nombre e imagen de Cloudinary. |
@@ -167,6 +167,9 @@ erDiagram
         string url
         string dimensions "lista de texto"
         string materials "lista de texto"
+        numeric width_cm "derivada de dimensions"
+        numeric depth_cm "derivada de dimensions"
+        numeric height_cm "derivada de dimensions"
         boolean is_active
         timestamp created_at
     }
@@ -274,8 +277,10 @@ infrastructure/
   cloudinary/           Cliente de Cloudinary
 database/
   schema.sql            Esquema de las cinco tablas (se puede ejecutar sobre una base de datos existente)
+  migrations/           Cambios de esquema para bases ya creadas (001: columnas de medidas en cm)
   seed.sql              Producto de ejemplo con tienda, imágenes, muestras y descargable
 public/icons/           Logotipo e iconos
+scripts/                Utilidades de uso único (importación, tiendas, backfill de medidas)
 middleware.ts           Protección de /admin y refresco de la sesión
 vitest.config.mts       Configuración de Vitest (alias `@`, pruebas junto al código en `*.test.ts`)
 next.config.mjs         Cabeceras de seguridad, CSP e imágenes remotas

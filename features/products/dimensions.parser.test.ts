@@ -45,6 +45,53 @@ describe('parseDimensions', () => {
         expect(r.unparsed).toEqual(['Largo: 2000 mm', 'Ver ficha técnica'])
     })
 
+    it('acepta "Profundo" como profundidad', () => {
+        expect(parseDimensions(['Profundo: 58 cm']).depthCm).toBe(58)
+    })
+
+    it('acepta un punto en lugar de dos puntos ("Alto. 25 cm")', () => {
+        expect(parseDimensions(['Alto. 25 cm']).heightCm).toBe(25)
+    })
+
+    it('convierte pies a cm', () => {
+        expect(parseDimensions(["Ancho: 8'", "Largo: 11'"])).toMatchObject({
+            widthCm: 335.3, depthCm: 243.8,
+        })
+    })
+
+    it('en un rango guarda el valor mayor', () => {
+        expect(parseDimensions(['Ancho: 241–244 cm']).widthCm).toBe(244)
+        expect(parseDimensions(['Largo: 85-90 cm']).widthCm).toBe(90)
+    })
+
+    it('ignora un asterisco final', () => {
+        expect(parseDimensions(['Ancho: 48 cm*']).widthCm).toBe(48)
+    })
+
+    it('con dos medidas separadas por "/" guarda la mayor', () => {
+        expect(parseDimensions(['Largo: 199.5 cm / 239,5 cm', 'Ancho: 89.5 cm / 119,5 cm'])).toMatchObject({
+            widthCm: 239.5, depthCm: 119.5,
+        })
+        expect(parseDimensions(['Largo: 200 / 240 cm']).widthCm).toBe(240)
+    })
+
+    it('ignora notas entre paréntesis y "aprox."', () => {
+        expect(parseDimensions(['Alto: 108 cm (altura máxima, el pedestal es ajustable)']).heightCm).toBe(108)
+        expect(parseDimensions(['Altura: 73 cm aprox.']).heightCm).toBe(73)
+    })
+
+    it('no cuenta el grosor como altura', () => {
+        const r = parseDimensions(['Alto: 0.7 cm (grosor)'])
+        expect(r.heightCm).toBeNull()
+        expect(r.unparsed).toEqual(['Alto: 0.7 cm (grosor)'])
+    })
+
+    it('no confunde medidas parciales con las del producto', () => {
+        const r = parseDimensions(['Altura del asiento: 45 cm', 'Profundidad del módulo: 115 cm'])
+        expect(r.heightCm).toBeNull()
+        expect(r.depthCm).toBeNull()
+    })
+
     it('tolera null, undefined, vacío y líneas en blanco', () => {
         const vacio = { widthCm: null, depthCm: null, heightCm: null, unparsed: [] }
         expect(parseDimensions(null)).toEqual(vacio)
