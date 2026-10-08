@@ -234,6 +234,8 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Clave pública `anon` de Supabase. |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | ✅ | Nombre de la cuenta (*cloud name*) de Cloudinary. |
 | `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Para subir imágenes | *Upload preset* que usa el widget de subida del panel. Si no se define, se usa `ml_default`. |
+| `ANTHROPIC_API_KEY` | Para la búsqueda con IA | Clave de la API de Anthropic. Solo servidor: no lleva el prefijo `NEXT_PUBLIC_`. |
+| `ANTHROPIC_MODEL` | No | Modelo de Claude para la búsqueda con IA. Por defecto, `claude-haiku-4-5-20251001`. |
 
 ## Scripts
 
