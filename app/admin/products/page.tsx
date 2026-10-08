@@ -1,8 +1,7 @@
 import { searchProductsAdmin } from '@/features/products/product.service'
 import { dbGetAllActiveSubcategories } from '@/features/products/product.repository'
 import { ProductTable } from '@/components/admin/ProductTable'
-import { ProductFiltersBar } from '@/components/admin/ProductFiltersBar'
-import { AiSearchBar } from '@/components/admin/AiSearchBar'
+import { AdminSearchHeader } from '@/components/admin/AdminSearchHeader'
 import { AdminPagination } from '@/components/admin/AdminPagination'
 import { parseAdminFilters, AdminSearchParams } from '@/features/products/admin-search-params'
 import Link from 'next/link'
@@ -59,9 +58,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
                 </Link>
             </div>
 
-            <AiSearchBar />
-
-            <ProductFiltersBar ambienteMap={subcategoriaMap} />
+            <AdminSearchHeader ambienteMap={subcategoriaMap} totalItems={data.totalItems} />
 
             <ProductTable products={data.items} />
 

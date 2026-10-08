@@ -73,7 +73,7 @@ Un mismo producto puede estar disponible en varias tiendas, cada una con su prop
 ### Panel de administración
 
 - **Acceso con correo y contraseña** (Supabase Auth).
-- **Gestión de productos:** listado paginado con búsqueda y filtros por estado (activos, ocultos), imágenes (con o sin), tienda, ambiente, subcategoría y stock (con o sin).
+- **Gestión de productos:** listado paginado con una cabecera de búsqueda: un interruptor entre *Con IA* y *Código / nombre*, los filtros activos como etiquetas que se quitan una a una y un panel desplegable de **Filtros** (ambiente, subcategoría, estado, stock, tienda e imágenes) que se aplican al momento y muestran cuántos resultados hay.
 - **Búsqueda con IA:** un campo en lenguaje natural sobre el listado (*"mesas de comedor de madera de más de 2 m"*). Se traduce a filtros que se aplican en la URL y se muestran como etiquetas que se quitan una a una. Detalle en [Búsqueda con IA](#búsqueda-con-ia).
 - **Edición de producto:** código, nombre, marca, diseñador, ambiente, subcategoría, dimensiones y materiales (uno por línea), tiendas con su stock, imágenes, muestras de material y archivo descargable. El *slug* se genera solo si se deja vacío. Mientras se escriben las dimensiones, el formulario muestra qué medidas entenderá el buscador.
 - **Publicar u ocultar** un producto sin borrarlo, o eliminarlo.
@@ -90,7 +90,7 @@ El administrador escribe una frase y Claude la convierte en filtros; la base de 
 
 ```mermaid
 flowchart TB
-    A(["Administrador<br/>escribe una frase"]) --> B["AiSearchBar<br/>Server Action aiSearchProducts"]
+    A(["Administrador<br/>escribe una frase"]) --> B["AdminSearchHeader<br/>Server Action aiSearchProducts"]
     B --> C{"¿Sesión de admin<br/>y dentro del límite?"}
     C -- "no" --> X(["Mensaje de error<br/>sin llamar a la IA"])
     C -- "sí" --> D["Claude (Haiku 4.5)<br/>tool use: set_filters"]
@@ -105,7 +105,7 @@ flowchart TB
 1. **Frase → filtros.** Claude devuelve los filtros llamando a una herramienta (`set_filters`) cuyo esquema se genera con Zod a partir del catálogo.
 2. **Validación campo a campo.** Un campo inválido se descarta y no arrastra a los demás. Se eliminan los filtros sin efecto (mínimo 0, máximo 1000), las medidas imposibles para un mueble (más de 600 cm) y se intercambian los mínimos mayores que los máximos.
 3. **La URL es el estado.** La IA solo escribe una dirección; la página la lee igual que si los filtros se hubieran elegido a mano, así que se puede recargar, compartir, paginar y afinar con los filtros manuales. La búsqueda con IA **reemplaza** los filtros actuales.
-4. **Etiquetas.** Los filtros activos se muestran como etiquetas con una × (*"Largo ≥ 200 cm"*, *"Material: madera, wood, nogal +4"*). Si la frase no contiene ningún filtro, avisa y conserva los que había.
+4. **Etiquetas y panel.** Los filtros activos se muestran como etiquetas con una × (*"Largo ≥ 200 cm"*, *"Material: madera, wood, nogal +4"*) y, tras una búsqueda con IA, se abre el panel de filtros con un destello ✦ junto a lo que marcó la IA. Los materiales y las medidas solo aparecen como etiquetas, porque no tienen casillas propias. Si la frase no contiene ningún filtro, avisa y conserva los que había.
 
 Ejemplos de frases reales y los filtros que producen:
 
@@ -388,13 +388,14 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 
 ## Tests
 
-`npm test` ejecuta **124 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
+`npm test` ejecuta **132 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
 
 | Área | Pruebas | Qué comprueban |
 |---|:---:|---|
 | Parser de dimensiones | 20 | Etiquetas ("Largo", "Ancho", "Profundo"...), coma decimal, metros, pies, rangos, grosores y medidas parciales |
 | Filtros de la URL | 13 | Leer y escribir los parámetros de `/admin/products`, con ida y vuelta |
 | Etiquetas de filtros | 9 | Texto de cada filtro activo y qué parámetros borra |
+| Opciones del panel de filtros | 8 | Qué opciones ofrece cada grupo y cómo dependen del ambiente elegido |
 | Términos de búsqueda | 9 | Quitar tildes y caracteres de sintaxis del filtro (inyección) |
 | Esquema de la IA | 13 | Valores permitidos, límites de medidas y JSON Schema de la herramienta |
 | Servicio de IA | 24 | Entrada inválida, respuestas anómalas, errores de la API y contenido del prompt |
@@ -414,7 +415,7 @@ app/
   admin/                Panel: login, gestión de productos, importador, comparador y baja por tienda
     actions.ts          Server Actions: productos, imágenes, muestras, descargables, inventario y búsqueda con IA
 components/
-  admin/                Tabla, filtros, búsqueda con IA, formulario y gestores de imágenes, muestras y descargas
+  admin/                Tabla, cabecera de búsqueda y filtros (con IA), formulario y gestores de imágenes, muestras y descargas
   catalog/              Cuadrícula, ficha de producto y barra de filtros
   layout/               Navbar
   ui/                   Paginación y wrapper de imágenes de Cloudinary

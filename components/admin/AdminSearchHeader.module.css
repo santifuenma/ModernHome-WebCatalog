@@ -1,0 +1,486 @@
+/* ── Tarjeta ───────────────────────────────────────────────────── */
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    margin-bottom: 2rem;
+}
+
+/* ── Fila del buscador ─────────────────────────────────────────── */
+
+.topRow {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.modeToggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 3px;
+    background: #f5f4f1;
+    border: 1px solid #e8e6e1;
+    border-radius: 10px;
+}
+
+.modeButton,
+.modeActive {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.modeButton {
+    background: transparent;
+    color: #777;
+}
+
+.modeButton:hover {
+    color: #333;
+}
+
+.modeActive {
+    background: #ffffff;
+    border-color: #e0ddd6;
+    color: #1b1b1b;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.modeActive svg,
+.modeButton svg {
+    color: #A90404;
+}
+
+.searchBox {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    padding: 0.35rem 0.35rem 0.35rem 0.85rem;
+    background: #ffffff;
+    border: 1.5px solid #cfcdc7;
+    border-radius: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchBoxAi {
+    border-color: #A90404;
+}
+
+.searchBox:focus-within {
+    border-color: #A90404;
+    box-shadow: 0 0 0 1px #A90404;
+}
+
+.searchIcon,
+.searchIconAi {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.searchIcon {
+    color: #888;
+}
+
+.searchIconAi {
+    color: #A90404;
+}
+
+.searchInput {
+    flex: 1;
+    min-width: 0;
+    padding: 0.4rem 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--color-text, #333333);
+    font: inherit;
+    font-size: 0.95rem;
+}
+
+.searchInput::placeholder {
+    color: #b1b1b1;
+}
+
+.searchInput:disabled {
+    color: #888;
+}
+
+.searchButton {
+    flex-shrink: 0;
+    padding: 0.6rem 1.4rem;
+    background: #1b1b1b;
+    border: none;
+    border-radius: 9px;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.searchButton:hover:not(:disabled) {
+    background: #000000;
+}
+
+.searchButton:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* ── Fila de filtros y etiquetas ───────────────────────────────── */
+
+.filterRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+}
+
+.filtersButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    background: #ffffff;
+    border: 1.5px solid #cfcdc7;
+    border-radius: 10px;
+    color: #333333;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.filtersButton:hover,
+.filtersButtonActive {
+    border-color: #A90404;
+    color: #A90404;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.3rem;
+    height: 1.3rem;
+    padding: 0 0.3rem;
+    background: #A90404;
+    border-radius: 999px;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.divider {
+    width: 1px;
+    height: 1.5rem;
+    background: #e0ddd6;
+}
+
+.chips {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.3rem 0.28rem 0.65rem;
+    background: #fdf2f2;
+    border: 1px solid #f5c6c6;
+    border-radius: 999px;
+    color: #7d0303;
+    font-size: 0.8rem;
+}
+
+.chip strong {
+    font-weight: 700;
+}
+
+.chipSparkle {
+    display: inline-flex;
+    color: #A90404;
+}
+
+.chipRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: #A90404;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.chipRemove:hover {
+    background: #A90404;
+    color: #ffffff;
+}
+
+.clearAll {
+    margin-left: auto;
+    padding: 0.3rem 0.2rem;
+    background: transparent;
+    border: none;
+    color: #777777;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.clearAll:hover {
+    color: #A90404;
+}
+
+/* ── Avisos ────────────────────────────────────────────────────── */
+
+.notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0;
+    padding: 0.55rem 0.8rem;
+    background: #fff8e6;
+    border: 1px solid #f1d28a;
+    border-radius: 8px;
+    color: #7a5200;
+    font-size: 0.85rem;
+}
+
+.notice svg {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+/* ── Panel de filtros ──────────────────────────────────────────── */
+
+.panel {
+    margin-top: 1rem;
+    background: #ffffff;
+    border: 1px solid #e8e6e1;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.panelSection {
+    padding: 1.1rem 1.25rem 1.25rem;
+    border-bottom: 1px solid #eeece7;
+}
+
+.sectionTitle {
+    margin: 0 0 0.9rem;
+    color: #888888;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.groups {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+}
+
+.group {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.groupWide {
+    grid-column: span 3;
+}
+
+/* Los grupos largos reparten sus opciones en columnas (varios ambientes tienen decenas de subcategorías) */
+.groupWide .options {
+    column-count: 3;
+    column-gap: 1.5rem;
+}
+
+.groupWide .option {
+    break-inside: avoid;
+}
+
+.groupTitle {
+    margin-bottom: 0.6rem;
+    padding: 0;
+    color: #222222;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.28rem 0;
+    color: #555555;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.option input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    accent-color: #A90404;
+    cursor: pointer;
+}
+
+.optionChecked {
+    color: #1b1b1b;
+    font-weight: 600;
+}
+
+.aiMark {
+    display: inline-flex;
+    margin-left: auto;
+    color: #A90404;
+}
+
+.emptyHint {
+    margin: 0;
+    color: #999999;
+    font-size: 0.8rem;
+}
+
+.panelFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 1.25rem;
+    background: #faf9f7;
+    color: #777777;
+    font-size: 0.8rem;
+}
+
+.footerText {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.footerText .aiMark {
+    margin-left: 0;
+}
+
+.footerText strong {
+    color: #222222;
+}
+
+.hideButton {
+    flex-shrink: 0;
+    padding: 0.45rem 0.9rem;
+    background: #ffffff;
+    border: 1px solid #d9d6cf;
+    border-radius: 8px;
+    color: #333333;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.hideButton:hover {
+    border-color: #A90404;
+    color: #A90404;
+}
+
+/* ── Adaptación a pantallas pequeñas ───────────────────────────── */
+
+@media (max-width: 900px) {
+    .groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .groupWide {
+        grid-column: span 2;
+    }
+
+    .groupWide .options {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .groups {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .groupWide {
+        grid-column: auto;
+    }
+
+    .groupWide .options {
+        column-count: 1;
+    }
+
+    .card {
+        padding: 0.9rem;
+    }
+
+    .topRow {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .modeToggle {
+        align-self: flex-start;
+    }
+
+    .filterRow {
+        align-items: flex-start;
+    }
+
+    .chips {
+        flex-basis: 100%;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .clearAll {
+        margin-left: 0;
+    }
+
+    .panelFooter {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
