@@ -111,7 +111,6 @@ export function AdminSearchHeader({ ambienteMap, totalItems }: AdminSearchHeader
                 }
                 setAiResult({ query: new URL(result.url, 'http://local').searchParams.toString(), dropped: result.dropped })
                 setCodeText('')
-                setPanelOpen(true)
                 router.push(result.url) // reemplaza los filtros actuales
             } catch {
                 setError('No se pudo completar la búsqueda con IA. Inténtalo de nuevo.')

@@ -105,7 +105,7 @@ flowchart TB
 1. **Frase → filtros.** Claude devuelve los filtros llamando a una herramienta (`set_filters`) cuyo esquema se genera con Zod a partir del catálogo.
 2. **Validación campo a campo.** Un campo inválido se descarta y no arrastra a los demás. Se eliminan los filtros sin efecto (mínimo 0, máximo 1000), las medidas imposibles para un mueble (más de 600 cm) y se intercambian los mínimos mayores que los máximos.
 3. **La URL es el estado.** La IA solo escribe una dirección; la página la lee igual que si los filtros se hubieran elegido a mano, así que se puede recargar, compartir, paginar y afinar con los filtros manuales. La búsqueda con IA **reemplaza** los filtros actuales.
-4. **Etiquetas y panel.** Los filtros activos se muestran como etiquetas con una × (*"Largo ≥ 200 cm"*, *"Material: madera, wood, nogal +4"*) y, tras una búsqueda con IA, se abre el panel de filtros con un destello ✦ junto a lo que marcó la IA. Los materiales y las medidas solo aparecen como etiquetas, porque no tienen casillas propias. Si la frase no contiene ningún filtro, avisa y conserva los que había.
+4. **Etiquetas y panel.** Los filtros activos se muestran como etiquetas con una × (*"Largo ≥ 200 cm"*, *"Material: madera, wood, nogal +4"*) y el panel de filtros (botón **Filtros**) muestra con un destello ✦ lo que marcó la IA. Los materiales y las medidas solo aparecen como etiquetas, porque no tienen casillas propias. Si la frase no contiene ningún filtro, avisa y conserva los que había.
 
 Ejemplos de frases reales y los filtros que producen:
 
