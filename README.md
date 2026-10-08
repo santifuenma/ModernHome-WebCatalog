@@ -245,6 +245,8 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 | `npm run build` | Build de producción. |
 | `npm run start` | Sirve el build de producción. |
 | `npm run lint` | ESLint. |
+| `npm test` | Pruebas unitarias con Vitest (una sola ejecución). |
+| `npm run test:watch` | Vitest en modo vigilancia: repite las pruebas al guardar. |
 
 ## Despliegue
 
@@ -263,7 +265,7 @@ components/
   layout/               Navbar
   ui/                   Paginación y wrapper de imágenes de Cloudinary
 features/
-  products/             Repository, service y tipos de producto (tiendas, stock, imágenes)
+  products/             Repository, service y tipos de producto (tiendas, stock, imágenes) y parser de dimensiones
   ambientes/            Ambientes del catálogo
   subcategorias/        Subcategorías del catálogo
   inventory/            Importación, comparación y exportación de inventario en Excel
@@ -275,6 +277,7 @@ database/
   seed.sql              Producto de ejemplo con tienda, imágenes, muestras y descargable
 public/icons/           Logotipo e iconos
 middleware.ts           Protección de /admin y refresco de la sesión
+vitest.config.mts       Configuración de Vitest (alias `@`, pruebas junto al código en `*.test.ts`)
 next.config.mjs         Cabeceras de seguridad, CSP e imágenes remotas
 ```
 
