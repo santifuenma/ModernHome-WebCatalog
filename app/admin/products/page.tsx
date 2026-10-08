@@ -3,19 +3,11 @@ import { dbGetAllActiveSubcategories } from '@/features/products/product.reposit
 import { ProductTable } from '@/components/admin/ProductTable'
 import { ProductFiltersBar } from '@/components/admin/ProductFiltersBar'
 import { AdminPagination } from '@/components/admin/AdminPagination'
+import { parseAdminFilters, AdminSearchParams } from '@/features/products/admin-search-params'
 import Link from 'next/link'
 
 interface AdminProductsPageProps {
-    searchParams: Promise<{
-        q?: string
-        status?: string
-        images?: string
-        store?: string
-        ambiente?: string
-        subcategoria?: string
-        stock?: string
-        page?: string
-    }>
+    searchParams: Promise<AdminSearchParams>
 }
 
 import styles from './products.module.css'
@@ -25,15 +17,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
     const page = Math.max(1, parseInt(sp.page || '1', 10))
 
     // Build AdminFilters from URL params
-    const filters = {
-        query: sp.q || undefined,
-        status: (sp.status as 'active' | 'hidden' | 'all') || undefined,
-        images: (sp.images as 'with' | 'without' | 'all') || undefined,
-        store: sp.store || undefined,
-        ambiente: sp.ambiente || undefined,
-        subcategoria: sp.subcategoria || undefined,
-        stock: (sp.stock as 'instock' | 'nostock' | 'all') || undefined,
-    }
+    const filters = parseAdminFilters(sp)
 
     // Fetch data concurrently
     const [data, subcategoriaMap] = await Promise.all([

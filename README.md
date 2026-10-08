@@ -269,7 +269,7 @@ components/
   layout/               Navbar
   ui/                   Paginación y wrapper de imágenes de Cloudinary
 features/
-  products/             Repository, service y tipos de producto (tiendas, stock, imágenes) y parser de dimensiones
+  products/             Repository, service y tipos de producto (tiendas, stock, imágenes), parser de dimensiones y lectura de los filtros de /admin/products desde la URL
   ambientes/            Ambientes del catálogo
   subcategorias/        Subcategorías del catálogo
   inventory/            Importación, comparación y exportación de inventario en Excel

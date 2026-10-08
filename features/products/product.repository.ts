@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/infrastructure/supabase/server'
 import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload, StoreCode, ProductStore } from './product.types'
+import { sanitizeSearchTerms } from './search-terms'
 
 /**
  * product.repository.ts
@@ -485,6 +486,14 @@ export interface AdminFilters {
     ambiente?: string
     subcategoria?: string
     stock?: 'instock' | 'nostock' | 'all'
+    // Búsqueda por características
+    materials?: string[]        // palabras clave: basta con que coincida UNA (p. ej. sinónimos)
+    minWidthCm?: number
+    maxWidthCm?: number
+    minDepthCm?: number
+    maxDepthCm?: number
+    minHeightCm?: number
+    maxHeightCm?: number
 }
 
 // ─── ADMIN CRUD FUNCTIONS ──────────────────────────────────────────────────────
@@ -530,6 +539,21 @@ export async function dbSearchProductsAdmin(
         // nostock: no existe ninguna asignación con stock > 0
         if (filters.stock === 'instock') chain = chain.gt('product_stores.stock', 0)
         else if (filters.stock === 'nostock') chain = chain.eq('product_stores.stock', 0)
+
+        // Materials — basta con que coincida una de las palabras (suelen ser sinónimos).
+        // Se busca en materials_search (texto en minúsculas mantenido por un trigger).
+        const materialTerms = sanitizeSearchTerms(filters.materials)
+        if (materialTerms.length > 0) {
+            chain = chain.or(materialTerms.map(t => `materials_search.ilike."%${t}%"`).join(','))
+        }
+
+        // Medidas (cm). Los productos sin esa medida (NULL) quedan fuera del rango.
+        if (filters.minWidthCm !== undefined) chain = chain.gte('width_cm', filters.minWidthCm)
+        if (filters.maxWidthCm !== undefined) chain = chain.lte('width_cm', filters.maxWidthCm)
+        if (filters.minDepthCm !== undefined) chain = chain.gte('depth_cm', filters.minDepthCm)
+        if (filters.maxDepthCm !== undefined) chain = chain.lte('depth_cm', filters.maxDepthCm)
+        if (filters.minHeightCm !== undefined) chain = chain.gte('height_cm', filters.minHeightCm)
+        if (filters.maxHeightCm !== undefined) chain = chain.lte('height_cm', filters.maxHeightCm)
 
         return chain
     }
