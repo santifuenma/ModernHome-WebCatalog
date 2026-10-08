@@ -380,6 +380,7 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 | `npm run dev` | Servidor de desarrollo. |
 | `npm run build` | Build de producción. |
 | `npm run start` | Sirve el build de producción. |
+| `npm run lint` | ESLint 9 con la configuración de Next.js ([`eslint.config.mjs`](eslint.config.mjs)). |
 | `npm test` | Pruebas unitarias con Vitest (una sola ejecución). |
 | `npm run test:watch` | Vitest en modo vigilancia: repite las pruebas al guardar. |
 | `npx tsx scripts/backfill_dimensions.ts [--sql]` | Calcula las medidas en cm de los productos existentes y, con `--sql`, genera el SQL para aplicarlas. |
@@ -433,6 +434,7 @@ database/
 public/icons/           Logotipo e iconos
 scripts/                Utilidades de línea de comandos: medidas de los productos existentes y prueba de la búsqueda con IA
 middleware.ts           Protección de /admin y refresco de la sesión
+eslint.config.mjs       Configuración de ESLint (reglas de Next.js y TypeScript)
 vitest.config.mts       Configuración de Vitest (alias `@`, pruebas junto al código en `*.test.ts`)
 next.config.mjs         Cabeceras de seguridad, CSP e imágenes remotas
 ```
