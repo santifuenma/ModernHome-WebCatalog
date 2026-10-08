@@ -2,8 +2,9 @@ import Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { buildFilterSchema } from './ai-search.schema'
 import { buildSystemPrompt, Catalog, TOOL_NAME } from './ai-search.prompt'
+import { MAX_QUERY_LENGTH } from './ai-search.constants'
 
-export const MAX_QUERY_LENGTH = 300
+export { MAX_QUERY_LENGTH }
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
 
 export type AiSearchErrorCode =
