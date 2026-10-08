@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
+import { z } from 'zod'
 import { buildFilterSchema } from './ai-search.schema'
-import { buildSystemPrompt, Catalog } from './ai-search.prompt'
+import { buildSystemPrompt, Catalog, TOOL_NAME } from './ai-search.prompt'
 
 export const MAX_QUERY_LENGTH = 300
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
@@ -18,7 +18,7 @@ export class AiSearchError extends Error {
 }
 
 export interface InterpretResult {
-    /** JSON tal cual lo devolvió la IA. Aún NO está validado: eso lo hace el paso siguiente. */
+    /** Filtros tal cual los devolvió la IA. Aún NO están validados: eso lo hace el paso siguiente. */
     raw: unknown
     usage: { inputTokens: number; outputTokens: number }
 }
@@ -32,8 +32,29 @@ function getClient(): Anthropic {
     if (!process.env.ANTHROPIC_API_KEY) {
         throw new AiSearchError('La búsqueda con IA no está configurada.', 'config')
     }
-    // Lee ANTHROPIC_API_KEY del entorno. 20 s de espera y un solo reintento.
-    return (cachedClient ??= new Anthropic({ timeout: 20_000, maxRetries: 1 }))
+    // Lee ANTHROPIC_API_KEY del entorno. 45 s de espera y un solo reintento.
+    return (cachedClient ??= new Anthropic({ timeout: 45_000, maxRetries: 1 }))
+}
+
+/**
+ * La IA devuelve los filtros llamando a esta herramienta. Su esquema sale del mismo
+ * esquema de Zod con el que luego se validan.
+ *
+ * Se usa tool use y no las salidas estructuradas (output_config.format) a propósito:
+ * estas obligan a escribir los campos en el orden del esquema sin poder volver atrás, y
+ * cuando la frase menciona los filtros en otro orden el modelo rellenaba campos con basura.
+ * En las pruebas, tool use acertó 8 de 8 frases difíciles y las salidas estructuradas fallaron.
+ */
+function buildTool(catalog: Catalog): Anthropic.Tool {
+    const { $schema: _ignored, ...inputSchema } = z.toJSONSchema(
+        buildFilterSchema(catalog.ambientes, catalog.subcategorias),
+    ) as Record<string, unknown>
+
+    return {
+        name: TOOL_NAME,
+        description: 'Aplica los filtros de búsqueda de productos. Llámala siempre, aunque sea sin filtros.',
+        input_schema: inputSchema as Anthropic.Tool['input_schema'],
+    }
 }
 
 function toAiSearchError(err: unknown): AiSearchError {
@@ -81,9 +102,7 @@ export async function interpretSearch(
             max_tokens: 1000,
             system: buildSystemPrompt(catalog),
             messages: [{ role: 'user', content: query }],
-            output_config: {
-                format: zodOutputFormat(buildFilterSchema(catalog.ambientes, catalog.subcategorias)),
-            },
+            tools: [buildTool(catalog)],
         })
 
         if (response.stop_reason === 'refusal') {
@@ -93,20 +112,15 @@ export async function interpretSearch(
             throw new AiSearchError('La respuesta de la IA quedó incompleta. Prueba con una frase más corta.', 'invalid')
         }
 
-        const block = response.content.find(b => b.type === 'text')
-        if (!block || block.type !== 'text') {
-            throw new AiSearchError('La IA no devolvió ninguna respuesta.', 'invalid')
-        }
-
-        let raw: unknown
-        try {
-            raw = JSON.parse(block.text)
-        } catch {
-            throw new AiSearchError('La IA devolvió una respuesta que no se pudo leer.', 'invalid')
+        const toolCall = response.content.find(
+            (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === TOOL_NAME,
+        )
+        if (!toolCall) {
+            throw new AiSearchError('La IA no devolvió ningún filtro. Inténtalo de nuevo.', 'invalid')
         }
 
         return {
-            raw,
+            raw: toolCall.input,
             usage: {
                 inputTokens: response.usage.input_tokens,
                 outputTokens: response.usage.output_tokens,
