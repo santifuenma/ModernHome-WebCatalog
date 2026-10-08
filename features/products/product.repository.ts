@@ -560,8 +560,11 @@ export async function dbSearchProductsAdmin(
         return chain
     }
 
-    // Construir select base. Si hay filtro por tienda, usamos inner join en product_stores.
-    const storeSelect = filters.store
+    // Construir select base. Los filtros de tienda y de stock se aplican sobre product_stores,
+    // así que necesitan un inner join en esa relación (también en el conteo; sin él, el stock
+    // por sí solo devolvía 0 productos).
+    const joinStores = Boolean(filters.store) || filters.stock === 'instock' || filters.stock === 'nostock'
+    const storeSelect = joinStores
         ? PRODUCT_CARD_SELECT.replace(
             'product_stores ( store_code, stock )',
             'product_stores!inner ( store_code, stock )'
@@ -569,7 +572,7 @@ export async function dbSearchProductsAdmin(
         : PRODUCT_CARD_SELECT
 
     let dataQuery = supabase.from('products').select(storeSelect)
-    let countQuery = filters.store
+    let countQuery = joinStores
         ? supabase.from('products').select('id, product_stores!inner(store_code)', { count: 'exact', head: true })
         : supabase.from('products').select('id', { count: 'exact', head: true })
 
@@ -580,13 +583,13 @@ export async function dbSearchProductsAdmin(
             'product_images!inner ( cloudinary_public_id, is_main )'
         )
         dataQuery = supabase.from('products').select(imgSelect)
-        const countImgSelect = filters.store
+        const countImgSelect = joinStores
             ? 'id, product_images!inner(id), product_stores!inner(store_code)'
             : 'id, product_images!inner(id)'
         countQuery = supabase.from('products').select(countImgSelect, { count: 'exact', head: true })
     } else if (filters.images === 'without') {
         dataQuery = supabase.from('products').select(storeSelect).is('product_images', null)
-        countQuery = filters.store
+        countQuery = joinStores
             ? supabase.from('products').select('id, product_stores!inner(store_code)', { count: 'exact', head: true }).is('product_images', null)
             : supabase.from('products').select('id', { count: 'exact', head: true }).is('product_images', null)
     }
