@@ -8,7 +8,7 @@ export { MAX_QUERY_LENGTH }
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
 
 export type AiSearchErrorCode =
-    | 'config' | 'rate_limit' | 'timeout' | 'connection' | 'refused' | 'invalid' | 'unknown'
+    | 'config' | 'rate_limit' | 'timeout' | 'connection' | 'refused' | 'invalid' | 'unclear' | 'unknown'
 
 /** Error con un mensaje apto para mostrar al admin (sin detalles técnicos de la API). */
 export class AiSearchError extends Error {
@@ -117,7 +117,12 @@ export async function interpretSearch(
             (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === TOOL_NAME,
         )
         if (!toolCall) {
-            throw new AiSearchError('La IA no devolvió ningún filtro. Inténtalo de nuevo.', 'invalid')
+            // La IA contestó con texto en vez de filtros (frase sin sentido, fuera de alcance, intento de manipularla...).
+            // Ese texto NO se muestra: podría repetir las instrucciones internas.
+            throw new AiSearchError(
+                'No entendí qué quieres buscar. Prueba con algo como "mesas de madera con stock en Valencia".',
+                'unclear',
+            )
         }
 
         return {

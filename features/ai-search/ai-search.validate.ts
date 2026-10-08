@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 import type { AdminFilters } from '@/features/products/product.repository'
+import { stripFilterSyntax } from '@/features/products/search-terms'
 import { buildFilterSchema, AiFilters } from './ai-search.schema'
 import type { Catalog } from './ai-search.prompt'
 
@@ -11,6 +12,10 @@ export interface ValidationResult {
 }
 
 const MEASURE_LIMIT = 1000
+
+// Ningún mueble del catálogo pasa de unos 430 cm. Por encima de esto casi seguro es un error de unidades de la IA
+// (p. ej. 1 metro escrito como 1000) y un filtro así dejaría la lista vacía sin que el admin sepa por qué.
+const PLAUSIBLE_MAX_CM = 600
 
 const RANGES = [
     ['minWidthCm', 'maxWidthCm'],
@@ -25,7 +30,7 @@ function cleanMaterials(value: unknown): unknown {
     const terms = [...new Set(
         value
             .filter((item): item is string => typeof item === 'string')
-            .map(item => item.trim().toLowerCase())
+            .map(item => stripFilterSyntax(item).trim().toLowerCase())
             .filter(item => item.length >= 2 && item.length <= 40),
     )].slice(0, 10)
 
@@ -34,7 +39,8 @@ function cleanMaterials(value: unknown): unknown {
 
 function cleanQuery(value: unknown): unknown {
     if (typeof value !== 'string') return value
-    return value.trim() || undefined
+    // Sin caracteres de sintaxis del filtro: así ni siquiera llegan a la URL
+    return stripFilterSyntax(value).trim() || undefined
 }
 
 /**
@@ -73,6 +79,17 @@ export function validateFilters(raw: unknown, catalog: Catalog): ValidationResul
     for (const [min, max] of RANGES) {
         if (kept[min] === 0) delete kept[min]
         if (typeof kept[max] === 'number' && kept[max] >= MEASURE_LIMIT) delete kept[max]
+    }
+
+    // Medidas imposibles para un mueble: se descartan con aviso
+    for (const [min, max] of RANGES) {
+        for (const key of [min, max]) {
+            const value = kept[key]
+            if (typeof value === 'number' && value > PLAUSIBLE_MAX_CM) {
+                delete kept[key]
+                dropped.push(key)
+            }
+        }
     }
 
     // Mínimo mayor que máximo: casi seguro la frase estaba invertida

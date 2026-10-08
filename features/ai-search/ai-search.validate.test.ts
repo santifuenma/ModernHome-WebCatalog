@@ -78,6 +78,21 @@ describe('validateFilters: limpieza', () => {
         expect(validateFilters({ q: '   ' }, catalog)).toEqual({ filters: {}, dropped: [] })
     })
 
+    it('q: quita los caracteres de sintaxis del filtro (inyección)', () => {
+        const result = validateFilters({ q: 'x",name.ilike."%' }, catalog)
+        expect(result.filters.q).toBe('xname.ilike.')
+        expect(result.filters.q).not.toMatch(/["%,()\\]/)
+    })
+
+    it('q formado solo por caracteres de sintaxis se ignora', () => {
+        expect(validateFilters({ q: '"%,()' }, catalog)).toEqual({ filters: {}, dropped: [] })
+    })
+
+    it('materiales: quita los caracteres de sintaxis del filtro', () => {
+        const result = validateFilters({ materials: ['madera",name.ilike."%', 'mdf'] }, catalog)
+        expect(result.filters.materials).toEqual(['maderaname.ilike.', 'mdf'])
+    })
+
     it('q demasiado largo se descarta con aviso', () => {
         expect(validateFilters({ q: 'x'.repeat(61) }, catalog).dropped).toEqual(['q'])
     })
@@ -85,6 +100,16 @@ describe('validateFilters: limpieza', () => {
     it('mínimo mayor que máximo: los intercambia', () => {
         const result = validateFilters({ minWidthCm: 300, maxWidthCm: 100 }, catalog)
         expect(result.filters).toEqual({ minWidthCm: 100, maxWidthCm: 300 })
+    })
+
+    it('medidas imposibles para un mueble (error de unidades) se descartan con aviso', () => {
+        const result = validateFilters({ minDepthCm: 1000, minHeightCm: 40, maxHeightCm: 40, maxWidthCm: 2500 }, catalog)
+        expect(result.filters).toEqual({ minHeightCm: 40, maxHeightCm: 40 })
+        expect(result.dropped.sort()).toEqual(['maxWidthCm', 'minDepthCm'])
+    })
+
+    it('600 cm todavía se acepta', () => {
+        expect(validateFilters({ maxWidthCm: 600 }, catalog).filters).toEqual({ maxWidthCm: 600 })
     })
 
     it('mínimo igual al máximo se respeta', () => {

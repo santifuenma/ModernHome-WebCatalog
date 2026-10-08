@@ -54,6 +54,10 @@ export function AiSearchBar() {
                     setError(result.error)
                     return
                 }
+                if (Object.keys(result.filters).length === 0) {
+                    setError('No encontré ningún filtro en tu frase. Prueba con algo como "mesas de madera con stock en Valencia".')
+                    return
+                }
                 setAiResult({ query: new URL(result.url, 'http://local').searchParams.toString(), dropped: result.dropped })
                 router.push(result.url) // reemplaza los filtros actuales
             } catch {
