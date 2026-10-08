@@ -14,6 +14,14 @@
 
 const UNSAFE_CHARS = /[%,()"\\]/g
 
+/**
+ * Quita solo los caracteres con significado en la sintaxis del filtro (no las tildes ni las
+ * mayúsculas). Para texto que se busca tal cual, como el nombre o el código de un producto.
+ */
+export function stripFilterSyntax(text: string): string {
+    return text.replace(UNSAFE_CHARS, '')
+}
+
 // Debe coincidir con el translate() de database/migrations/003_materials_search_unaccent.sql
 const ACCENTED = 'áéíóúüñ'
 const PLAIN = 'aeiouun'
@@ -25,6 +33,6 @@ function stripAccents(text: string): string {
 
 export function sanitizeSearchTerms(terms: string[] | null | undefined): string[] {
     return (terms ?? [])
-        .map(term => stripAccents(term.replace(UNSAFE_CHARS, '').trim().toLowerCase()))
+        .map(term => stripAccents(stripFilterSyntax(term).trim().toLowerCase()))
         .filter(Boolean)
 }

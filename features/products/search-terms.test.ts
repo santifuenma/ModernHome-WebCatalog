@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sanitizeSearchTerms } from './search-terms'
+import { sanitizeSearchTerms, stripFilterSyntax } from './search-terms'
 
 describe('sanitizeSearchTerms', () => {
     it('pasa a minúsculas y recorta espacios', () => {
@@ -32,5 +32,15 @@ describe('sanitizeSearchTerms', () => {
         expect(sanitizeSearchTerms(null)).toEqual([])
         expect(sanitizeSearchTerms(undefined)).toEqual([])
         expect(sanitizeSearchTerms([])).toEqual([])
+    })
+})
+
+describe('stripFilterSyntax', () => {
+    it('quita los caracteres de sintaxis pero conserva tildes y mayúsculas', () => {
+        expect(stripFilterSyntax('Diseño "Ñandú" (50%), nuevo\\')).toBe('Diseño Ñandú 50 nuevo')
+    })
+
+    it('un intento de inyección queda inofensivo', () => {
+        expect(stripFilterSyntax('x",name.ilike."%')).toBe('xname.ilike.')
     })
 })

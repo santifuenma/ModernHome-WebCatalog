@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/infrastructure/supabase/server'
 import { Product, ProductCard, ProductImage, MaterialSwatch, ProductDownload, StoreCode, ProductStore } from './product.types'
-import { sanitizeSearchTerms } from './search-terms'
+import { sanitizeSearchTerms, stripFilterSyntax } from './search-terms'
 
 /**
  * product.repository.ts
@@ -515,9 +515,11 @@ export async function dbSearchProductsAdmin(
     function applyFilters(q: any) {
         let chain = q as any
 
-        // Text search
-        if (filters.query) {
-            const searchQuery = `%${filters.query}%`
+        // Text search. El texto se limpia: va dentro de una expresión de filtro y una comilla,
+        // una coma o un paréntesis la romperían (o añadirían condiciones que nadie pidió).
+        const queryText = stripFilterSyntax(filters.query ?? '').trim()
+        if (queryText) {
+            const searchQuery = `%${queryText}%`
             chain = chain.or(`code.ilike."${searchQuery}",name.ilike."${searchQuery}"`)
         }
 
