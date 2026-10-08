@@ -71,11 +71,34 @@ CREATE TABLE IF NOT EXISTS products (
     depth_cm      numeric,                       -- other horizontal side ("Profundidad", or "Ancho" if "Largo")
     height_cm     numeric,                       -- "Alto"
 
+    -- Lowercase text copy of `materials`, used only to search with ilike.
+    -- Kept in sync by the trigger below; see database/migrations/002_add_materials_search.sql
+    materials_search text,
+
     -- Publication status. false = hidden from the public catalog.
     is_active     boolean     DEFAULT true,
     created_at    timestamp   DEFAULT now()
 
 );
+
+-- Keeps products.materials_search in sync with products.materials on every
+-- insert or change of materials (whatever writes the row).
+CREATE OR REPLACE FUNCTION products_set_materials_search()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+    NEW.materials_search := lower(array_to_string(NEW.materials, ' | '));
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_products_materials_search ON products;
+
+CREATE TRIGGER trg_products_materials_search
+    BEFORE INSERT OR UPDATE OF materials ON products
+    FOR EACH ROW EXECUTE FUNCTION products_set_materials_search();
 
 
 -- =============================================================================
