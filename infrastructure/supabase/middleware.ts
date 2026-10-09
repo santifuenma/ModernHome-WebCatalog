@@ -7,8 +7,10 @@ import { NextResponse, type NextRequest } from 'next/server'
  * Reads / writes cookies directly on NextRequest + NextResponse
  * (cannot use next/headers in the Edge Runtime).
  *
- * Returns both the client and the mutated response so the caller
- * can forward the refreshed session cookies to the browser.
+ * Returns the client and a `response` getter. When Supabase renews the session it calls
+ * `setAll`, which REPLACES the response so the new cookies are forwarded to the browser:
+ * the caller must read `response` after using the client and must not keep an earlier copy
+ * (a copy taken before would not carry the renewed cookies).
  */
 export function createSupabaseMiddlewareClient(request: NextRequest) {
     let response = NextResponse.next({ request })
@@ -38,5 +40,10 @@ export function createSupabaseMiddlewareClient(request: NextRequest) {
         }
     )
 
-    return { supabase, response }
+    return {
+        supabase,
+        get response() {
+            return response
+        },
+    }
 }
