@@ -307,7 +307,7 @@ Los ambientes y las subcategorías no tienen tabla propia: se obtienen de los va
 ## Seguridad
 
 - **Las rutas `/admin` exigen sesión.** El middleware redirige a `/admin/login` a quien no la tiene, y envía al panel a quien ya la tiene si abre el login.
-- **La sesión se valida contra Supabase** con `getUser()` en cada petición, y no solo leyendo la cookie, para que no pueda falsificarse. Cada Server Action del panel vuelve a comprobarla (`requireAuth`).
+- **La sesión se valida en el middleware con `getClaims()`**, que verifica la firma y la caducidad del token (no se fía de la cookie tal cual, así que no se puede falsificar) y renueva la sesión si ha caducado. Con claves de firma asimétricas lo hace en local, sin llamar a la red; los visitantes sin cookie de sesión ni siquiera llegan a Supabase Auth. Cada Server Action del panel vuelve a comprobarla con `getUser()` (`requireAuth`), que siempre pregunta a Supabase.
 - **Políticas de acceso (RLS) en Supabase:** la tabla `products` tiene RLS con dos políticas: lectura pública para el rol `anon` y lectura y escritura completas para `authenticated` (la sesión de administrador).
 - **Cabeceras de seguridad** en todas las respuestas: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy` y `Permissions-Policy` (sin cámara, micrófono ni geolocalización).
 - **Content Security Policy** en producción, ajustada para Supabase y el widget de subida de Cloudinary.
@@ -388,7 +388,7 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 
 ## Tests
 
-`npm test` ejecuta **132 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
+`npm test` ejecuta **154 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
 
 | Área | Pruebas | Qué comprueban |
 |---|:---:|---|
@@ -402,6 +402,7 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 | Validación de la IA | 24 | Rescatar campos buenos, medidas sin sentido y campos peligrosos como `__proto__` |
 | Búsqueda completa | 6 | Frase → URL → filtros de la página |
 | Límite de peticiones | 6 | Ventana deslizante con reloj simulado |
+| Middleware y sesión | 22 | Quién pasa y quién es redirigido, que un visitante anónimo no llama a Supabase Auth y que las cookies de sesión renovadas llegan al navegador |
 
 ## Despliegue
 
@@ -451,7 +452,7 @@ next.config.mjs         Cabeceras de seguridad, CSP e imágenes remotas
 - **Ocultar en lugar de borrar.** `is_active` permite retirar un producto del catálogo sin perder su ficha ni sus imágenes.
 - **Solo el identificador de la imagen en la base de datos.** Cloudinary aloja las imágenes y la aplicación guarda únicamente su `cloudinary_public_id`. Next.js cachea las imágenes procesadas durante 7 días.
 - **Server Components y Server Actions.** Las páginas se renderizan en el servidor y las mutaciones del panel son Server Actions, sin una API REST propia.
-- **`getUser()` en el middleware.** Valida el token con Supabase en cada petición; leer solo la sesión de la cookie permitiría suplantarla.
+- **`getClaims()` en el middleware y `getUser()` en las acciones.** El middleware verifica la firma del token en lugar de fiarse de la cookie, pero sin una llamada de red por petición: con una llamada por página, enlace precargado y acción, una ráfaga hacía saltar el límite de Supabase Auth (error 429) y mandaba al login a un admin con sesión válida. Lo que modifica datos (las Server Actions) sigue preguntando a Supabase con `getUser()`, así que una sesión revocada no puede ejecutar acciones.
 - **CSP solo en producción.** En desarrollo Turbopack necesita conexiones que la política bloquearía (HMR y peticiones RSC).
 - **CSS Modules sin frameworks.** Estilos aislados por componente y sin dependencias de UI externas.
 
