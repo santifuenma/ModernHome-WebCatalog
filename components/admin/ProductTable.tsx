@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ProductCard } from '@/features/products/product.types'
+import { ProductThumbnail } from './ProductThumbnail'
 import styles from './ProductTable.module.css'
 
 interface ProductTableProps {
@@ -29,10 +30,12 @@ export function ProductTable({ products }: ProductTableProps) {
                         <tr key={product.id} className={styles.tr}>
                             <td className={styles.td}>
                                 {product.image ? (
-                                    <img
+                                    <ProductThumbnail
                                         src={product.image}
-                                        alt={product.name}
-                                        className={styles.productImage}
+                                        name={product.name}
+                                        code={product.slug?.split('-').pop() ?? ''}
+                                        brand={product.brand}
+                                        editHref={`/admin/products/${product.id}`}
                                     />
                                 ) : (
                                     <div className={styles.imagePlaceholder}>
