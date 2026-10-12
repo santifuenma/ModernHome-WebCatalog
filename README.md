@@ -73,7 +73,7 @@ Un mismo producto puede estar disponible en varias tiendas, cada una con su prop
 ### Panel de administración
 
 - **Acceso con correo y contraseña** (Supabase Auth).
-- **Gestión de productos:** listado paginado con una cabecera de búsqueda: un interruptor entre *Con IA* y *Código / nombre*, los filtros activos como etiquetas que se quitan una a una y un panel desplegable de **Filtros** (ambiente, subcategoría, estado, stock, tienda e imágenes) que se aplican al momento y muestran cuántos resultados hay.
+- **Gestión de productos:** listado paginado con una cabecera de búsqueda: un interruptor entre *Con IA* y *Código / nombre*, los filtros activos como etiquetas que se quitan una a una y un panel desplegable de **Filtros** (ambiente, subcategoría, estado, stock, tienda e imágenes) que se aplican al momento y muestran cuántos resultados hay. Al pulsar la miniatura de un producto se abre un **visor** con la imagen ampliada, su nombre, código y marca, y un enlace para editarlo (se cierra con Escape, con la × o pulsando fuera).
 - **Búsqueda con IA:** un campo en lenguaje natural sobre el listado (*"mesas de comedor de madera de más de 2 m"*). Se traduce a filtros que se aplican en la URL y se muestran como etiquetas que se quitan una a una. Detalle en [Búsqueda con IA](#búsqueda-con-ia).
 - **Edición de producto:** código, nombre, marca, diseñador, ambiente, subcategoría, dimensiones y materiales (uno por línea), tiendas con su stock, imágenes, muestras de material y archivo descargable. El *slug* se genera solo si se deja vacío. Mientras se escriben las dimensiones, el formulario muestra qué medidas entenderá el buscador.
 - **Publicar u ocultar** un producto sin borrarlo, o eliminarlo.
@@ -388,13 +388,14 @@ Se definen en `.env.local` (no se sube al repositorio). Hay una plantilla en [`.
 
 ## Tests
 
-`npm test` ejecuta **154 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
+`npm test` ejecuta **161 pruebas** en unos segundos, sin red y sin coste: la lógica está escrita como funciones puras y la API de Anthropic se sustituye por un cliente falso. Las llamadas reales a la IA se prueban a mano con `scripts/try_ai_search.ts`.
 
 | Área | Pruebas | Qué comprueban |
 |---|:---:|---|
 | Parser de dimensiones | 20 | Etiquetas ("Largo", "Ancho", "Profundo"...), coma decimal, metros, pies, rangos, grosores y medidas parciales |
 | Filtros de la URL | 13 | Leer y escribir los parámetros de `/admin/products`, con ida y vuelta |
 | Etiquetas de filtros | 9 | Texto de cada filtro activo y qué parámetros borra |
+| Imágenes ampliadas | 7 | Versión redimensionada de la imagen de Cloudinary para el visor, sin ampliar nunca una imagen pequeña |
 | Opciones del panel de filtros | 8 | Qué opciones ofrece cada grupo y cómo dependen del ambiente elegido |
 | Términos de búsqueda | 9 | Quitar tildes y caracteres de sintaxis del filtro (inyección) |
 | Esquema de la IA | 13 | Valores permitidos, límites de medidas y JSON Schema de la herramienta |

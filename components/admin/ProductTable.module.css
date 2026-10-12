@@ -62,14 +62,6 @@
     height: 20px;
 }
 
-.productImage {
-    width: 48px;
-    height: 48px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #e8e6e1;
-}
-
 .slugText {
     font-weight: 600;
     color: #1a1a1a;
